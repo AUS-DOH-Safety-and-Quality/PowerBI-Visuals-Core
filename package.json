@@ -10,11 +10,15 @@
     "./math": {
       "types": "./dist/math/index.d.ts",
       "import": "./dist/math/index.js"
+    },
+    "./settings": {
+      "types": "./dist/settings/index.d.ts",
+      "import": "./dist/settings/index.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.types.json",
     "test": "vitest run",
     "prepack": "npm run build"
   },

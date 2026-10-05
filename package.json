@@ -1,6 +1,6 @@
 {
   "name": "powerbi-visuals-core",
-  "version": "0.1.0",
+  "version": "0.13.0",
   "private": true,
   "type": "module",
   "files": [
@@ -14,6 +14,18 @@
     "./settings": {
       "types": "./dist/settings/index.d.ts",
       "import": "./dist/settings/index.js"
+    },
+    "./powerbi": {
+      "types": "./dist/powerbi/index.d.ts",
+      "import": "./dist/powerbi/index.js"
+    },
+    "./data": {
+      "types": "./dist/data/index.d.ts",
+      "import": "./dist/data/index.js"
+    },
+    "./rendering": {
+      "types": "./dist/rendering/index.d.ts",
+      "import": "./dist/rendering/index.js"
     }
   },
   "scripts": {

@@ -18,6 +18,9 @@ export type SettingDefinition = {
   valid?: readonly string[];
   items?: { displayName: string; value: string }[];
   options?: { minValue?: { value: number }; maxValue?: { value: number } };
+  // Validation only; not part of the formatting-pane payload.
+  integer?: boolean;
+  constant?: boolean;
 };
 export type SettingCard = {
   displayName: string;
@@ -42,9 +45,10 @@ type NumberDefinition<T extends number | undefined> = {
   type: typeof FormattingComponent.NumUpDown;
   default: T;
   options?: SettingDefinition["options"];
+  integer?: boolean;
 };
 
-type NumberBounds = { min?: number; max?: number };
+type NumberBounds = { min?: number; max?: number; integer?: boolean };
 
 function numberOption(displayName: string, defaultValue: number, minMax?: NumberBounds): NumberDefinition<number>;
 function numberOption(displayName: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined>;
@@ -53,9 +57,12 @@ function numberOption(displayName: string, defaultValue: number | undefined, min
     displayName, type: FormattingComponent.NumUpDown, default: defaultValue
   };
   if (minMax !== undefined) {
-    result.options = {};
-    if (minMax.min !== undefined) result.options.minValue = { value: minMax.min };
-    if (minMax.max !== undefined) result.options.maxValue = { value: minMax.max };
+    if (minMax.min !== undefined || minMax.max !== undefined) {
+      result.options = {};
+      if (minMax.min !== undefined) result.options.minValue = { value: minMax.min };
+      if (minMax.max !== undefined) result.options.maxValue = { value: minMax.max };
+    }
+    if (minMax.integer) result.integer = true;
   }
   return result;
 }
@@ -205,7 +212,7 @@ type MergeUnions<T> = (T extends unknown ? (value: T) => void : never) extends (
 
 type SettingMembers<T extends SettingCard> = MergeUnions<T["settingsGroups"][keyof T["settingsGroups"]]>;
 export type CardValues<T extends SettingCard> = {
-  [K in keyof SettingMembers<T>]: SettingMembers<T>[K] extends { default: infer Value } ? Value : never;
+  [K in keyof SettingMembers<T>]: SettingMembers<T>[K] extends { default: infer Value extends SettingValue } ? Value : never;
 };
 export type SettingsValues<T extends Record<string, SettingCard>> = {
   [K in keyof T]: CardValues<T[K]>;

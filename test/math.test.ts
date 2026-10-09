@@ -1,17 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mean, median, min, max, rep, between, clamp } from "../src/math/index";
+import { median, min, max, rep, between, clamp } from "../src/math/index";
 
-describe("mean and median", () => {
-  it("return NaN for empty input", () => {
-    expect(mean([])).toBeNaN();
+describe("median", () => {
+  it("returns NaN for empty input", () => {
     expect(median([])).toBeNaN();
-  });
-
-  it("preserve accumulation order and read-only input", () => {
-    const values = Object.freeze([1e16, -1e16, 1, 2]);
-    expect(mean(values)).toBe(0.75);
-    expect(mean([1e16, 1, -1e16, 2])).toBe(0.5);
-    expect(values).toEqual([1e16, -1e16, 1, 2]);
   });
 
   it("median sorts an owned copy for odd and even lengths", () => {

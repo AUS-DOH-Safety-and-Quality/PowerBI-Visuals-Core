@@ -1,10 +1,9 @@
-import { min, max, mean, between, rep, clamp } from "../src/math/index";
+import { min, max, between, rep, clamp } from "../src/math/index";
 import { isValidNumber, isNullOrUndefined, groupBy } from "../src/data/index";
 
 const frozen: readonly number[] = Object.freeze([1, 2]);
 min(frozen);
 max(frozen);
-mean(frozen);
 // @ts-expect-error Reductions take an explicit array, never a scalar.
 min(1);
 // @ts-expect-error Missing values must be validated before numerical reduction.

@@ -1,3 +1,5 @@
+import { rescalePlotFrame, type PlotFrame } from "./plotFrame";
+
 export type PlotPadding = {
   readonly left: number;
   readonly right: number;
@@ -27,4 +29,12 @@ export function adjustPaddingForOverflow(bbox: Box, width: number, height: numbe
     top: padding.top + top,
     bottom: padding.bottom + bottom
   };
+}
+
+// The frame with its padding grown by the drawn overflow; undefined when nothing overflows
+export function fitPlotToOverflow(svg: SVGSVGElement, frame: PlotFrame): PlotFrame | undefined {
+  const padding = adjustPaddingForOverflow(svg.getBBox(), frame.width, frame.height, {
+    left: frame.xAxis.start_padding, right: frame.xAxis.end_padding, top: frame.yAxis.end_padding, bottom: frame.yAxis.start_padding
+  });
+  return padding === undefined ? undefined : rescalePlotFrame(frame, padding);
 }

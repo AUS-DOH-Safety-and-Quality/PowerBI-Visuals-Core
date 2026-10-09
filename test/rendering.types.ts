@@ -1,4 +1,6 @@
-import { drawValueLabels, labelGeometry, type LabelPoint, type ValueLabelOptions } from "../src/rendering/index";
+import { drawValueLabels, labelGeometry } from "../src/rendering/index";
+import type { LabelPoint } from "../src/rendering/labelGeometry";
+import type { ValueLabelOptions } from "../src/rendering/drawValueLabels";
 
 type LocalPoint = {
   x: number;
@@ -40,7 +42,8 @@ missing.visible;
 const loose: LabelPoint = { x: 0, value: 0, label: { text_value: "A", angle: undefined, distance: undefined, aesthetics: { ...local[0].label.aesthetics, label_position: "left" } } };
 loose.x;
 
-import { drawLineLabels, drawErrorMessage, drawCrosshairs, type LineLabel, type ErrorMessageOptions } from "../src/rendering/index";
+import { drawLineLabels, drawErrorMessage, drawCrosshairs, type LineLabel } from "../src/rendering/index";
+import type { ErrorMessageOptions } from "../src/rendering/errorMessage";
 
 declare const group: SVGGElement;
 declare const lineElement: SVGLineElement;
@@ -58,7 +61,7 @@ unsided.x;
 const loosePosition: LineLabel = { ...lineLabel, position: "left" };
 loosePosition.x;
 
-const error: ErrorMessageOptions = { width: 100, height: 50, message: "m", kind: undefined, colour: "#000" };
+const error: ErrorMessageOptions = { width: 100, height: 50, message: "m", kind: undefined, colour: "#000", show: true };
 drawErrorMessage(svg, error);
 
 // @ts-expect-error Unknown error kinds have no preamble.
@@ -66,14 +69,15 @@ const looseKind: ErrorMessageOptions = { ...error, kind: "other" };
 looseKind.kind;
 
 // @ts-expect-error The kind must be stated, even when absent.
-const missingKind: ErrorMessageOptions = { width: 100, height: 50, message: "m", colour: "#000" };
+const missingKind: ErrorMessageOptions = { width: 100, height: 50, message: "m", colour: "#000", show: true };
 missingKind.kind;
 
 const crosshairs = drawCrosshairs({ vertical: lineElement, horizontal: lineElement, left: 0, right: 10, top: 0, bottom: 10, colour: "#000" });
 crosshairs.show(1, 2);
 crosshairs.hide();
 
-import { drawGridlines, axisLabelPlacement, type AxisLabelAlign } from "../src/rendering/index";
+import { drawGridlines, axisLabelPlacement } from "../src/rendering/index";
+import type { AxisLabelAlign } from "../src/rendering/axis";
 
 declare const align: AxisLabelAlign;
 const anchor: "start" | "middle" | "end" = axisLabelPlacement(align, 0, 100).anchor;

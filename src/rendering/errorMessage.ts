@@ -9,6 +9,8 @@ export type ErrorMessageOptions = {
   // A kind adds its preamble above the message
   readonly kind: ErrorKind | undefined;
   readonly colour: string;
+  // A hidden error leaves an empty canvas
+  readonly show: boolean;
 };
 
 const preambles: Record<ErrorKind, string> = {
@@ -32,6 +34,9 @@ function addText(group: SVGGElement, x: number, y: number, text: string, colour:
 // Replaces the plot with a centred error message group
 export function drawErrorMessage(svg: SVGSVGElement, options: ErrorMessageOptions): void {
   initialiseSvg(svg, true);
+  if (!options.show) {
+    return;
+  }
   const group = svg.ownerDocument.createElementNS(SVG_NS, "g");
   svg.appendChild(group);
   group.classList.add("errormessage");

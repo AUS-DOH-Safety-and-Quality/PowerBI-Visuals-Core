@@ -1,3 +1,5 @@
+import type powerbi from "powerbi-visuals-api";
+
 // Anything with a Power BI selection key; ISelectionId satisfies it without importing the API
 export type SelectionKeyed = { getKey(): string };
 
@@ -15,4 +17,15 @@ export function identitySelected(identity: SelectionKeyed | readonly SelectionKe
     if (selected.has(identity[i].getKey())) return true;
   }
   return false;
+}
+
+export type SelectionState = {
+  readonly active: boolean;
+  readonly selected: ReadonlySet<string>;
+};
+
+// Active while the host highlights rows or anything is selected; the manager's ids are keyed at runtime
+export function selectionState(manager: powerbi.extensibility.ISelectionManager, anyHighlights: boolean): SelectionState {
+  const ids = manager.getSelectionIds() as powerbi.visuals.ISelectionId[];
+  return { active: anyHighlights || ids.length > 0, selected: selectedKeys(ids) };
 }

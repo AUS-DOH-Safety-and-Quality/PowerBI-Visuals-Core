@@ -1,5 +1,4 @@
 export { default as sum } from "./sum";
-export { default as mean } from "./mean";
 export { default as median } from "./median";
 export { default as min } from "./min";
 export { default as max } from "./max";

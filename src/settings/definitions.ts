@@ -182,12 +182,10 @@ function lineLabelPositionOption() {
                         "sentence");
 }
 
-function borderStyleOption(displayName: string) {
-  return dropdownOption(
-    displayName, "solid",
-    ["solid", "dotted", "dashed", "double", "groove", "ridge", "inset", "outset", "none"],
-    "sentence"
-  )
+const borderStyles = ["solid", "dotted", "dashed", "double", "groove", "ridge", "inset", "outset", "none"] as const;
+
+function borderStyleOption(displayName: string, defaultValue: typeof borderStyles[number] = "solid") {
+  return dropdownOption(displayName, defaultValue, borderStyles, "sentence");
 }
 
 function borderWidthOption(displayName: string) {
@@ -203,13 +201,10 @@ function alignmentOption(displayName: string) {
   }
 }
 
-function fontWeightOption(displayName: string) {
-  return dropdownOption(
-    displayName,
-    "normal",
-    ["normal", "bold", "bolder", "lighter"],
-    "sentence"
-  )
+const fontWeights = ["normal", "bold", "bolder", "lighter"] as const;
+
+function fontWeightOption(displayName: string, defaultValue: typeof fontWeights[number] = "normal") {
+  return dropdownOption(displayName, defaultValue, fontWeights, "sentence");
 }
 
 function fontStyleOption(displayName: string) {
@@ -219,7 +214,7 @@ function fontStyleOption(displayName: string) {
 function textTransformOption(displayName: string) {
   return dropdownOption(
     displayName,
-    "capitalize",
+    "none",
     ["uppercase", "lowercase", "capitalize", "none"],
     "sentence"
   )

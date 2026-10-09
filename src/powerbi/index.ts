@@ -8,4 +8,6 @@ export type { CategoryGroups } from "./groupCategoryRows.js";
 export { indexColumnsByRole, formatPrimitiveValue } from "./columns.js";
 export type { RoleColumn, RoleColumns, PrimitiveValue } from "./columns.js";
 export { selectedKeys, identitySelected } from "./selection.js";
+export { readColourPalette } from "./colourPalette.js";
+export type { ColourPalette, PaletteHost } from "./colourPalette.js";
 export type { SelectionKeyed } from "./selection.js";

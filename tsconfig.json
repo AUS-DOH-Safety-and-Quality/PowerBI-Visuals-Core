@@ -12,7 +12,8 @@
     "strictNullChecks": true,
     "declaration": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts"

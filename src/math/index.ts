@@ -18,4 +18,24 @@ export { default as sinpi } from "./sinpi.js";
 export { default as logcf } from "./logcf.js";
 export { default as log1pmx } from "./log1pmx.js";
 export { default as ldexp } from "./ldexp.js";
-export { LOG_TWO_PI, LOG_SQRT_TWO_PI, LOG_SQRT_PI_DIV_2, EULER, DBL_MIN } from "./constants.js";
+export { default as calculateTrendLine } from "./trendLine.js";
+export { c4, c5, a3 } from "./sampleConstants.js";
+export { default as normalCDF } from "./normalCDF.js";
+export { default as normalDensity } from "./normalDensity.js";
+export { default as normalQuantile } from "./normalQuantile.js";
+export { default as gammaCDF } from "./gammaCDF.js";
+export { default as gammaDensity } from "./gammaDensity.js";
+export { default as gammaQuantile } from "./gammaQuantile.js";
+export { default as chisqCDF } from "./chisqCDF.js";
+export { default as chisqQuantile } from "./chisqQuantile.js";
+export { default as chisqQuantileApprox } from "./chisqQuantileApprox.js";
+export { default as poissonDensity } from "./poissonDensity.js";
+export { default as binomialDeviance } from "./binomialDeviance.js";
+export { default as frexp } from "./frexp.js";
+export { default as log1mExp } from "./log1mExp.js";
+export { default as logP } from "./logP.js";
+export { default as quantile } from "./quantile.js";
+export {
+  LOG_TWO_PI, LOG_SQRT_TWO_PI, LOG_SQRT_PI_DIV_2, EULER, DBL_MIN,
+  SQRT_TWO_PI, TWO_PI, SQRT_THIRTY_TWO, ONE_DIV_SQRT_TWO_PI
+} from "./constants.js";

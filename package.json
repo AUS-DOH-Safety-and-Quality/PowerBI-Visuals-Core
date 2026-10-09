@@ -26,6 +26,14 @@
     "./rendering": {
       "types": "./dist/rendering/index.d.ts",
       "import": "./dist/rendering/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js"
+    },
+    "./spc": {
+      "types": "./dist/spc/index.d.ts",
+      "import": "./dist/spc/index.js"
     }
   },
   "scripts": {
@@ -35,6 +43,8 @@
     "prepare": "npm run build"
   },
   "devDependencies": {
+    "powerbi-visuals-api": "5.1.0",
+    "powerbi-visuals-utils-testutils": "7.0.1",
     "typescript": "6.0.3",
     "vitest": "4.1.10"
   }

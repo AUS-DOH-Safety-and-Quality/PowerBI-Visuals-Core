@@ -18,7 +18,7 @@ export type SettingDefinition = {
   valid?: readonly string[];
   items?: { displayName: string; value: string }[];
   options?: { minValue?: { value: number }; maxValue?: { value: number } };
-  // Validation only; not part of the formatting-pane payload.
+  /** Validation only; not part of the formatting-pane payload. */
   integer?: boolean;
   constant?: boolean;
 };
@@ -54,15 +54,23 @@ function numberOption(displayName: string, defaultValue: number, minMax?: Number
 function numberOption(displayName: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined>;
 function numberOption(displayName: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined> {
   const result: NumberDefinition<number | undefined> = {
-    displayName, type: FormattingComponent.NumUpDown, default: defaultValue
+    displayName,
+    type: FormattingComponent.NumUpDown,
+    default: defaultValue
   };
   if (minMax !== undefined) {
     if (minMax.min !== undefined || minMax.max !== undefined) {
       result.options = {};
-      if (minMax.min !== undefined) result.options.minValue = { value: minMax.min };
-      if (minMax.max !== undefined) result.options.maxValue = { value: minMax.max };
+      if (minMax.min !== undefined) {
+        result.options.minValue = { value: minMax.min };
+      }
+      if (minMax.max !== undefined) {
+        result.options.maxValue = { value: minMax.max };
+      }
     }
-    if (minMax.integer) result.integer = true;
+    if (minMax.integer) {
+      result.integer = true;
+    }
   }
   return result;
 }
@@ -147,7 +155,13 @@ function dropdownOption<const Values extends readonly string[]>(
     valid[i] = value;
     items[i] = { displayName: displayNames === undefined ? transform(value) : displayNames[i], value };
   }
-  return { displayName, type: FormattingComponent.Dropdown, default: defaultValue, valid, items };
+  return {
+    displayName,
+    type: FormattingComponent.Dropdown,
+    default: defaultValue,
+    valid,
+    items
+  };
 }
 
 function lineTypeOption(displayName: string, defaultValue: "10 0" | "10 10" | "2 5") {

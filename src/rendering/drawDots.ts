@@ -31,23 +31,30 @@ export type DotsOptions<P extends DotPoint> = {
   readonly frame: PlotFrame;
   readonly points: readonly P[];
   readonly show: boolean;
-  // Draws each point as this text instead of a marker
+  /** Draws each point as this text instead of a marker */
   readonly text: ((point: P) => DotText) | undefined;
   readonly host: powerbi.extensibility.visual.IVisualHost;
   readonly selectionManager: powerbi.extensibility.ISelectionManager;
   readonly onSelectionChange: () => void;
-  // Replaces selection as the click action
+  /** Replaces selection as the click action */
   readonly onClick: ((point: P) => void) | undefined;
 };
 
 const shapes: Record<string, SymbolType> = {
-  Circle: symbolCircle, Cross: symbolCross, Diamond: symbolDiamond, Square: symbolSquare,
-  Star: symbolStar, Triangle: symbolTriangle, Wye: symbolWye
+  Circle: symbolCircle,
+  Cross: symbolCross,
+  Diamond: symbolDiamond,
+  Square: symbolSquare,
+  Star: symbolStar,
+  Triangle: symbolTriangle,
+  Wye: symbolWye
 };
 
-// Markers (or text) as direct children of the dots group; a point outside the frame is scaled away
+/** Markers (or text) as direct children of the dots group; a point outside the frame is scaled away */
 export function drawDots<P extends DotPoint>(svg: SVGSVGElement, options: DotsOptions<P>): void {
-  const { frame, host, text } = options;
+  const frame = options.frame;
+  const host = options.host;
+  const text = options.text;
   const group = select(svg).select<SVGGElement>(".dotsgroup");
   const textMode = text !== undefined;
   group.selectAll(textMode ? "path" : "text").remove();
@@ -88,8 +95,13 @@ export function drawDots<P extends DotPoint>(svg: SVGSVGElement, options: DotsOp
       event.stopPropagation();
     })
     .on("mouseover", (event: MouseEvent, point) => {
-      const { x, y } = screenToSvg(svg, event.clientX, event.clientY);
-      host.tooltipService.show({ dataItems: point.tooltip, identities: [point.identity], coordinates: [x, y], isTouchEvent: false });
+      const pointer = screenToSvg(svg, event.clientX, event.clientY);
+      host.tooltipService.show({
+        dataItems: point.tooltip,
+        identities: [point.identity],
+        coordinates: [pointer.x, pointer.y],
+        isTouchEvent: false
+      });
     })
     .on("mouseout", () => {
       host.tooltipService.hide({ immediately: true, isTouchEvent: false });

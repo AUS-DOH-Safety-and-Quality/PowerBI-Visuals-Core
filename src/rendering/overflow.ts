@@ -14,7 +14,7 @@ export type Box = {
   readonly height: number;
 };
 
-// Each side's padding grows by its overflow; undefined when nothing overflows
+/** Each side's padding grows by its overflow; undefined when nothing overflows */
 export function adjustPaddingForOverflow(bbox: Box, width: number, height: number, padding: PlotPadding): PlotPadding | undefined {
   const left = Math.abs(Math.min(0, bbox.x));
   const right = Math.max(0, bbox.width + bbox.x - width);
@@ -31,10 +31,13 @@ export function adjustPaddingForOverflow(bbox: Box, width: number, height: numbe
   };
 }
 
-// The frame with its padding grown by the drawn overflow; undefined when nothing overflows
+/** The frame with its padding grown by the drawn overflow; undefined when nothing overflows */
 export function fitPlotToOverflow(svg: SVGSVGElement, frame: PlotFrame): PlotFrame | undefined {
   const padding = adjustPaddingForOverflow(svg.getBBox(), frame.width, frame.height, {
-    left: frame.xAxis.start_padding, right: frame.xAxis.end_padding, top: frame.yAxis.end_padding, bottom: frame.yAxis.start_padding
+    left: frame.xAxis.start_padding,
+    right: frame.xAxis.end_padding,
+    top: frame.yAxis.end_padding,
+    bottom: frame.yAxis.start_padding
   });
   return padding === undefined ? undefined : rescalePlotFrame(frame, padding);
 }

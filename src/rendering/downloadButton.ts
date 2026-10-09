@@ -7,7 +7,7 @@ export type DownloadButtonOptions = {
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-// Keeps a single underlined "Download" link at the position; removed when not visible
+/** Keeps a single underlined "Download" link at the position; removed when not visible */
 export function drawDownloadButton(svg: SVGSVGElement, options: DownloadButtonOptions): void {
   let button = svg.querySelector<SVGTextElement>(".download-btn-group");
   if (!options.visible) {

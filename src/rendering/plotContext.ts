@@ -18,7 +18,7 @@ export type PlotSettings = {
   readonly download_options: { readonly show_button: boolean };
 };
 
-// What the plot renderers read from a visual for one draw
+/** What the plot renderers read from a visual for one draw */
 export type PlotContext<P extends PlotPoint = PlotPoint> = {
   readonly frame: PlotFrame;
   readonly points: readonly P[];

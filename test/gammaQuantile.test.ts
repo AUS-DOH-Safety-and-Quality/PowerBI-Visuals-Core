@@ -2,28 +2,22 @@ import { gammaQuantile } from "../src/math/index";
 import { describe, it, expect } from "vitest";
 
 describe("gammaQuantile", () => {
-    // Reference values computed using R's qgamma function
+    // Reference values from R's qgamma(p, shape, scale = scale)
 
     describe("basic functionality", () => {
         it("should return correct quantiles for standard cases", () => {
-            // qgamma(0.5, 1, 1) = 0.6931472 (median of Exp(1))
             expect(gammaQuantile(0.5, 1, 1)).toBeCloseTo(0.6931472, 5);
-
-            // qgamma(0.5, 2, 1) = 1.678347
             expect(gammaQuantile(0.5, 2, 1)).toBeCloseTo(1.678347, 5);
-
-            // qgamma(0.5, 5, scale=2) = R qgamma
             expect(gammaQuantile(0.5, 5, 2)).toBeCloseTo(9.341818, 4);
         });
 
         it("should return correct quantiles for various probabilities", () => {
-            // Gamma(2, 1) distribution
             expect(gammaQuantile(0.1, 2, 1)).toBeCloseTo(0.5318116, 5);
             expect(gammaQuantile(0.25, 2, 1)).toBeCloseTo(0.9612813, 5);
             expect(gammaQuantile(0.75, 2, 1)).toBeCloseTo(2.692633, 5);
             expect(gammaQuantile(0.9, 2, 1)).toBeCloseTo(3.889720, 5);
             expect(gammaQuantile(0.95, 2, 1)).toBeCloseTo(4.743864, 5);
-            expect(gammaQuantile(0.99, 2, 1)).toBeCloseTo(6.638352, 4);  // adjusted precision
+            expect(gammaQuantile(0.99, 2, 1)).toBeCloseTo(6.638352, 4);
         });
     });
 
@@ -51,9 +45,9 @@ describe("gammaQuantile", () => {
         });
 
         it("should return NaN for invalid parameters", () => {
-            expect(gammaQuantile(0.5, -1, 1)).toBeNaN();  // negative alpha
-            expect(gammaQuantile(0.5, 2, 0)).toBeNaN();   // zero scale
-            expect(gammaQuantile(0.5, 2, -1)).toBeNaN(); // negative scale
+            expect(gammaQuantile(0.5, -1, 1)).toBeNaN();
+            expect(gammaQuantile(0.5, 2, 0)).toBeNaN();
+            expect(gammaQuantile(0.5, 2, -1)).toBeNaN();
         });
 
         it("should handle NaN inputs", () => {
@@ -65,12 +59,10 @@ describe("gammaQuantile", () => {
 
     describe("extreme probabilities", () => {
         it("should handle very small probabilities", () => {
-            // qgamma(1e-10, 2, 1) = 1.414220e-05
             expect(gammaQuantile(1e-10, 2, 1) / 1.414220e-5).toBeCloseTo(1, 6);
         });
 
         it("should handle probabilities very close to 1", () => {
-            // qgamma(1 - 1e-10, 2, 1) = 26.33398
             expect(gammaQuantile(1 - 1e-10, 2, 1)).toBeCloseTo(26.33398, 4);
         });
 
@@ -78,14 +70,13 @@ describe("gammaQuantile", () => {
             // log(0.5) = -0.6931472
             expect(gammaQuantile(-0.6931472, 2, 1, true, true)).toBeCloseTo(1.678347, 4);
 
-            // qgamma(log(1e-100), 2, 1, log.p=TRUE) = 1.414220e-50
+            // log(1e-100) = -230.2585
             expect(gammaQuantile(-230.2585, 2, 1, true, true) / 1.414220e-50).toBeCloseTo(1, 6);
         });
     });
 
     describe("upper tail", () => {
         it("should return correct upper tail quantiles", () => {
-            // P(X > x) = 0.05 is equivalent to P(X <= x) = 0.95
             expect(gammaQuantile(0.05, 2, 1, false)).toBeCloseTo(gammaQuantile(0.95, 2, 1, true), 5);
             expect(gammaQuantile(0.1, 2, 1, false)).toBeCloseTo(gammaQuantile(0.9, 2, 1, true), 5);
         });
@@ -93,7 +84,6 @@ describe("gammaQuantile", () => {
 
     describe("scale parameter", () => {
         it("should scale quantiles correctly", () => {
-            // Quantile scales linearly with scale parameter
             const q1 = gammaQuantile(0.5, 2, 1);
             const q2 = gammaQuantile(0.5, 2, 2);
             const q3 = gammaQuantile(0.5, 2, 0.5);
@@ -105,34 +95,24 @@ describe("gammaQuantile", () => {
 
     describe("numerical accuracy for various shape parameters", () => {
         it("should be accurate for small shape (alpha < 1)", () => {
-            // qgamma(0.5, 0.5, 1) = R qgamma
             expect(gammaQuantile(0.5, 0.5, 1)).toBeCloseTo(0.2274682, 4);
-
-            // qgamma(0.5, 0.1, 1) = R qgamma
             expect(gammaQuantile(0.5, 0.1, 1)).toBeCloseTo(0.0005934, 5);
         });
 
         it("should be accurate for large shape", () => {
-            // qgamma(0.5, 100, 1) = R qgamma
             expect(gammaQuantile(0.5, 100, 1)).toBeCloseTo(99.66687, 3);
-
-            // qgamma(0.5, 50, 2) = R qgamma
             expect(gammaQuantile(0.5, 50, 2)).toBeCloseTo(99.33412, 2);
         });
 
         it("should be accurate for very small shape", () => {
-            // qgamma(0.5, 0.01, 1) = 4.465535e-31
             expect(gammaQuantile(0.5, 0.01, 1) / 4.465535e-31).toBeCloseTo(1, 6);
         });
     });
 
     describe("chi-squared relationship", () => {
         it("should match chi-squared quantiles", () => {
-            // Chi-squared(df) = Gamma(df/2, 2)
-            // qchisq(0.95, 10) = qgamma(0.95, 5, 2) = 18.30704
+            // Chi-squared(df) = Gamma(df/2, scale = 2); values from R's qchisq(0.95, 10) and qchisq(0.99, 20)
             expect(gammaQuantile(0.95, 5, 2)).toBeCloseTo(18.30704, 4);
-
-            // qchisq(0.99, 20) = qgamma(0.99, 10, 2) = 37.56623
             expect(gammaQuantile(0.99, 10, 2)).toBeCloseTo(37.56623, 4);
         });
     });

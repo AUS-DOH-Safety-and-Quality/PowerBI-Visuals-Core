@@ -1,10 +1,4 @@
-/**
- * Decomposes a floating-point number into its mantissa and exponent, such that:
- * value = mantissa * 2^exponent, with mantissa in the range [0.5, 1) or 0.
- *
- * @param value The floating-point number to decompose.
- * @returns An object containing the mantissa and exponent.
- */
+/** C frexp: value = mantissa * 2^exponent, mantissa in [0.5, 1); zero, infinities and NaN pass through. */
 export default function frexp(value: number): {mantissa: number, exponent: number} {
   // C frexp returns zero, infinities and NaN unchanged.
   if (value === 0 || !Number.isFinite(value)) {

@@ -14,7 +14,7 @@ const card = defineCard({
 const schema = { subset: card };
 const defaults = createDefaultValues(schema).subset;
 
-// Core finding 16: an integer descriptor rejects fractional values with a message and resets to the default.
+// An integer descriptor rejects fractional values with a message and resets to the default.
 describe("integer settings", () => {
   it("accepts whole numbers and unset optional values", () => {
     const rows = readSettingsRows(card, "subset", defaults, { objects: [{ subset: { count: 3, bounded: 0 } }, {}] }, [0, 1]);

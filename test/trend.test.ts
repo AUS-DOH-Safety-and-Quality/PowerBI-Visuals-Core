@@ -93,7 +93,6 @@ describe("trend", () => {
 
         const result = trend(val, n);
 
-        // First 7 points show consistent upward trend
         expect(result).toEqual(["upper", "upper", "upper", "upper", "upper", "upper", "upper", "none"]);
     });
 

@@ -9,7 +9,9 @@ export type SettingsCategory = {
 };
 
 function readValue(raw: unknown, defaultValue: SettingValue, type: SettingDefinition["type"]): unknown {
-  if (raw == null || (raw === "" && type !== FormattingComponent.TextInput)) return defaultValue;
+  if (raw == null || (raw === "" && type !== FormattingComponent.TextInput)) {
+    return defaultValue;
+  }
   if (typeof raw === "object" && "solid" in raw) {
     const solid = raw.solid;
     return typeof solid === "object" && solid !== null && "color" in solid ? solid.color : undefined;
@@ -18,10 +20,14 @@ function readValue(raw: unknown, defaultValue: SettingValue, type: SettingDefini
 }
 
 function validationMessage(value: unknown, definition: SettingDefinition, name: string): string {
-  if (value === undefined && definition.default === undefined) return "";
+  if (value === undefined && definition.default === undefined) {
+    return "";
+  }
   const expected = definition.type === FormattingComponent.NumUpDown ? "number"
     : definition.type === FormattingComponent.ToggleSwitch ? "boolean" : "string";
-  if (typeof value !== expected) return `${value} is not a valid ${expected} for ${name}`;
+  if (typeof value !== expected) {
+    return `${value} is not a valid ${expected} for ${name}`;
+  }
   if (definition.valid !== undefined) {
     let valid = false;
     for (let i = 0; i < definition.valid.length; i++) {
@@ -30,7 +36,9 @@ function validationMessage(value: unknown, definition: SettingDefinition, name: 
         break;
       }
     }
-    if (!valid) return `${value} is not a valid value for ${name}. Valid values are: ${definition.valid.join(", ")}`;
+    if (!valid) {
+      return `${value} is not a valid value for ${name}. Valid values are: ${definition.valid.join(", ")}`;
+    }
   }
   if (typeof value === "number") {
     const min = definition.options?.minValue?.value;
@@ -49,7 +57,9 @@ export default function readSettingsRows<T extends SettingCard>(
   cardSchema: T, cardName: string, defaults: NoInfer<CardValues<T>>,
   category: SettingsCategory, rawRowIndices: readonly number[]
 ): SettingsRows<CardValues<T>> {
-  if (rawRowIndices.length === 0) return { values: [], validation: { status: 0, messages: [] } };
+  if (rawRowIndices.length === 0) {
+    return { values: [], validation: { status: 0, messages: [] } };
+  }
   const defaultValues: Readonly<Record<string, SettingValue>> = defaults;
   const groups = Object.keys(cardSchema.settingsGroups);
   const entries: { name: string; definition: SettingDefinition; defaultValue: SettingValue }[] = [];
@@ -78,7 +88,9 @@ export default function readSettingsRows<T extends SettingCard>(
     const row: Record<string, SettingValue> = {};
     const rowMessages: string[] = [];
     for (let j = 0; j < entries.length; j++) {
-      const { name, definition, defaultValue } = entries[j];
+      const name = entries[j].name;
+      const definition = entries[j].definition;
+      const defaultValue = entries[j].defaultValue;
       let value = readValue(objects?.[name], defaultValue, definition.type);
       const message = validationMessage(value, definition, name);
       if (message !== "") {

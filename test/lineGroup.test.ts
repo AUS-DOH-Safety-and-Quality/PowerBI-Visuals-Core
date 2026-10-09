@@ -4,8 +4,14 @@ import { createLineGroup, defineCard, createDefaultValues, numberOption, toggleO
 describe("line group factory", () => {
   it("orders a full group as show, extras, style, join, tooltip, prefixes, then value labels", () => {
     const group = createLineGroup("68", {
-      showLabel: "Show 68% Lines", showDefault: false, width: 2, type: "2 5", colour: "limits",
-      rebaselines: true, tooltipLabel: "68% Limit", tooltipPrefixes: true
+      showLabel: "Show 68% Lines",
+      showDefault: false,
+      width: 2,
+      type: "2 5",
+      colour: "limits",
+      rebaselines: true,
+      tooltipLabel: "68% Limit",
+      tooltipPrefixes: true
     }, { extra_68: numberOption("Extra", undefined), multiplier_68: toggleOption("Multiply", false) });
     expect(Object.keys(group)).toEqual([
       "show_68", "extra_68", "multiplier_68", "width_68", "type_68", "colour_68", "opacity_68", "opacity_unselected_68",
@@ -23,7 +29,15 @@ describe("line group factory", () => {
   });
 
   it("omits re-baseline, tooltip and prefix settings unless asked and prefixes style names", () => {
-    const group = createLineGroup("main", { showLabel: "Show Main Line", showDefault: true, namePrefix: "Main ", width: 1, type: "10 0", colour: "common_cause", rebaselines: false });
+    const group = createLineGroup("main", {
+      showLabel: "Show Main Line",
+      showDefault: true,
+      namePrefix: "Main ",
+      width: 1,
+      type: "10 0",
+      colour: "common_cause",
+      rebaselines: false
+    });
     expect(Object.keys(group)).toEqual([
       "show_main", "width_main", "type_main", "colour_main", "opacity_main", "opacity_unselected_main",
       "plot_label_show_main", "plot_label_position_main", "plot_label_vpad_main", "plot_label_hpad_main",
@@ -36,7 +50,15 @@ describe("line group factory", () => {
 
   it("feeds a card with flat typed values", () => {
     const card = defineCard({ displayName: "Lines", description: "Lines", settingsGroups: {
-      Target: createLineGroup("target", { showLabel: "Show Target", showDefault: true, width: 1.5, type: "10 0", colour: "standard", rebaselines: false, tooltipLabel: "Centerline" })
+      Target: createLineGroup("target", {
+        showLabel: "Show Target",
+        showDefault: true,
+        width: 1.5,
+        type: "10 0",
+        colour: "standard",
+        rebaselines: false,
+        tooltipLabel: "Centerline"
+      })
     } });
     const values = createDefaultValues({ lines: card }).lines;
     expect(values.show_target).toBe(true);

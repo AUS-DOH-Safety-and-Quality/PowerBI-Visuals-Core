@@ -1,16 +1,7 @@
 import poissonDensity from "./poissonDensity";
 import lgamma from "./lgamma";
 
-/**
- * Computes the Poisson density for the previous value (x_plus_1 - 1).
- *
- * The implementation is adapted from the dpois_wrap function in R's source code.
- *
- * @param x_plus_1 The value x + 1 for which to compute the Poisson density.
- * @param lambda The rate parameter of the Poisson distribution.
- * @param log_p If true, returns the log of the density; otherwise, returns the density.
- * @returns The Poisson density or its logarithm for the previous value.
- */
+/** Poisson density at x_plus_1 - 1; adapted from R's dpois_wrap. */
 export default function poissonDensityPrev(x_plus_1: number, lambda: number, log_p: boolean): number {
   if (!Number.isFinite(lambda)) {
     return log_p ? Number.NEGATIVE_INFINITY : 0;
@@ -20,7 +11,7 @@ export default function poissonDensityPrev(x_plus_1: number, lambda: number, log
     return poissonDensity(x_plus_1 - 1, lambda, log_p);
   }
 
-  // Cutoff for when lambda is very large relative to |x|
+  // R's M_cutoff = ln(2) * DBL_MAX_EXP / DBL_EPSILON: beyond it log(exp(-x) * k^x) ≈ -x
   const M_cutoff: number = 3.196577161300664E18;
 
   if (lambda > Math.abs(x_plus_1 - 1) * M_cutoff) {

@@ -1,22 +1,10 @@
 import type { OutlierStatus } from "../data/flagDirection";
 import sum from "../math/sum";
 
-/**
- * Detects shift rule violations (n consecutive points on same side of target/centerline).
- *
- * A shift represents special cause variation when a specified number of consecutive points
- * fall on the same side of the target or centerline. This indicates a sustained change
- * in the process level. When detected, all points in the shift sequence are flagged.
- *
- * @param val - Array of data values to check
- * @param targets - Array of target/centerline values
- * @param n - Number of consecutive points required to trigger shift detection
- * @returns Array indicating outlier direction: "upper", "lower", or "none" for each point
- */
+/** Shift rule: n consecutive points on the same side of the target; flags the whole run. */
 export default function shift(val: readonly number[], targets: readonly (number | undefined)[], n: number): OutlierStatus[] {
   const length: number = val.length;
 
-  // Calculate sign of difference from target for each point (+1, -1, or 0)
   let lagged_sign: number[] = new Array<number>(length);
   let shift_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
 
@@ -30,7 +18,6 @@ export default function shift(val: readonly number[], targets: readonly (number 
       shift_detected[i] = "none";
     }
 
-    // Backfill flags to all previous points in the shift sequence
     if (shift_detected[i] !== "none") {
       for (let j: number = (i - 1); j >= (i - (n - 1)); j--) {
         shift_detected[j] = shift_detected[i];

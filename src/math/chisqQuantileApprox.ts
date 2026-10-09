@@ -2,24 +2,11 @@ import lgamma1p from "./lgamma1p";
 import normalQuantile from "./normalQuantile";
 import logP from "./logP";
 
-/**
- * Compute an approximate quantile for the chi-squared distribution
- *
- * This function is adapted from R's qchisq_appr function
- *
- * @param p Probability
- * @param nu Degrees of freedom
- * @param g Log-Gamma of nu/2
- * @param lower_tail If true, probabilities are P[X ≤ x], otherwise, P[X > x]
- * @param log_p If true, probabilities p are given as log(p)
- * @param tol Tolerance for convergence
- * @returns Approximate quantile for the chi-squared distribution
- */
+/** Starting value for qgamma, with g = lgamma(nu / 2); adapted from R's qchisq_appr. */
 export default function chisqQuantileApprox(p: number, nu: number, g: number,
                                             lower_tail: boolean = true,
                                             log_p: boolean = false,
                                             tol: number): number {
-  // Check for invalid inputs (NaN or out of bounds)
   if (Number.isNaN(p) || Number.isNaN(nu)) {
     return p + nu;
   }
@@ -31,7 +18,6 @@ export default function chisqQuantileApprox(p: number, nu: number, g: number,
   const alpha: number = 0.5 * nu;
   let p1: number = logP(p, lower_tail, log_p);
 
-  // Approximation for small degrees of freedom or extreme tail probabilities
   if (nu < -1.24 * p1) {
     const lgam1pa: number = (alpha < 0.5) ? lgamma1p(alpha)
                                           : ((Math.log(nu) - Math.LN2) + g);
@@ -40,19 +26,19 @@ export default function chisqQuantileApprox(p: number, nu: number, g: number,
 
   const c: number = alpha - 1;
 
-  // Wilson-Hilferty approximation for larger degrees of freedom
+  // Wilson-Hilferty
   if (nu > 0.32) {
     const x: number = normalQuantile(p, 0, 1, lower_tail, log_p);
     p1 = 2 / (9 * nu);
     const ch: number = nu * Math.pow(x * Math.sqrt(p1) + 1 - p1, 3);
 
-    // If approximation is large, use a logarithmic correction
+    // p tending to 1
     return (ch > 2.2 * nu + 6)
             ? -2 * (logP(p, !lower_tail, log_p) - c * (Math.log(ch) - Math.LN2) + g)
             : ch;
   }
 
-  // Iterative approximation for intermediate range
+  // 1.24 * -log(p) <= nu <= 0.32
   const C7: number = 4.67;
   const C8: number = 6.66;
   const C9: number = 6.73;
@@ -64,7 +50,6 @@ export default function chisqQuantileApprox(p: number, nu: number, g: number,
   let t: number = 0;
   const a: number = logP(p, !lower_tail, log_p) + g + c * Math.LN2;
 
-  // Refine the approximation iteratively
   while (Math.abs(q - ch) > tol * Math.abs(ch)) {
     q = ch;
     p1 = 1 / (1 + ch * (C7 + ch));

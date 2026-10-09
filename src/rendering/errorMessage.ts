@@ -6,10 +6,10 @@ export type ErrorMessageOptions = {
   readonly width: number;
   readonly height: number;
   readonly message: string;
-  // A kind adds its preamble above the message
+  /** A kind adds its preamble above the message */
   readonly kind: ErrorKind | undefined;
   readonly colour: string;
-  // A hidden error leaves an empty canvas
+  /** A hidden error leaves an empty canvas */
   readonly show: boolean;
 };
 
@@ -31,7 +31,7 @@ function addText(group: SVGGElement, x: number, y: number, text: string, colour:
   element.style.setProperty("fill", colour);
 }
 
-// Replaces the plot with a centred error message group
+/** Replaces the plot with a centred error message group */
 export function drawErrorMessage(svg: SVGSVGElement, options: ErrorMessageOptions): void {
   initialiseSvg(svg, true);
   if (!options.show) {
@@ -41,6 +41,8 @@ export function drawErrorMessage(svg: SVGSVGElement, options: ErrorMessageOption
   svg.appendChild(group);
   group.classList.add("errormessage");
   const x = options.width / 2;
-  if (options.kind !== undefined) addText(group, x, options.height / 3, preambles[options.kind], options.colour);
+  if (options.kind !== undefined) {
+    addText(group, x, options.height / 3, preambles[options.kind], options.colour);
+  }
   addText(group, x, options.height / 2, options.message, options.colour);
 }

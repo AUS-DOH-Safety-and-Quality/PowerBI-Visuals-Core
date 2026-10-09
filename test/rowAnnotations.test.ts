@@ -3,7 +3,10 @@ import type powerbi from "powerbi-visuals-api";
 import { createDefaultValues, createLabelsCard, defineCard, dotOptions } from "../src/settings/index";
 import { indexColumnsByRole, readRowAnnotations } from "../src/powerbi/index";
 
-const cards = { scatter: defineCard({ displayName: "Scatter", description: "", settingsGroups: { all: dotOptions() } }), labels: createLabelsCard() };
+const cards = {
+  scatter: defineCard({ displayName: "Scatter", description: "", settingsGroups: { all: dotOptions() } }),
+  labels: createLabelsCard()
+};
 const defaults = createDefaultValues(cards);
 
 function categorical(withLabels: boolean): powerbi.DataViewCategorical {
@@ -15,8 +18,13 @@ function categorical(withLabels: boolean): powerbi.DataViewCategorical {
   ];
   return {
     categories: [{
-      source: { displayName: "Date", roles: { key: true } }, values: ["A", "B", "C"],
-      objects: [{}, { scatter: { size: 9 } }, { scatter: { colour: { solid: { color: "#123456" } } }, labels: { label_size: 14 } }]
+      source: { displayName: "Date", roles: { key: true } },
+      values: ["A", "B", "C"],
+      objects: [
+        {},
+        { scatter: { size: 9 } },
+        { scatter: { colour: { solid: { color: "#123456" } } }, labels: { label_size: 14 } }
+      ]
     }],
     values: values as unknown as powerbi.DataViewValueColumns
   };
@@ -24,7 +32,13 @@ function categorical(withLabels: boolean): powerbi.DataViewCategorical {
 
 function sources(withLabels: boolean) {
   const view = categorical(withLabels);
-  return { categorical: view, values: indexColumnsByRole(view.values ?? []), categories: view.categories![0], cards, defaults };
+  return {
+    categorical: view,
+    values: indexColumnsByRole(view.values ?? []),
+    categories: view.categories![0],
+    cards,
+    defaults
+  };
 }
 
 describe("row annotations", () => {

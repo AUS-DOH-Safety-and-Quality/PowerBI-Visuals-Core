@@ -1,4 +1,4 @@
-// Matches Math.max: NaN propagates, empty input is -Infinity, +0 orders above -0.
+/** Matches Math.max: NaN propagates, empty input is -Infinity, +0 orders above -0. */
 export default function max(values: readonly number[]): number {
   let result = Number.NEGATIVE_INFINITY;
   for (let i = 0; i < values.length; i++) {

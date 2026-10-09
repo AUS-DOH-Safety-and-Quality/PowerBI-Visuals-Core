@@ -9,16 +9,16 @@ export type LineType = Parameters<typeof lineTypeOption>[1];
 export type LineGroupOptions = {
   readonly showLabel: string;
   readonly showDefault: boolean;
-  // Prefixes the width, type and colour names, e.g. "Main " for "Main Line Width"
+  /** Prefixes the width, type and colour names, e.g. "Main " for "Main Line Width" */
   readonly namePrefix?: string;
   readonly width: number;
   readonly type: LineType;
   readonly colour: ColourName;
-  // Adds the re-baseline join and per-segment value label controls
+  /** Adds the re-baseline join and per-segment value label controls */
   readonly rebaselines: boolean;
-  // Adds the tooltip toggle and label, with this as the default label
+  /** Adds the tooltip toggle and label, with this as the default label */
   readonly tooltipLabel?: string;
-  // Adds upper and lower tooltip label prefixes for paired limit lines
+  /** Adds upper and lower tooltip label prefixes for paired limit lines */
   readonly tooltipPrefixes?: boolean;
 };
 
@@ -90,7 +90,7 @@ function addSuffixed(group: Record<string, SettingDefinition>, key: string, defi
   }
 }
 
-// One line's settings, named `<setting>_<key>`; extras follow the show toggle so they lead the pane
+/** One line's settings, named `<setting>_<key>`; extras follow the show toggle so they lead the pane */
 export default function createLineGroup<const K extends string, const O extends LineGroupOptions,
   E extends Record<string, SettingDefinition> = Record<never, never>>(key: K, options: O, extras?: E): LineGroup<K, O, E> {
   const group: Record<string, SettingDefinition> = {};

@@ -134,40 +134,19 @@ const bd0_scale: readonly [number, number, number, number][] = [
   [0, 0, 0, 0]
 ];
 
-/**
- * Helper function to add high and low parts of a number.
- *
- * @param d Number to add
- * @param yh Existing high part
- * @param yl Existing low part
- * @returns High and low parts after addition
- */
-function addHighLow(d: number, yh: number, yl: number): {yh: number, yl: number} {
+/** R's ADD1 in ebd0: accumulates round(d) into yh and the remainder into yl. */
+function addHighLow(acc: {yh: number, yl: number}, d: number): void {
   const d1: number = Math.floor(d + 0.5);
-  const d2: number = d - d1;
-  return {yh: yh + d1, yl: yl + d2};
+  acc.yh += d1;
+  acc.yl += d - d1;
 }
 
-/**
- * Compute the binomial deviance term for providing higher precision in
- * binomial calculations.
- *
- * This function returns an object with two properties: `yh` and `yl`, which
- * represent the high and low parts of the computed binomial deviance, respectively.
- *
- * This implementation is adapted from the ebd0 function in R's source code.
- *
- * @param x The observed number of successes.
- * @param M The expected number of successes.
- * @returns An object containing the high (`yh`) and low (`yl`) parts of the binomial deviance.
- */
+/** Binomial deviance term as an unevaluated sum yh + yl; adapted from R's ebd0. */
 export default function binomialDeviance(x: number, M: number): {yh: number, yl: number} {
   const Sb: number = 10;
   const S: number = 1 << Sb;
-  const N: number = 128; // Table size factor
-  let yh: number = 0, yl: number = 0;
+  const N: number = 128;
 
-  // Handle special cases matching R's dbinom logic
   if (x === M) {
     return {yh: 0, yl: 0};
   }
@@ -178,19 +157,17 @@ export default function binomialDeviance(x: number, M: number): {yh: number, yl:
     return {yh: Number.POSITIVE_INFINITY, yl: 0};
   }
   if (M / x === Number.POSITIVE_INFINITY) {
-    // This case happens when x is very small relative to M
     return {yh: M, yl: 0};
   }
 
-  // Argument reduction: M/x = 2^e * r
-  let {mantissa: r, exponent: e} = frexp(M / x);
+  const reduced = frexp(M / x);
+  const r: number = reduced.mantissa;
+  const e: number = reduced.exponent;
 
-  // Check for potential overflow
   if (Math.LN2 * -e > 1 + Number.MAX_VALUE / x) {
     return {yh: Number.POSITIVE_INFINITY, yl: 0};
   }
 
-  // Calculate table index and interpolation factor
   const i: number = Math.floor((r - 0.5) * (2 * N) + 0.5)
   const f: number = Math.floor(S / (0.5 + i / (2.0 * N)) + 0.5)
   const fg: number = ldexp(f, -(e + Sb));
@@ -199,24 +176,22 @@ export default function binomialDeviance(x: number, M: number): {yh: number, yl:
     return {yh: Number.POSITIVE_INFINITY, yl: 0};
   }
 
-  // First term of the expansion
-  ({yh, yl} = addHighLow(-x * log1pmx((M * fg - x) / x), yh, yl));
+  const dev = {yh: 0, yl: 0};
+  addHighLow(dev, -x * log1pmx((M * fg - x) / x));
 
   if (fg === 1) {
-    return {yh: yh, yl: yl};
+    return dev;
   }
 
-  // Add terms from the precomputed scale table
   for (let j: number = 0; j < 4; j++) {
-    ({yh, yl} = addHighLow(x * bd0_scale[i][j], yh, yl));
-    ({yh, yl} = addHighLow(-x * bd0_scale[0][j] * e, yh, yl));
-    if (!Number.isFinite(yh)) {
+    addHighLow(dev, x * bd0_scale[i][j]);
+    addHighLow(dev, -x * bd0_scale[0][j] * e);
+    if (!Number.isFinite(dev.yh)) {
       return { yh: Number.POSITIVE_INFINITY, yl: 0};
     }
   }
 
-  // Final adjustment
-  ({yh, yl} = addHighLow(M, yh, yl));
-  ({yh, yl} = addHighLow(-M * fg, yh, yl));
-  return {yh: yh, yl: yl};
+  addHighLow(dev, M);
+  addHighLow(dev, -M * fg);
+  return dev;
 }

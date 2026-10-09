@@ -1,12 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 import { drawDots, drawPlotDots, drawLines, highlightPlot, type PlotLine } from "../src/rendering/index";
-import { svgElement, frame, host, points, context, client, type TestPoint } from "./browserHelpers";
+import { svgElement, frame, host, points, context, client, palette, type TestPoint } from "./browserHelpers";
 
 function draw(svg: SVGSVGElement, plotPoints: readonly TestPoint[], overrides: Partial<Parameters<typeof drawDots<TestPoint>>[1]> = {}) {
   const visualHost = overrides.host ?? host();
   const options = {
-    frame: frame(), points: plotPoints, show: true, text: undefined, host: visualHost,
-    selectionManager: visualHost.createSelectionManager(), onSelectionChange: vi.fn(), onClick: undefined, ...overrides
+    frame: frame(),
+    points: plotPoints,
+    show: true,
+    text: undefined,
+    host: visualHost,
+    selectionManager: visualHost.createSelectionManager(),
+    onSelectionChange: vi.fn(),
+    onClick: undefined,
+    ...overrides
   };
   drawDots(svg, options);
   return options;
@@ -17,7 +24,14 @@ describe("dot drawing", () => {
     const svg = svgElement();
     const visualHost = host();
     const plotPoints = points(visualHost, [10, 50, 500]);
-    plotPoints[1].aesthetics = { ...plotPoints[1].aesthetics, shape: "Square", size: 4, colour: "#ff0000", colour_outline: "#00ff00", width_outline: 3 };
+    plotPoints[1].aesthetics = {
+      ...plotPoints[1].aesthetics,
+      shape: "Square",
+      size: 4,
+      colour: "#ff0000",
+      colour_outline: "#00ff00",
+      width_outline: 3
+    };
     draw(svg, plotPoints, { host: visualHost });
     const marks = svg.querySelectorAll<SVGPathElement>(".dotsgroup > path");
     expect(marks).toHaveLength(3);
@@ -46,7 +60,10 @@ describe("dot drawing", () => {
     const svg = svgElement();
     const visualHost = host();
     const plotPoints = points(visualHost, [10, 20]);
-    draw(svg, plotPoints, { host: visualHost, text: point => ({ text: `P${point.x}`, size: 14, font: "Georgia", colour: "#0000ff" }) });
+    draw(svg, plotPoints, {
+      host: visualHost,
+      text: point => ({ text: `P${point.x}`, size: 14, font: "Georgia", colour: "#0000ff" })
+    });
     const texts = svg.querySelectorAll<SVGTextElement>(".dotsgroup > text");
     expect(texts).toHaveLength(2);
     expect(svg.querySelectorAll(".dotsgroup > path")).toHaveLength(0);
@@ -104,7 +121,10 @@ describe("dot drawing", () => {
     const mark = svg.querySelectorAll<SVGPathElement>(".dotsgroup > path")[1];
     mark.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, ...client(svg, 40, 30) }));
     expect(visualHost.tooltipService.show).toHaveBeenCalledWith({
-      dataItems: plotPoints[1].tooltip, identities: [plotPoints[1].identity], coordinates: [40, 30], isTouchEvent: false
+      dataItems: plotPoints[1].tooltip,
+      identities: [plotPoints[1].identity],
+      coordinates: [40, 30],
+      isTouchEvent: false
     });
     mark.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
     expect(visualHost.tooltipService.hide).toHaveBeenCalledWith({ immediately: true, isTouchEvent: false });
@@ -131,9 +151,10 @@ describe("plot highlighting", () => {
       { name: "a", points: [{ x: 0, line_value: 10 }, { x: 2, line_value: 30 }], style: () => style },
       { name: "b", points: [{ x: 0, line_value: 50 }, { x: 2, line_value: 60 }], style: () => style }
     ];
-    drawLines(svg.querySelector<SVGGElement>(".linesgroup")!, { frame: frame(), lines, palette: { isHighContrast: false, foregroundColour: "#fff" } });
+    drawLines(svg.querySelector<SVGGElement>(".linesgroup")!, { frame: frame(), lines, palette });
     highlightPlot<TestPoint>(svg, {
-      active: true, selected: new Set([plotPoints[1].identity.getKey()]),
+      active: true,
+      selected: new Set([plotPoints[1].identity.getKey()]),
       lineOpacity: line => line.name === "a" ? 0.5 : 0.1,
       dotOpacities: point => ({ opacity: 1, opacity_selected: 0.9, opacity_unselected: point.x === 0 ? 0.3 : 0.2 })
     });
@@ -142,7 +163,12 @@ describe("plot highlighting", () => {
     expect(marks[0].style.strokeOpacity).toBe("0.3");
     expect(svg.querySelector<SVGGElement>(".a-linegroup")!.style.strokeOpacity).toBe("0.5");
     expect(svg.querySelector<SVGGElement>(".b-linegroup")!.style.strokeOpacity).toBe("0.1");
-    highlightPlot<TestPoint>(svg, { active: false, selected: new Set(), lineOpacity: () => 1, dotOpacities: () => ({ opacity: 0.7, opacity_selected: 0.9, opacity_unselected: 0.2 }) });
+    highlightPlot<TestPoint>(svg, {
+      active: false,
+      selected: new Set(),
+      lineOpacity: () => 1,
+      dotOpacities: () => ({ opacity: 0.7, opacity_selected: 0.9, opacity_unselected: 0.2 })
+    });
     expect(marks[1].style.fillOpacity).toBe("0.7");
   });
 });

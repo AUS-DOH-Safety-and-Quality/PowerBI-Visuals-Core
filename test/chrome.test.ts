@@ -2,14 +2,27 @@ import { describe, expect, it, vi } from "vitest";
 import {
   drawErrorMessage, drawCrosshairs, drawDownloadButton, bindContextMenu, drawPlotTooltips, drawPlotDownload, initialiseSvg, fitPlotToOverflow
 } from "../src/rendering/index";
+import type { ErrorMessageOptions } from "../src/rendering/errorMessage";
 import { toCsv } from "../src/data/index";
-import { svgElement, frame, host, points, context, client } from "./browserHelpers";
+import { svgElement, frame, host, points, context, client, settings } from "./browserHelpers";
+
+function errorOptions(message: string, overrides: Partial<ErrorMessageOptions> = {}): ErrorMessageOptions {
+  return {
+    width: 500,
+    height: 300,
+    message,
+    kind: undefined,
+    colour: "#000",
+    show: true,
+    ...overrides
+  };
+}
 
 describe("error message", () => {
   it("replaces the plot with the preamble and message, and clears it again", () => {
     const svg = svgElement();
     svg.querySelector(".dotsgroup")!.appendChild(svg.ownerDocument.createElementNS("http://www.w3.org/2000/svg", "path"));
-    drawErrorMessage(svg, { width: 500, height: 300, message: "Bad input", kind: "settings", colour: "#ff0000", show: true });
+    drawErrorMessage(svg, errorOptions("Bad input", { kind: "settings", colour: "#ff0000" }));
     const texts = svg.querySelectorAll<SVGTextElement>(".errormessage text");
     expect(texts).toHaveLength(2);
     expect(texts[0].textContent).toBe("Invalid settings provided for all observations! First error:");
@@ -18,14 +31,14 @@ describe("error message", () => {
     expect(texts[1].getAttribute("y")).toBe("150");
     expect(texts[1].style.fill).toBe("rgb(255, 0, 0)");
     expect(svg.querySelector(".dotsgroup path")).toBeNull();
-    drawErrorMessage(svg, { width: 500, height: 300, message: "Quiet", kind: undefined, colour: "#000", show: false });
+    drawErrorMessage(svg, errorOptions("Quiet", { show: false }));
     expect(svg.querySelector(".errormessage")).toBeNull();
     expect(svg.querySelector(".dotsgroup")).not.toBeNull();
   });
 
   it("shows only the message for an unkinded error", () => {
     const svg = svgElement();
-    drawErrorMessage(svg, { width: 500, height: 300, message: "Plain", kind: undefined, colour: "#000", show: true });
+    drawErrorMessage(svg, errorOptions("Plain"));
     expect(svg.querySelectorAll(".errormessage text")).toHaveLength(1);
   });
 });
@@ -35,7 +48,15 @@ describe("crosshairs", () => {
     const svg = svgElement();
     const vertical = svg.querySelector<SVGLineElement>(".ttip-line-x")!;
     const horizontal = svg.querySelector<SVGLineElement>(".ttip-line-y")!;
-    const crosshairs = drawCrosshairs({ vertical, horizontal, left: 10, right: 490, top: 5, bottom: 390, colour: "#00ff00" });
+    const crosshairs = drawCrosshairs({
+      vertical,
+      horizontal,
+      left: 10,
+      right: 490,
+      top: 5,
+      bottom: 390,
+      colour: "#00ff00"
+    });
     expect([vertical.getAttribute("y1"), vertical.getAttribute("y2")]).toEqual(["5", "390"]);
     expect([horizontal.getAttribute("x1"), horizontal.getAttribute("x2")]).toEqual(["10", "490"]);
     expect(vertical.getAttribute("stroke")).toBe("#00ff00");
@@ -72,7 +93,9 @@ describe("download button", () => {
     const rows = [{ date: "A", value: 1 }, { date: "B", value: 2 }];
     drawPlotDownload(svg, context(visualHost, points(visualHost, [1, 2])), () => rows);
     expect(svg.querySelector(".download-btn-group")).toBeNull();
-    const shown = context(visualHost, points(visualHost, [1, 2]), { settings: { ...context(visualHost, []).settings, download_options: { show_button: true } } });
+    const shown = context(visualHost, points(visualHost, [1, 2]), {
+      settings: { ...settings, download_options: { show_button: true } }
+    });
     drawPlotDownload(svg, shown, () => rows);
     const button = svg.querySelector<SVGTextElement>(".download-btn-group")!;
     expect(button.getAttribute("x")).toBe("450");
@@ -87,7 +110,11 @@ describe("context menu", () => {
     const svg = svgElement();
     const child = svg.querySelector(".dotsgroup")!;
     const show = vi.fn();
-    const options = { enabled: true, identity: (target: EventTarget | null) => (target === child ? "dot" : "background"), show };
+    const options = {
+      enabled: true,
+      identity: (target: EventTarget | null) => (target === child ? "dot" : "background"),
+      show
+    };
     bindContextMenu(svg, options);
     bindContextMenu(svg, options);
     const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 7, clientY: 9 });
@@ -117,7 +144,10 @@ describe("plot tooltips", () => {
     // Horizontally nearest point 1 even though point 2 is vertically closer
     svg.dispatchEvent(new MouseEvent("mousemove", { ...client(svg, f.xScale(1) + 5, f.yScale(50)) }));
     expect(visualHost.tooltipService.show).toHaveBeenCalledWith({
-      dataItems: plotPoints[1].tooltip, identities: [plotPoints[1].identity], coordinates: [f.xScale(1), f.yScale(90)], isTouchEvent: false
+      dataItems: plotPoints[1].tooltip,
+      identities: [plotPoints[1].identity],
+      coordinates: [f.xScale(1), f.yScale(90)],
+      isTouchEvent: false
     });
     expect(vertical.getAttribute("x1")).toBe(String(f.xScale(1)));
     expect(vertical.style.strokeOpacity).toBe("0.4");

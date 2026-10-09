@@ -6,7 +6,7 @@ import { gammaQuantile } from "../src/math/index";
 import { chisqCDF } from "../src/math/index";
 import { poissonDensity } from "../src/math/index";
 
-// Reference values from R 4.6.0 (Core finding 28). Tolerances are relative.
+/** Reference values from R 4.6.0. Tolerances are relative. */
 function expectRel(actual: number, expected: number, tol: number): void {
   expect(Math.abs(actual / expected - 1), `${actual} vs ${expected}`).toBeLessThan(tol);
 }

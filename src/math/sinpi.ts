@@ -1,4 +1,4 @@
-// sin(pi * x) with exact results at multiples of 1/2; adapted from R's sinpi.
+/** sin(pi * x) with exact results at multiples of 1/2; adapted from R's sinpi. */
 export default function sinpi(x: number): number {
   if (Number.isNaN(x) || !Number.isFinite(x)) {
     return Number.NaN;

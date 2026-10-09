@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createAxisCard, createDefaultValues, numberOption } from "../src/settings/index";
 import { axisPropertiesFromSettings } from "../src/rendering/index";
+import { palette } from "./browserHelpers";
 
 describe("axis card factory", () => {
   it("builds the x card with a show toggle and no decimal places", () => {
@@ -41,10 +42,25 @@ describe("axis properties from settings", () => {
   const range = { lower: 0, upper: 10, start_padding: 30, end_padding: 10 };
 
   it("copies the range, sizes in pixels and settings colours", () => {
-    const properties = axisPropertiesFromSettings("x", settings, { isHighContrast: false, foregroundColour: "#ffffff" }, range);
-    expect(properties).toMatchObject({ lower: 0, upper: 10, start_padding: 30, end_padding: 10, colour: "#000000",
-      ticks: true, tick_marks: true, tick_size: "10px", tick_rotation: -35, tick_count: 10, label_size: "10px",
-      label_align: "center", label_style: "normal", grid_show: false, grid_colour: "#D3D3D3", grid_width: 1 });
+    const properties = axisPropertiesFromSettings("x", settings, palette, range);
+    expect(properties).toMatchObject({
+      lower: 0,
+      upper: 10,
+      start_padding: 30,
+      end_padding: 10,
+      colour: "#000000",
+      ticks: true,
+      tick_marks: true,
+      tick_size: "10px",
+      tick_rotation: -35,
+      tick_count: 10,
+      label_size: "10px",
+      label_align: "center",
+      label_style: "normal",
+      grid_show: false,
+      grid_colour: "#D3D3D3",
+      grid_width: 1
+    });
   });
 
   it("uses the host foreground for every colour in high contrast", () => {
@@ -53,7 +69,7 @@ describe("axis properties from settings", () => {
   });
 
   it("draws no ticks when the maximum tick count is zero", () => {
-    expect(axisPropertiesFromSettings("x", { ...settings, xlimit_tick_count: 0 }, { isHighContrast: false, foregroundColour: "" }, range).ticks).toBe(false);
-    expect(axisPropertiesFromSettings("x", { ...settings, xlimit_ticks: false }, { isHighContrast: false, foregroundColour: "" }, range).ticks).toBe(false);
+    expect(axisPropertiesFromSettings("x", { ...settings, xlimit_tick_count: 0 }, palette, range).ticks).toBe(false);
+    expect(axisPropertiesFromSettings("x", { ...settings, xlimit_ticks: false }, palette, range).ticks).toBe(false);
   });
 });

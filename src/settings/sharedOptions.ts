@@ -1,6 +1,6 @@
 import { colourOption, dropdownOption, numberOption, textOption, toggleOption } from "./definitions";
 
-// Marker appearance and the opacities a selection applies
+/** Marker appearance and the opacities a selection applies */
 export function dotOptions() {
   return {
     shape: dropdownOption("Shape", "Circle", ["Circle", "Cross", "Diamond", "Square", "Star", "Triangle", "Wye"]),
@@ -14,7 +14,7 @@ export function dotOptions() {
   };
 }
 
-// Which flagged changes count, and which direction is an improvement
+/** Which flagged changes count, and which direction is an improvement */
 export function flagDirectionOptions() {
   return {
     process_flag_type: dropdownOption("Type of Change to Flag", "both", ["both", "improvement", "deterioration"], "sentence"),

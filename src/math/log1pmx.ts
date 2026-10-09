@@ -1,6 +1,6 @@
 import logcf from "./logcf";
 
-// log(1 + x) - x, accurate for small x; adapted from R's log1pmx (src/nmath/pgamma.c).
+/** log(1 + x) - x, accurate for small x; adapted from R's log1pmx (src/nmath/pgamma.c). */
 export default function log1pmx(x: number): number {
   const minLog1Value = -0.79149064;
   if (x > 1 || x < minLog1Value) {

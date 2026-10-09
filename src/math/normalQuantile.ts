@@ -1,15 +1,7 @@
 import { LOG_TWO_PI } from "./constants";
 import ldexp from "./ldexp";
 
-/**
- * Evaluates a rational polynomial P(x)/Q(x) using Horner's method.
- *
- * @param x The point at which to evaluate
- * @param q Multiplier for the result
- * @param num_coeffs Numerator polynomial coefficients (highest degree first)
- * @param den_coeffs Denominator polynomial coefficients (highest degree first)
- * @returns q * P(x) / Q(x)
- */
+/** q * P(x) / Q(x) by Horner's method; coefficients highest degree first. */
 function polyEval(x: number, q: number, num_coeffs: readonly number[], den_coeffs: readonly number[]): number {
   let numerator = num_coeffs[0];
   let denominator = den_coeffs[0];
@@ -20,27 +12,17 @@ function polyEval(x: number, q: number, num_coeffs: readonly number[], den_coeff
   return q * numerator / denominator;
 }
 
-/**
- * Calculates the quantile function (inverse CDF) of the normal distribution.
- *
- * The implementation is adapted from the qnorm function in R's source code.
- *
- * @param p Probability value
- * @param mu Mean of the normal distribution
- * @param sigma SD of the normal distribution
- * @param lower_tail If true, probabilities are P[X ≤ x], otherwise, P[X > x]
- * @param log_p If true, probabilities p are given as log(p)
- * @returns The quantile corresponding to the given probability for the normal distribution with specified parameters.
- */
+/** Normal quantile (Wichura 1988, AS 241); adapted from R's qnorm. */
 export default function normalQuantile(p: number, mu: number, sigma: number, lower_tail: boolean, log_p: boolean) {
-  let p_: number, q: number, r: number, val: number;
+  let p_: number;
+  let q: number;
+  let r: number;
+  let val: number;
 
-  // Handle NaN inputs
   if (Number.isNaN(p) || Number.isNaN(mu) || Number.isNaN(sigma)) {
     return p + mu + sigma;
   }
 
-  // Validate probability bounds and handle edge cases
   if (log_p) {
     if (p > 0) {
       return Number.NaN;  // log(p) > 0 means p > 1
@@ -63,23 +45,19 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
     }
   }
 
-  // Validate sigma
   if (sigma < 0) {
     return Number.NaN;
   }
 
-  // Degenerate case: point mass at mu
   if (sigma == 0) {
     return mu;
   }
 
-  // Convert to standard form: compute p_ as lower-tail probability
+  // Lower-tail probability on the natural scale
   p_ = log_p ? (lower_tail ? Math.exp(p) : - Math.expm1(p))
               : (lower_tail ? p : (0.5 - p + 0.5));
-  q = p_ - 0.5;  // Deviation from median  // Deviation from median
+  q = p_ - 0.5;
 
-  // Rational approximation coefficients for central region |q| <= 0.425
-  // Based on Wichura's AS 241 algorithm
   const coeffs_a: readonly number[] = [
     2509.0809287301226727,
     33430.575583588128105,
@@ -101,7 +79,6 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
     1
   ];
 
-  // Coefficients for intermediate tail region (r <= 5)
   const coeffs_c: readonly number[] = [
     7.7454501427834140764e-4,
     0.0227238449892691845833,
@@ -123,7 +100,6 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
     1
   ];
 
-  // Coefficients for extreme tail region (r <= 27)
   const coeffs_e: readonly number[] = [
     2.01033439929228813265e-7,
     2.71155556874348757815e-5,
@@ -145,13 +121,10 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
     1
   ];
 
-  // Region 1: Central region |q| <= 0.425 (covers about 85% of distribution)
-  // Use rational approximation in r = 0.180625 - q²
   if (Math.abs(q) <= 0.425) {
-    r = 0.180625 - q * q;
+    r = 0.180625 - q * q;  // 0.180625 = 0.425^2
     val = polyEval(r, q, coeffs_a, coeffs_b);
   } else {
-    // Tail regions: work with r = sqrt(-log(p)) for numerical stability
     let lp: number;
     if (log_p && ((lower_tail && q <= 0) || (!lower_tail && q > 0))) {
       lp = p;
@@ -166,21 +139,16 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
     }
     r = Math.sqrt(-lp);
 
-    // Region 2: Intermediate tail (r <= 5)
     if (r <= 5) {
       val = polyEval(r - 1.6, 1, coeffs_c, coeffs_d);
     } else if(r <= 27) {
-      // Region 3: Far tail (r <= 27)
       val = polyEval(r - 5, 1, coeffs_e, coeffs_f);
     } else {
-      // Region 4: Extreme tail - use asymptotic expansion
-      // Based on inverting the Mills ratio approximation
+      // R's asymptotic expansion for p extremely close to 0 or 1
       if (r >= 6.4e8) {
         val = r * Math.SQRT2;
       } else {
-        // Iterative refinement using asymptotic formula
-        // Phi^{-1}(p) ≈ sqrt(-2*log(p) - log(2*pi) - log(-2*log(p) - log(2*pi)))
-        const s2: number = -ldexp(lp, 1);  // s2 = -2 * log(p)
+        const s2: number = -ldexp(lp, 1);  // -2 * lp
         let x2: number = s2 - (Math.log(s2) + LOG_TWO_PI);
         if (r < 36000) {
           x2 = s2 - (LOG_TWO_PI + Math.log(x2)) - 2 / (2 + x2);
@@ -200,12 +168,10 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
         val = Math.sqrt(x2);
       }
     }
-    // Apply sign based on which tail
     if (q < 0.0) {
       val = -val;
     }
   }
 
-  // Transform from standard normal to N(mu, sigma)
   return mu + sigma * val;
 }

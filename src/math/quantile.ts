@@ -1,11 +1,8 @@
-/**
- * Calculates the q-quantile of ascending-sorted values by linear interpolation.
- * @param sorted - Values already sorted ascending.
- * @param q - The target quantile (0 <= q <= 1).
- * @returns The quantile, or undefined for empty input.
- */
+/** Linearly interpolated q-quantile of ascending-sorted values; undefined if empty. */
 export default function quantile(sorted: readonly number[], q: number): number | undefined {
-  if (sorted.length === 0) return undefined;
+  if (sorted.length === 0) {
+    return undefined;
+  }
 
   const pos = (sorted.length - 1) * q;
   const base = Math.floor(pos);

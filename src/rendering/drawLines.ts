@@ -17,7 +17,7 @@ export type LineStyle = {
 export type PlotLine = {
   readonly name: string;
   readonly points: readonly LinePoint[];
-  // Style of the segment starting at a point; a change between points splits the line into segments
+  /** Style of the segment starting at a point; a change between points splits the line into segments */
   readonly style: (index: number) => LineStyle;
 };
 
@@ -31,9 +31,10 @@ function sameStyle(a: LineStyle, b: LineStyle): boolean {
   return a.colour === b.colour && a.width === b.width && a.type === b.type;
 }
 
-// One group per line bound to its PlotLine: a single path, or per-segment lines when the style varies
+/** One group per line bound to its PlotLine: a single path, or per-segment lines when the style varies */
 export function drawLines(group: SVGGElement, options: LinesOptions): void {
-  const { frame, palette } = options;
+  const frame = options.frame;
+  const palette = options.palette;
   select(group)
     .selectChildren<SVGGElement, PlotLine>("g")
     .data(options.lines)

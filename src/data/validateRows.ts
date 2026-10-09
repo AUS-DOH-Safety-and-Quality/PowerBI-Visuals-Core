@@ -1,6 +1,6 @@
 export type RowValidation = { status: 0; messages: string[] } | { status: 1; messages: string[]; error: string };
 
-// A row fails on its first matching rule; `all` names the error when every row fails the same rule
+/** A row fails on its first matching rule; `all` names the error when every row fails the same rule */
 export type RowRule = {
   readonly fails: (index: number) => boolean;
   readonly message: string;

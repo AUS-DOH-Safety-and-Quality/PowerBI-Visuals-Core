@@ -17,11 +17,11 @@ export type PlotHighlightOptions<P extends HighlightPoint> = {
   readonly active: boolean;
   readonly selected: ReadonlySet<string>;
   readonly lineOpacity: (line: PlotLine) => number;
-  // The opacities a dot fades between, which depend on how the visual drew it
+  /** The opacities a dot fades between, which depend on how the visual drew it */
   readonly dotOpacities: (point: P) => HighlightOpacities;
 };
 
-// Default opacity until a selection or highlight is active, then selected or unselected
+/** Default opacity until a selection or highlight is active, then selected or unselected */
 export function highlightOpacity(opacities: HighlightOpacities, active: boolean, emphasised: boolean): number {
   if (!active) {
     return opacities.opacity;
@@ -29,7 +29,7 @@ export function highlightOpacity(opacities: HighlightOpacities, active: boolean,
   return emphasised ? opacities.opacity_selected : opacities.opacity_unselected;
 }
 
-// Line groups take their settings' opacity; dots fade unless selected or host-highlighted
+/** Line groups take their settings' opacity; dots fade unless selected or host-highlighted */
 export function highlightPlot<P extends HighlightPoint>(svg: SVGSVGElement, options: PlotHighlightOptions<P>): void {
   const root = select(svg);
   root.selectAll(".linesgroup").selectChildren<SVGGElement, PlotLine>("g").style("stroke-opacity", options.lineOpacity);

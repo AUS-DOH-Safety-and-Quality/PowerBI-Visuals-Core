@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isNullOrUndefined, isValidNumber, groupBy } from "../src/data/index";
+import { pluck } from "./browserHelpers";
 
 describe("missing-value and finite-number predicates", () => {
   it("isNullOrUndefined accepts only null and undefined", () => {
@@ -56,8 +57,8 @@ describe("groupBy", () => {
       { id: "1", name: "Text" }
     ];
     const result = groupBy(data, "id");
-    expect(result.map(g => g[0])).toEqual([1, 2, "1"]);
-    expect(result[0][1].map(r => r.name)).toEqual(["Alice", "Charlie"]);
+    expect(pluck(result, 0)).toEqual([1, 2, "1"]);
+    expect(pluck(result[0][1], "name")).toEqual(["Alice", "Charlie"]);
   });
 
   it("groups undefined keys and NaN keys together", () => {

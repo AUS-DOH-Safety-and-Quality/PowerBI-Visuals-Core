@@ -8,16 +8,17 @@ export type AxisDrawOptions = {
   readonly frame: PlotFrame;
   readonly show: boolean;
   readonly tickFormat: ((value: number) => string) | undefined;
-  // Unscaled title size; places the title when the axis cannot be measured
+  /** Unscaled title size; places the title when the axis cannot be measured */
   readonly labelSize: number;
   readonly measure: boolean;
 };
 
 const HIDDEN = "#FFFFFF";
 
-// Draws one axis with its gridlines and title beneath the lines; a hidden axis is removed entirely
+/** Draws one axis with its gridlines and title beneath the lines; a hidden axis is removed entirely */
 export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
-  const { axis, frame } = options;
+  const axis = options.axis;
+  const frame = options.frame;
   const selection = select(svg);
   const existingGroup = selection.select<SVGGElement>(`.${axis}axisgroup`);
   const existingLabel = selection.select<SVGTextElement>(`.${axis}axislabel`);
@@ -71,7 +72,9 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   const gridGroup = svg.querySelector<SVGGElement>(".gridgroup");
   if (gridGroup !== null) {
     drawGridlines({
-      container: gridGroup, className: `${axis}gridline`, orientation: isX ? "vertical" : "horizontal",
+      container: gridGroup,
+      className: `${axis}gridline`,
+      orientation: isX ? "vertical" : "horizontal",
       values: properties.grid_show ? group.selectAll<SVGGElement, number>(".tick").data() : [],
       scale,
       from: isX ? edge : frame.xAxis.start_padding,

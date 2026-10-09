@@ -3,10 +3,19 @@ import { labelGeometry, trianglePath, axisLabelPlacement } from "../src/renderin
 import type { LabelAesthetics, LabelState } from "../src/rendering/labelGeometry";
 
 const aesthetics: LabelAesthetics = {
-  label_position: "top", label_y_offset: 20, label_line_offset: 5, label_angle_offset: 0,
-  label_font: "Arial", label_size: 10, label_colour: "#000000", label_line_max_length: 1000,
-  label_marker_show: true, label_marker_offset: 5, label_marker_size: 3,
-  label_marker_colour: "#000000", label_marker_outline_colour: "#000000"
+  label_position: "top",
+  label_y_offset: 20,
+  label_line_offset: 5,
+  label_angle_offset: 0,
+  label_font: "Arial",
+  label_size: 10,
+  label_colour: "#000000",
+  label_line_max_length: 1000,
+  label_marker_show: true,
+  label_marker_offset: 5,
+  label_marker_size: 3,
+  label_marker_colour: "#000000",
+  label_marker_outline_colour: "#000000"
 };
 
 function label(overrides: Partial<LabelAesthetics>, angle?: number, distance?: number): LabelState {
@@ -14,7 +23,9 @@ function label(overrides: Partial<LabelAesthetics>, angle?: number, distance?: n
 }
 
 function must<T>(value: T | undefined): T {
-  if (value === undefined) throw new Error("Expected geometry");
+  if (value === undefined) {
+    throw new Error("Expected geometry");
+  }
   return value;
 }
 
@@ -51,7 +62,7 @@ describe("label geometry", () => {
     expect(g.y).toBeCloseTo(150, 10);
   });
 
-  // Finding 30: only non-finite positions are missing; the origin is an ordinary position
+  // Only non-finite positions are missing; the origin is an ordinary position
   it("returns no geometry for a non-finite position and keeps the origin", () => {
     expect(labelGeometry(label({}, NaN, 7), 100, 150, 400, 30)).toBeUndefined();
     expect(labelGeometry(label({}, 0, Infinity), 100, 150, 400, 30)).toBeUndefined();

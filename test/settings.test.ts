@@ -81,7 +81,10 @@ describe("setting definitions", () => {
 
 it("offers a normal/italic font style dropdown", () => {
   expect(fontStyleOption("Style")).toEqual({
-    displayName: "Style", type: "Dropdown", default: "normal", valid: ["normal", "italic"],
+    displayName: "Style",
+    type: "Dropdown",
+    default: "normal",
+    valid: ["normal", "italic"],
     items: [{ displayName: "Normal", value: "normal" }, { displayName: "Italic", value: "italic" }]
   });
 });

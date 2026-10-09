@@ -4,7 +4,7 @@ import lgammaCorrection from "./lgammaCorrection";
 import stirlingError from "./stirlingError";
 import { LOG_SQRT_TWO_PI } from "./constants";
 
-// gamma(x); NaN at zero and negative integers; adapted from R's gammafn.
+/** gamma(x); NaN at zero and negative integers; adapted from R's gammafn. */
 export default function gamma(x: number): number {
   const gamcs: readonly number[] = [
     .8571195590989331421920062399942e-2,

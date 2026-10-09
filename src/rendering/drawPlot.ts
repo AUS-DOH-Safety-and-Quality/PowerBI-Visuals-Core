@@ -22,35 +22,52 @@ export type PlotDotsOptions<P extends PlotPoint> = {
   readonly onClick: ((point: P) => void) | undefined;
 };
 
-// Fixed decimals, as a percentage when the values are scaled to one hundred
+/** Fixed decimals, as a percentage when the values are scaled to one hundred */
 export function valueTickFormat(decimals: number, percent: boolean): TickFormat {
   return value => percent ? `${value.toFixed(decimals)}%` : value.toFixed(decimals);
 }
 
-// Axis titles are measured against the live layout, which the frontend renderer lacks
+/** Axis titles are measured against the live layout, which the frontend renderer lacks */
 export function drawPlotAxes(svg: SVGSVGElement, context: PlotContext, formats: TickFormats): void {
-  const { frame, settings } = context;
+  const frame = context.frame;
+  const settings = context.settings;
   const measure = !context.frontend;
   drawAxis(svg, {
-    axis: "x", frame, show: settings.x_axis.xlimit_show, labelSize: settings.x_axis.xlimit_label_size, measure, tickFormat: formats.x
+    axis: "x",
+    frame,
+    show: settings.x_axis.xlimit_show,
+    labelSize: settings.x_axis.xlimit_label_size,
+    measure,
+    tickFormat: formats.x
   });
   drawAxis(svg, {
-    axis: "y", frame, show: settings.y_axis.ylimit_show, labelSize: settings.y_axis.ylimit_label_size, measure, tickFormat: formats.y
+    axis: "y",
+    frame,
+    show: settings.y_axis.ylimit_show,
+    labelSize: settings.y_axis.ylimit_label_size,
+    measure,
+    tickFormat: formats.y
   });
 }
 
-// Crosshairs and the host tooltip follow the nearest point; `.plot` handlers are dropped when the svg is reset
+/** Crosshairs and the host tooltip follow the nearest point; `.plot` handlers are dropped when the svg is reset */
 export function drawPlotTooltips(svg: SVGSVGElement, context: PlotContext, includeVertical: boolean): void {
-  const { frame, points, host, palette } = context;
+  const frame = context.frame;
+  const points = context.points;
+  const host = context.host;
+  const palette = context.palette;
   const vertical = svg.querySelector<SVGLineElement>(".ttip-line-x");
   const horizontal = svg.querySelector<SVGLineElement>(".ttip-line-y");
   if (vertical === null || horizontal === null) {
     return;
   }
   const crosshairs = drawCrosshairs({
-    vertical, horizontal,
-    left: frame.xAxis.start_padding, right: frame.width - frame.xAxis.end_padding,
-    top: frame.yAxis.end_padding, bottom: frame.height - frame.yAxis.start_padding,
+    vertical,
+    horizontal,
+    left: frame.xAxis.start_padding,
+    right: frame.width - frame.xAxis.end_padding,
+    top: frame.yAxis.end_padding,
+    bottom: frame.height - frame.yAxis.start_padding,
     colour: palette.isHighContrast ? palette.foregroundColour : "black"
   });
   select(svg)
@@ -59,14 +76,22 @@ export function drawPlotTooltips(svg: SVGSVGElement, context: PlotContext, inclu
         return;
       }
       const pointer = screenToSvg(svg, event.clientX, event.clientY);
-      const nearest = nearestPoint(points.length,
-        i => ({ x: frame.xScale(points[i].x), y: frame.yScale(points[i].value) }), pointer.x, pointer.y, includeVertical);
+      const nearest = nearestPoint(
+        points.length,
+        i => ({ x: frame.xScale(points[i].x), y: frame.yScale(points[i].value) }),
+        pointer.x,
+        pointer.y,
+        includeVertical
+      );
       if (nearest === undefined) {
         return;
       }
       const point = points[nearest.index];
       host.tooltipService.show({
-        dataItems: point.tooltip, identities: [point.identity], coordinates: [nearest.x, nearest.y], isTouchEvent: false
+        dataItems: point.tooltip,
+        identities: [point.identity],
+        coordinates: [nearest.x, nearest.y],
+        isTouchEvent: false
       });
       crosshairs.show(nearest.x, nearest.y);
     })
@@ -80,7 +105,8 @@ export function drawPlotTooltips(svg: SVGSVGElement, context: PlotContext, inclu
 }
 
 export function drawPlotValueLabels(svg: SVGSVGElement, context: PlotContext, anyLabels: boolean): void {
-  const { frame, settings } = context;
+  const frame = context.frame;
+  const settings = context.settings;
   drawValueLabels(svg, {
     visible: settings.labels.show_labels && anyLabels,
     points: context.points,
@@ -88,7 +114,11 @@ export function drawPlotValueLabels(svg: SVGSVGElement, context: PlotContext, an
     yScale: frame.yScale,
     plotHeight: frame.height,
     bottomPadding: frame.yAxis.start_padding,
-    line: { colour: settings.labels.label_line_colour, width: settings.labels.label_line_width, type: settings.labels.label_line_type },
+    line: {
+      colour: settings.labels.label_line_colour,
+      width: settings.labels.label_line_width,
+      type: settings.labels.label_line_type
+    },
     interactive: !context.headless
   });
 }
@@ -106,7 +136,7 @@ export function drawPlotDots<P extends PlotPoint>(svg: SVGSVGElement, context: P
   });
 }
 
-// Exports the rows as chartdata.csv through the host's download service
+/** Exports the rows as chartdata.csv through the host's download service */
 export function drawPlotDownload(svg: SVGSVGElement, context: PlotContext, rows: () => readonly Readonly<Record<string, unknown>>[]): void {
   drawDownloadButton(svg, {
     visible: context.settings.download_options.show_button,

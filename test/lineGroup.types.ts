@@ -1,8 +1,28 @@
 import { createLineGroup, defineCard, createDefaultValues } from "../src/settings/index";
 
-const withRebaselines = createLineGroup("99", { showLabel: "Show", showDefault: true, width: 2, type: "10 10", colour: "limits", rebaselines: true, tooltipLabel: "99% Limit", tooltipPrefixes: true });
-const plain = createLineGroup("target", { showLabel: "Show", showDefault: true, width: 1.5, type: "10 0", colour: "standard", rebaselines: false });
-const values = createDefaultValues({ lines: defineCard({ displayName: "L", description: "L", settingsGroups: { a: withRebaselines, b: plain } }) }).lines;
+const withRebaselines = createLineGroup("99", {
+  showLabel: "Show",
+  showDefault: true,
+  width: 2,
+  type: "10 10",
+  colour: "limits",
+  rebaselines: true,
+  tooltipLabel: "99% Limit",
+  tooltipPrefixes: true
+});
+const plain = createLineGroup("target", {
+  showLabel: "Show",
+  showDefault: true,
+  width: 1.5,
+  type: "10 0",
+  colour: "standard",
+  rebaselines: false
+});
+const values = createDefaultValues({ lines: defineCard({
+  displayName: "L",
+  description: "L",
+  settingsGroups: { a: withRebaselines, b: plain }
+}) }).lines;
 
 const shown: boolean = values.show_99;
 const lineType: "10 0" | "10 10" | "2 5" = values.type_target;

@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { createAxisCard, createCanvasCard, createDefaultValues } from "../src/settings/index";
 import { createPlotFrame, rescalePlotFrame, valueTickFormat } from "../src/rendering/index";
+import { settings, palette } from "./browserHelpers";
 
-const settings = createDefaultValues({ canvas: createCanvasCard(), x_axis: createAxisCard("x", { tickRotation: 0 }), y_axis: createAxisCard("y", { tickRotation: 0 }) });
-const palette = { isHighContrast: false, foregroundColour: "#ffffff" };
-const options = { width: 400, height: 300, displayPlot: true, x: { lower: 0, upper: 10 }, y: { lower: -5, upper: 5 }, settings, palette };
+const options = {
+  width: 400,
+  height: 300,
+  displayPlot: true,
+  x: { lower: 0, upper: 10 },
+  y: { lower: -5, upper: 5 },
+  settings,
+  palette
+};
 
 describe("plot frame", () => {
   it("pads from the canvas settings and scales each axis into the padded range", () => {

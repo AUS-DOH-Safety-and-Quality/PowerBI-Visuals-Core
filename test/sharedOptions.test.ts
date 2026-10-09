@@ -3,6 +3,7 @@ import {
   createDownloadCard, createDefaultValues, defineCard, dotOptions, flagDirectionOptions, scalingOptions,
   valueTooltipOptions, limitTruncationOptions, toggleOption
 } from "../src/settings/index";
+import { pluck } from "./browserHelpers";
 
 describe("shared setting options", () => {
   it("builds the download card", () => {
@@ -20,12 +21,16 @@ describe("shared setting options", () => {
       "show_dots", "shape", "size", "colour", "colour_outline", "width_outline", "opacity", "opacity_selected", "opacity_unselected"
     ]);
     expect(card.shape.valid).toEqual(["Circle", "Cross", "Diamond", "Square", "Star", "Triangle", "Wye"]);
-    expect(createDefaultValues({ scatter: card }).scatter).toMatchObject({ size: 2.5, colour: "#A6A6A6", opacity_unselected: 0.2 });
+    expect(createDefaultValues({ scatter: card }).scatter).toMatchObject({
+      size: 2.5,
+      colour: "#A6A6A6",
+      opacity_unselected: 0.2
+    });
   });
 
   it("provides the flag direction, scaling, tooltip and truncation options", () => {
     expect(Object.keys(flagDirectionOptions())).toEqual(["process_flag_type", "improvement_direction"]);
-    expect(flagDirectionOptions().improvement_direction.items.map(item => item.displayName)).toEqual(["Increase", "Neutral", "Decrease"]);
+    expect(pluck(flagDirectionOptions().improvement_direction.items, "displayName")).toEqual(["Increase", "Neutral", "Decrease"]);
     expect(Object.keys(scalingOptions())).toEqual(["multiplier", "sig_figs", "perc_labels"]);
     expect(scalingOptions().sig_figs.options).toEqual({ minValue: { value: 0 }, maxValue: { value: 20 } });
     expect(Object.keys(valueTooltipOptions())).toEqual([

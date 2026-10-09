@@ -6,7 +6,7 @@ type VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 type Level = "68" | "95" | "99";
 type Line = Level | "target" | "alt_target";
 
-// The `valueTooltipOptions` values
+/** The `valueTooltipOptions` values */
 export type ValueTooltipSettings = {
   readonly ttip_show_value: boolean;
   readonly ttip_label_value: string;
@@ -22,14 +22,14 @@ export type ValueTooltipRow = {
   readonly denominator: number | undefined;
 };
 
-// The limit and target lines' `createLineGroup` tooltip values
+/** The limit and target lines' `createLineGroup` tooltip values */
 export type LimitTooltipSettings =
   { readonly [K in `show_${Line}` | `ttip_show_${Line}`]: boolean }
   & { readonly [K in `ttip_label_${Line}` | `ttip_label_${Level}_prefix_lower` | `ttip_label_${Level}_prefix_upper`]: string };
 
 export type LimitTooltipRow = { readonly [K in `ll${Level}` | `ul${Level}` | "target" | "alt_target"]: number | undefined };
 
-// Value, numerator and denominator; an "Automatic" value label takes the chart's name for it
+/** Value, numerator and denominator; an "Automatic" value label takes the chart's name for it */
 export function valueTooltips(settings: ValueTooltipSettings, row: ValueTooltipRow, automaticLabel: string, format: ValueFormatter): VisualTooltipDataItem[] {
   const tooltip: VisualTooltipDataItem[] = [];
   if (settings.ttip_show_value) {
@@ -47,7 +47,7 @@ export function valueTooltips(settings: ValueTooltipSettings, row: ValueTooltipR
   return tooltip;
 }
 
-// Upper limits from 99% in, the targets, then lower limits from 68% out; charts without limits show only targets
+/** Upper limits from 99% in, the targets, then lower limits from 68% out; charts without limits show only targets */
 export function limitTooltips(settings: LimitTooltipSettings, row: LimitTooltipRow, format: ValueFormatter, controlLimits: boolean): VisualTooltipDataItem[] {
   const tooltip: VisualTooltipDataItem[] = [];
   const levels: Level[] = ["99", "95", "68"];
@@ -75,7 +75,7 @@ export function limitTooltips(settings: LimitTooltipSettings, row: LimitTooltipR
   return tooltip;
 }
 
-// Flagged patterns as one item, then the report's own tooltip columns
+/** Flagged patterns as one item, then the report's own tooltip columns */
 export function appendPatternTooltips(tooltip: VisualTooltipDataItem[], patterns: readonly string[],
                                       custom: readonly VisualTooltipDataItem[]): void {
   if (patterns.length > 0) {

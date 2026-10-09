@@ -1,4 +1,4 @@
-// Continued fraction for sum_{k>=0} x^k / (i + k*d); adapted from R's logcf.
+/** Continued fraction for sum_{k>=0} x^k / (i + k*d); adapted from R's logcf. */
 export default function logcf(x: number, i: number, d: number, eps: number): number {
   let c1 = 2 * d;
   let c2 = i + d;

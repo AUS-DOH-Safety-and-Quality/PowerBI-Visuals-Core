@@ -6,7 +6,10 @@ import { svgElement } from "./browserHelpers";
 describe("svg layers", () => {
   it("builds the fixed layer order", () => {
     const svg = svgElement();
-    const classes = Array.from(svg.children).map(child => `${child.tagName}.${child.getAttribute("class")}`);
+    const classes = new Array<string>(svg.children.length);
+    for (let i = 0; i < svg.children.length; i++) {
+      classes[i] = `${svg.children[i].tagName}.${svg.children[i].getAttribute("class")}`;
+    }
     expect(classes).toEqual([
       "line.ttip-line-x", "line.ttip-line-y", "g.gridgroup", "g.xaxisgroup", "text.xaxislabel", "g.yaxisgroup", "text.yaxislabel", "g.linesgroup", "g.dotsgroup"
     ]);

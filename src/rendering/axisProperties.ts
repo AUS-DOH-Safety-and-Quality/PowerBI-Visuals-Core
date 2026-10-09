@@ -25,11 +25,25 @@ export type AxisProperties = {
 };
 
 type AxisSettingFields = {
-  colour: string; ticks: boolean; tick_marks: boolean; tick_count: number; tick_font: string; tick_size: number;
-  tick_colour: string; tick_rotation: number; label: string; label_font: string; label_size: number; label_colour: string;
-  label_style: string; label_align: AxisLabelAlign; grid_show: boolean; grid_colour: string; grid_width: number;
+  colour: string;
+  ticks: boolean;
+  tick_marks: boolean;
+  tick_count: number;
+  tick_font: string;
+  tick_size: number;
+  tick_colour: string;
+  tick_rotation: number;
+  label: string;
+  label_font: string;
+  label_size: number;
+  label_colour: string;
+  label_style: string;
+  label_align: AxisLabelAlign;
+  grid_show: boolean;
+  grid_colour: string;
+  grid_width: number;
 };
-// The `<axis>limit_` settings an axis card provides, as read from the formatting pane
+/** The `<axis>limit_` settings an axis card provides, as read from the formatting pane */
 export type AxisSettingValues<A extends "x" | "y"> = { readonly [K in keyof AxisSettingFields as `${A}limit_${K}`]: AxisSettingFields[K] };
 export type AxisRange = {
   readonly lower: number;
@@ -42,7 +56,7 @@ export type AxisPalette = {
   readonly foregroundColour: string;
 };
 
-// High-contrast hosts override every colour; a zero maximum tick count draws no ticks
+/** High-contrast hosts override every colour; a zero maximum tick count draws no ticks */
 export function axisPropertiesFromSettings<A extends "x" | "y">(axis: A, settings: AxisSettingValues<A>, palette: AxisPalette, range: AxisRange): AxisProperties {
   const values = settings as Readonly<Record<string, unknown>>;
   const value = <K extends keyof AxisSettingFields>(name: K): AxisSettingFields[K] => values[`${axis}limit_${name}`] as AxisSettingFields[K];

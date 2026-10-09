@@ -5,7 +5,7 @@ export type NearestPoint = {
 };
 export type PointPosition = (index: number) => { readonly x: number; readonly y: number };
 
-// Nearest of `count` points by horizontal distance, adding vertical distance when asked
+/** Nearest of `count` points by horizontal distance, adding vertical distance when asked */
 export function nearestPoint(count: number, position: PointPosition, targetX: number, targetY: number, includeVertical: boolean): NearestPoint | undefined {
   let nearest: NearestPoint | undefined;
   let nearestDistance = Infinity;

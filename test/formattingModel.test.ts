@@ -50,7 +50,11 @@ describe("formatting model", () => {
     const card = buildFormattingModel(schema, values).cards[0];
     const all = card.groups[0].slices;
     expect(all[0].control).toEqual({ type: "ToggleSwitch", properties: {
-      descriptor: { objectName: "example", propertyName: "enabled", selector: { data: [{ dataViewWildcard: { matchingOption: 0 } }] } },
+      descriptor: {
+        objectName: "example",
+        propertyName: "enabled",
+        selector: { data: [{ dataViewWildcard: { matchingOption: 0 } }] }
+      },
       value: false
     } });
     expect(all[1].control).toMatchObject({ type: "ColorPicker", properties: { value: { value: "#000000" } } });
@@ -71,7 +75,9 @@ describe("formatting model", () => {
       for (let j = 0; j < slices.length; j++) {
         const control = slices[j].control;
         expect(control.properties.descriptor.selector).toEqual({ data: [{ dataViewWildcard: { matchingOption: 0 } }] });
-        if (control.type !== "ToggleSwitch") expect(control.properties.descriptor.instanceKind).toBe(3);
+        if (control.type !== "ToggleSwitch") {
+          expect(control.properties.descriptor.instanceKind).toBe(3);
+        }
       }
     }
     expect(values.example.count).toBeUndefined();

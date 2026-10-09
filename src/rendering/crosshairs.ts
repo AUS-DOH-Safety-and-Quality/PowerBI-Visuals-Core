@@ -1,5 +1,5 @@
 export type CrosshairOptions = {
-  // Existing line elements: vertical follows x, horizontal follows y
+  /** Existing line elements: vertical follows x, horizontal follows y */
   readonly vertical: SVGLineElement;
   readonly horizontal: SVGLineElement;
   readonly left: number;
@@ -24,9 +24,10 @@ function setLine(line: SVGLineElement, x1: number, x2: number, y1: number, y2: n
   line.style.setProperty("stroke-opacity", "0");
 }
 
-// Sizes and hides both lines; the caller decides which point the crosshairs follow
+/** Sizes and hides both lines; the caller decides which point the crosshairs follow */
 export function drawCrosshairs(options: CrosshairOptions): Crosshairs {
-  const { vertical, horizontal } = options;
+  const vertical = options.vertical;
+  const horizontal = options.horizontal;
   setLine(vertical, 0, 0, options.top, options.bottom, options.colour);
   setLine(horizontal, options.left, options.right, 0, 0, options.colour);
   return {

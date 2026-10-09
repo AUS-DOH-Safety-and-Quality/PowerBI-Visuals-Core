@@ -3,7 +3,7 @@ import ldexp from "./ldexp";
 import lgamma1p from "./lgamma1p";
 import { LOG_TWO_PI, LOG_SQRT_TWO_PI } from "./constants";
 
-// Stirling's error term ln(n!) - Stirling(n); adapted from R's stirlerr.
+/** Stirling's error term ln(n!) - Stirling(n); adapted from R's stirlerr. */
 export default function stirlingError(n: number): number {
   const s_coeffs: readonly number[] = [
     0.083333333333333333333,

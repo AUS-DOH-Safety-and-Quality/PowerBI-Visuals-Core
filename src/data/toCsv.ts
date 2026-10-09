@@ -1,4 +1,4 @@
-// Fields holding a comma, quote or line break are quoted, with embedded quotes doubled
+/** Fields holding a comma, quote or line break are quoted, with embedded quotes doubled */
 function csvField(value: unknown): string {
   const text = String(value ?? "");
   if (!/[",\r\n]/.test(text)) {
@@ -7,7 +7,7 @@ function csvField(value: unknown): string {
   return `"${text.replace(/"/g, "\"\"")}"`;
 }
 
-// Header from the first row's keys; missing values are blank
+/** Header from the first row's keys; missing values are blank */
 export default function toCsv(rows: readonly Readonly<Record<string, unknown>>[]): string {
   if (rows.length === 0) {
     return "";

@@ -66,7 +66,13 @@ describe("settings row contracts", () => {
 
   it("uses named defaults for missing row objects and normalizes null/eraser values", () => {
     const result = readSettingsRows(card, "example", defaults, { objects: [
-      { example: { count: null, optional: "", enabled: undefined, mode: "", colour: { solid: { color: "#123456" } } } }
+      { example: {
+        count: null,
+        optional: "",
+        enabled: undefined,
+        mode: "",
+        colour: { solid: { color: "#123456" } }
+      } }
     ] }, [0, 1]);
     expect(result.values[0]).toEqual({ ...defaults, colour: "#123456" });
     expect(result.values[1]).toEqual(defaults);
@@ -125,14 +131,23 @@ it("keeps explicit blank text while missing and null text use the non-blank defa
 
 it("keeps text blank while resetting erased non-text controls", () => {
   const result = readSettingsRows(card, "example", defaults, { objects: [{ example: {
-    count: "", optional: "", enabled: "", mode: "", colour: "", title: "", font: "", alignment: ""
+    count: "",
+    optional: "",
+    enabled: "",
+    mode: "",
+    colour: "",
+    title: "",
+    font: "",
+    alignment: ""
   } }] }, [0]);
   expect(result.values[0]).toEqual({ ...defaults, title: "" });
   expect(result.validation).toEqual({ status: 0, messages: [[]] });
 });
 
 it("gives rows without card objects independent copies of the shared defaults", () => {
-  const result = readSettingsRows(card, "example", defaults, { objects: [{}, undefined, { other: { count: 1 } }] }, [0, 1, 2, 0]);
+  const result = readSettingsRows(card, "example", defaults, {
+    objects: [{}, undefined, { other: { count: 1 } }]
+  }, [0, 1, 2, 0]);
   expect(result.values).toEqual([defaults, defaults, defaults, defaults]);
   expect(result.validation).toEqual({ status: 0, messages: [[], [], [], []] });
   result.values[0].count = 9;

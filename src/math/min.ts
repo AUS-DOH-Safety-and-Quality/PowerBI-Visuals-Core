@@ -1,4 +1,4 @@
-// Matches Math.min: NaN propagates, empty input is Infinity, -0 orders below +0.
+/** Matches Math.min: NaN propagates, empty input is Infinity, -0 orders below +0. */
 export default function min(values: readonly number[]): number {
   let result = Number.POSITIVE_INFINITY;
   for (let i = 0; i < values.length; i++) {

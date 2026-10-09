@@ -1,4 +1,4 @@
-// Clenshaw evaluation of a Chebyshev series; adapted from R's chebyshev_eval.
+/** Clenshaw evaluation of a Chebyshev series; adapted from R's chebyshev_eval. */
 export default function chebyshevPolynomial(x: number, a: readonly number[], n: number): number {
   if (x < -1.1 || x > 1.1) {
     throw new Error("chebyshevPolynomial: x must be in [-1,1]");

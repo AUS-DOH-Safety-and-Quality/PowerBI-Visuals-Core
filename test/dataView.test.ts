@@ -30,7 +30,9 @@ describe("data view validation", () => {
     const indicator: powerbi.DataViewCategoryColumn = { source: { displayName: "Indicator", roles: { indicator: true } }, values: ["X"] };
     const dataView = view([indicator, key], [value("numerators"), value("tooltips")]);
     const result = validateDataView([dataView], ["numerators"]);
-    if (result.status !== "valid") throw new Error(result.error);
+    if (result.status !== "valid") {
+      throw new Error(result.error);
+    }
     expect(result.view.dataView).toBe(dataView);
     expect(result.view.category).toBe(indicator);
     expect(result.view.rowCount).toBe(1);

@@ -2,13 +2,20 @@ import { describe, expect, it } from "vitest";
 import { lineLabelGeometry } from "../src/rendering/index";
 import type { LineLabelPlacement } from "../src/rendering/lineLabels";
 
-const base: LineLabelPlacement = { position: "above", lower: false, hpad: 3, vpad: 5, lineWidth: 2, size: 10 };
+const base: LineLabelPlacement = {
+  position: "above",
+  lower: false,
+  hpad: 3,
+  vpad: 5,
+  lineWidth: 2,
+  size: 10
+};
 
 function place(overrides: Partial<LineLabelPlacement>, textHeight = 12) {
   return lineLabelGeometry({ ...base, ...overrides }, textHeight);
 }
 
-// Changeset 8: line-label placement shared by both visuals; eligibility and text stay local
+// Line-label placement shared by both visuals; eligibility and text stay local
 describe("line label geometry", () => {
   it("offsets above by the padding and line width, anchored at the end", () => {
     expect(place({ position: "above" })).toEqual({ anchor: "end", dx: -3, dy: -7 });

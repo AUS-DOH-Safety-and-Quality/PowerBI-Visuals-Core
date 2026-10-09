@@ -26,14 +26,18 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
     for (let j = 0; j < result.validation.messages.length; j++) {
       const messages = validation.messages[j] ??= [];
       const row = result.validation.messages[j];
-      for (let k = 0; k < row.length; k++) messages.push(row[k]);
+      for (let k = 0; k < row.length; k++) {
+        messages.push(row[k]);
+      }
     }
     if (result.validation.status !== 0) {
       validation = { status: 1, messages: validation.messages, error: result.validation.error };
     }
     for (let j = 0; j < groups.length; j++) {
       const position = firstPositions[j];
-      if (position !== undefined) values[j][card] = result.values[position];
+      if (position !== undefined) {
+        values[j][card] = result.values[position];
+      }
     }
   }
   return { values, validation, messagePositionByRowIndex };

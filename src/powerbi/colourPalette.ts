@@ -6,7 +6,7 @@ export type ColourPalette = {
   hyperlinkColour: string;
 };
 
-// The slice of IVisualHost.colorPalette the visuals use, without importing the API
+/** The slice of IVisualHost.colorPalette the visuals use, without importing the API */
 export type PaletteHost = {
   readonly colorPalette: {
     readonly isHighContrast: boolean;
@@ -17,7 +17,7 @@ export type PaletteHost = {
   };
 };
 
-// Read on every update so theme changes reach error text as well as the plot
+/** Read on every update so theme changes reach error text as well as the plot */
 export function readColourPalette(host: PaletteHost): ColourPalette {
   const palette = host.colorPalette;
   return {

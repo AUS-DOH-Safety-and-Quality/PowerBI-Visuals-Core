@@ -57,7 +57,6 @@ describe("twoInThree", () => {
 
         const result = twoInThree(val, ll95, ul95, highlight_series);
 
-        // With highlight_series=true, all 3 points are flagged
         expect(result).toEqual(["upper", "upper", "upper", "none", "none"]);
     });
 
@@ -150,7 +149,6 @@ describe("twoInThree", () => {
 
         const result = twoInThree(val, ll95, ul95, highlight_series);
 
-        // Points exactly on limit are not outside
         expect(result).toEqual(["none", "none", "none", "none", "none"]);
     });
 

@@ -1,4 +1,4 @@
-// Adapted from the tickSpec function in the d3-array package
+/** Adapted from the tickSpec function in the d3-array package */
 function tickSpec(start: number, stop: number, count: number): [number, number, number] {
   const step = (stop - start) / count;
   const power = Math.floor(Math.log10(step));
@@ -12,15 +12,23 @@ function tickSpec(start: number, stop: number, count: number): [number, number, 
     inc = Math.pow(10, -power) / factor;
     i1 = Math.round(start * inc);
     i2 = Math.round(stop * inc);
-    if (i1 / inc < start) ++i1;
-    if (i2 / inc > stop) --i2;
+    if (i1 / inc < start) {
+      ++i1;
+    }
+    if (i2 / inc > stop) {
+      --i2;
+    }
     inc = -inc;
   } else {
     inc = Math.pow(10, power) * factor;
     i1 = Math.round(start / inc);
     i2 = Math.round(stop / inc);
-    if (i1 * inc < start) ++i1;
-    if (i2 * inc > stop) --i2;
+    if (i1 * inc < start) {
+      ++i1;
+    }
+    if (i2 * inc > stop) {
+      --i2;
+    }
   }
   if (i2 < i1 && 0.5 <= count && count < 2) {
     return tickSpec(start, stop, count * 2);
@@ -42,14 +50,16 @@ export interface LinearScale {
   ticks(count?: number): number[];
 }
 
-// Equal domain endpoints map every input to the midpoint of the range (finding 19).
+/** Equal domain endpoints map every input to the midpoint of the range. */
 export default function scaleLinear(): LinearScale {
   let domain: readonly [number, number] = [0, 1];
   let range: readonly [number, number] = [0, 1];
 
   function scale(x: number): number {
-    const [d0, d1] = domain;
-    const [r0, r1] = range;
+    const d0 = domain[0];
+    const d1 = domain[1];
+    const r0 = range[0];
+    const r1 = range[1];
     return r0 + (r1 - r0) * (d0 === d1 ? 0.5 : (x - d0) / (d1 - d0));
   }
 
@@ -76,8 +86,10 @@ export default function scaleLinear(): LinearScale {
   scale.range = setRange;
 
   scale.invert = function(y: number): number {
-    const [d0, d1] = domain;
-    const [r0, r1] = range;
+    const d0 = domain[0];
+    const d1 = domain[1];
+    const r0 = range[0];
+    const r1 = range[1];
     return d0 + (d1 - d0) * ((y - r0) / (r1 - r0));
   };
 
@@ -86,15 +98,21 @@ export default function scaleLinear(): LinearScale {
   };
 
   scale.ticks = function(count: number = 10): number[] {
-    const [d0, d1] = domain;
+    const d0 = domain[0];
+    const d1 = domain[1];
     if (count <= 0) {
       return [];
     }
     if (d0 === d1) {
       return [d0];
     }
-    const [i1, i2, inc] = tickSpec(d0, d1, count);
-    if (!(i2 >= i1)) return [];
+    const spec = tickSpec(d0, d1, count);
+    const i1 = spec[0];
+    const i2 = spec[1];
+    const inc = spec[2];
+    if (!(i2 >= i1)) {
+      return [];
+    }
     const n = i2 - i1 + 1;
     const ticks = new Array<number>(n);
     for (let i = 0; i < n; ++i) {

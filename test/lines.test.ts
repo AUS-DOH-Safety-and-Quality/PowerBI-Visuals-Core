@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { drawLines, drawLineLabels, type PlotLine } from "../src/rendering/index";
-import { svgElement, frame } from "./browserHelpers";
+import { drawLines, drawLineLabels, type LineLabel, type PlotLine } from "../src/rendering/index";
+import { svgElement, frame, palette } from "./browserHelpers";
 
 const style = { colour: "#112233", width: 2, type: "2 5" };
 const points = [{ x: 0, line_value: 10 }, { x: 2, line_value: 30 }, { x: 4, line_value: 20 }];
@@ -9,11 +9,32 @@ function group(svg: SVGSVGElement): SVGGElement {
   return svg.querySelector<SVGGElement>(".linesgroup")!;
 }
 
+function draw(svg: SVGSVGElement, lines: readonly PlotLine[], linePalette = palette): void {
+  drawLines(group(svg), { frame: frame(), lines, palette: linePalette });
+}
+
+function lineLabel(text: string, x: number, y: number, overrides: Partial<LineLabel> = {}): LineLabel {
+  return {
+    text,
+    x,
+    y,
+    position: "above",
+    lower: false,
+    hpad: 3,
+    vpad: 5,
+    lineWidth: 2,
+    size: 10,
+    font: "Arial",
+    colour: "#000",
+    ...overrides
+  };
+}
+
 describe("line drawing", () => {
   it("draws a uniformly styled line as one path bound to its definition", () => {
     const svg = svgElement();
     const line: PlotLine = { name: "target", points, style: () => style };
-    drawLines(group(svg), { frame: frame(), lines: [line], palette: { isHighContrast: false, foregroundColour: "#fff" } });
+    draw(svg, [line]);
     const lineGroup = svg.querySelector<SVGGElement>(".linesgroup > g.target-linegroup")!;
     const path = lineGroup.querySelector("path")!;
     expect(lineGroup.querySelectorAll("line")).toHaveLength(0);
@@ -26,8 +47,14 @@ describe("line drawing", () => {
 
   it("breaks the path at gaps and points outside the frame", () => {
     const svg = svgElement();
-    const gapped = [{ x: 0, line_value: 10 }, { x: 1, line_value: undefined }, { x: 2, line_value: 30 }, { x: 3, line_value: 500 }, { x: 4, line_value: 20 }];
-    drawLines(group(svg), { frame: frame(), lines: [{ name: "a", points: gapped, style: () => style }], palette: { isHighContrast: false, foregroundColour: "#fff" } });
+    const gapped = [
+      { x: 0, line_value: 10 },
+      { x: 1, line_value: undefined },
+      { x: 2, line_value: 30 },
+      { x: 3, line_value: 500 },
+      { x: 4, line_value: 20 }
+    ];
+    draw(svg, [{ name: "a", points: gapped, style: () => style }]);
     const d = svg.querySelector(".a-linegroup path")!.getAttribute("d")!;
     expect(d.split("M")).toHaveLength(4);
   });
@@ -36,7 +63,7 @@ describe("line drawing", () => {
     const svg = svgElement();
     // A segment takes the style of the point it starts at
     const styles = [style, { ...style, colour: "#ff0000" }, { ...style, colour: "#ff0000" }];
-    drawLines(group(svg), { frame: frame(), lines: [{ name: "a", points, style: index => styles[index] }], palette: { isHighContrast: false, foregroundColour: "#fff" } });
+    draw(svg, [{ name: "a", points, style: index => styles[index] }]);
     const lineGroup = svg.querySelector<SVGGElement>(".a-linegroup")!;
     expect(lineGroup.querySelectorAll("path")).toHaveLength(0);
     const segments = lineGroup.querySelectorAll("line");
@@ -50,17 +77,16 @@ describe("line drawing", () => {
 
   it("removes a line with no drawable points and drops lines no longer supplied", () => {
     const svg = svgElement();
-    const palette = { isHighContrast: false, foregroundColour: "#fff" };
-    drawLines(group(svg), { frame: frame(), lines: [{ name: "a", points, style: () => style }, { name: "b", points, style: () => style }], palette });
+    draw(svg, [{ name: "a", points, style: () => style }, { name: "b", points, style: () => style }]);
     expect(svg.querySelectorAll(".linesgroup > g")).toHaveLength(2);
-    drawLines(group(svg), { frame: frame(), lines: [{ name: "a", points: [{ x: 0, line_value: undefined }], style: () => style }], palette });
+    draw(svg, [{ name: "a", points: [{ x: 0, line_value: undefined }], style: () => style }]);
     expect(svg.querySelectorAll(".linesgroup > g")).toHaveLength(1);
     expect(svg.querySelectorAll(".a-linegroup path, .a-linegroup line")).toHaveLength(0);
   });
 
   it("uses the host foreground colour in high contrast", () => {
     const svg = svgElement();
-    drawLines(group(svg), { frame: frame(), lines: [{ name: "a", points, style: () => style }], palette: { isHighContrast: true, foregroundColour: "#00ff00" } });
+    draw(svg, [{ name: "a", points, style: () => style }], { isHighContrast: true, foregroundColour: "#00ff00" });
     expect(svg.querySelector(".a-linegroup path")!.getAttribute("stroke")).toBe("#00ff00");
   });
 });
@@ -69,10 +95,10 @@ describe("line labels", () => {
   it("replaces the group's text children with placed labels", () => {
     const svg = svgElement();
     const target = group(svg);
-    drawLineLabels(target, [{ text: "old", x: 0, y: 0, position: "above", lower: false, hpad: 1, vpad: 1, lineWidth: 1, size: 10, font: "Arial", colour: "#000" }]);
+    drawLineLabels(target, [lineLabel("old", 0, 0, { hpad: 1, vpad: 1, lineWidth: 1 })]);
     drawLineLabels(target, [
-      { text: "UCL 9.5", x: 300, y: 40, position: "above", lower: false, hpad: 3, vpad: 5, lineWidth: 2, size: 10, font: "Arial", colour: "#123456" },
-      { text: "LCL 1.5", x: 300, y: 360, position: "outside", lower: true, hpad: 3, vpad: 5, lineWidth: 2, size: 10, font: "Arial", colour: "#654321" }
+      lineLabel("UCL 9.5", 300, 40, { colour: "#123456" }),
+      lineLabel("LCL 1.5", 300, 360, { position: "outside", lower: true, colour: "#654321" })
     ]);
     const texts = target.querySelectorAll("text");
     expect(texts).toHaveLength(2);

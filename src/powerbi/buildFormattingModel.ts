@@ -52,12 +52,16 @@ export default function buildFormattingModel<T extends Record<string, SettingCar
         const descriptor: FormattingDescriptor = { objectName: name, propertyName: settingName };
         if (!setting.constant) {
           descriptor.selector = { data: [{ dataViewWildcard: { matchingOption: 0 } }] };
-          if (setting.type !== FormattingComponent.ToggleSwitch) descriptor.instanceKind = 3;
+          if (setting.type !== FormattingComponent.ToggleSwitch) {
+            descriptor.instanceKind = 3;
+          }
         }
         const value = values[settingName];
         const control: FormattingControl = { type: setting.type, properties: { descriptor, value } };
         if (setting.type === FormattingComponent.ColorPicker) {
-          if (typeof value !== "string") throw new Error(`Missing colour for ${name}.${settingName}`);
+          if (typeof value !== "string") {
+            throw new Error(`Missing colour for ${name}.${settingName}`);
+          }
           control.properties.value = { value };
         } else if (setting.type === FormattingComponent.Dropdown && setting.items !== undefined) {
           control.properties.items = setting.items;
@@ -69,13 +73,28 @@ export default function buildFormattingModel<T extends Record<string, SettingCar
             }
           }
         }
-        if (setting.options !== undefined) control.properties.options = setting.options;
-        slices.push({ uid: name + "_" + groupName + "_" + settingName + "_slice_uid", displayName: setting.displayName, control });
+        if (setting.options !== undefined) {
+          control.properties.options = setting.options;
+        }
+        slices.push({
+          uid: name + "_" + groupName + "_" + settingName + "_slice_uid",
+          displayName: setting.displayName,
+          control
+        });
       }
-      groups.push({ displayName: groupName === "all" ? definition.displayName : groupName, uid: name + "_" + groupName + "_uid", slices });
+      groups.push({
+        displayName: groupName === "all" ? definition.displayName : groupName,
+        uid: name + "_" + groupName + "_uid",
+        slices
+      });
     }
-    cards.push({ description: definition.description, displayName: definition.displayName,
-      uid: name + "_card_uid", groups, revertToDefaultDescriptors: descriptors });
+    cards.push({
+      description: definition.description,
+      displayName: definition.displayName,
+      uid: name + "_card_uid",
+      groups,
+      revertToDefaultDescriptors: descriptors
+    });
   }
   return { cards };
 }

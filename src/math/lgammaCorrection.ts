@@ -1,6 +1,6 @@
 import chebyshevPolynomial from "./chebyshevPolynomial";
 
-// Stirling correction term for ln(gamma(x)), x >= 10; adapted from R's lgammacor.
+/** Stirling correction term for ln(gamma(x)), x >= 10; adapted from R's lgammacor. */
 export default function lgammaCorrection(x: number): number {
   const algmcs: readonly number[] = [
     .1666389480451863247205729650822e+0,

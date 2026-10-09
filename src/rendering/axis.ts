@@ -5,14 +5,14 @@ export type AxisLabelPlacement = {
 };
 
 export type GridlineOptions = {
-  // Group holding the gridlines; lines of this class are replaced
+  /** Group holding the gridlines; lines of this class are replaced */
   readonly container: Element;
   readonly className: string;
   readonly orientation: "vertical" | "horizontal";
-  // Tick values and the scale placing them along the axis
+  /** Tick values and the scale placing them along the axis */
   readonly values: readonly number[];
   readonly scale: (value: number) => number;
-  // Extent of each line across the plot
+  /** Extent of each line across the plot */
   readonly from: number;
   readonly to: number;
   readonly colour: string;
@@ -21,7 +21,7 @@ export type GridlineOptions = {
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-// Bottom/top mirror left/right for the rotated y-axis label; centre is the plot midpoint
+/** Bottom/top mirror left/right for the rotated y-axis label; centre is the plot midpoint */
 export function axisLabelPlacement(align: AxisLabelAlign, start: number, end: number): AxisLabelPlacement {
   if (align === "left" || align === "bottom") {
     return { position: start, anchor: "start" };
@@ -38,7 +38,7 @@ export type TickLabelOffsets = {
   readonly dy: string;
 };
 
-// Rotated tick labels hang from their rotated end; unrotated ones keep d3's centred placement
+/** Rotated tick labels hang from their rotated end; unrotated ones keep d3's centred placement */
 export function xTickLabelOffsets(rotation: number): TickLabelOffsets {
   if (rotation < 0) {
     return { anchor: "end", dx: "-.8em", dy: "-.15em" };
@@ -51,8 +51,10 @@ export function xTickLabelOffsets(rotation: number): TickLabelOffsets {
 
 export type AxisTitleSide = "bottom" | "left";
 
-// Bottom titles sit midway between the axis and the canvas edge, left titles at 0.7 of the axis offset;
-// without a measurement the title sits a label size in from the edge
+/**
+ * Bottom titles sit midway between the axis and the canvas edge, left titles at 0.7 of the axis offset;
+ * without a measurement the title sits a label size in from the edge
+ */
 export function axisTitleOffset(side: AxisTitleSide, canvasExtent: number, axisEdge: number | undefined, labelSize: number): number {
   if (side === "bottom") {
     return axisEdge === undefined ? canvasExtent - labelSize / 2 : canvasExtent - (canvasExtent - axisEdge) / 2;
@@ -60,7 +62,7 @@ export function axisTitleOffset(side: AxisTitleSide, canvasExtent: number, axisE
   return axisEdge === undefined ? labelSize * 1.5 : axisEdge * 0.7;
 }
 
-// The axis's outer edge in the SVG's coordinates: bottom of a horizontal axis, left of a vertical one
+/** The axis's outer edge in the SVG's coordinates: bottom of a horizontal axis, left of a vertical one */
 export function measureAxisEdge(svg: SVGSVGElement, axis: Element, side: AxisTitleSide): number {
   const svgRect = svg.getBoundingClientRect();
   const axisRect = axis.getBoundingClientRect();
@@ -68,7 +70,8 @@ export function measureAxisEdge(svg: SVGSVGElement, axis: Element, side: AxisTit
 }
 
 export function drawGridlines(options: GridlineOptions): void {
-  const { container, className } = options;
+  const container = options.container;
+  const className = options.className;
   const existing = container.querySelectorAll(`.${className}`);
   for (let i = 0; i < existing.length; i++) {
     existing[i].remove();

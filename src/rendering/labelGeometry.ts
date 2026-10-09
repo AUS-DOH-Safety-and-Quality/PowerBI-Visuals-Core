@@ -16,7 +16,7 @@ export type LabelAesthetics = {
   readonly label_marker_outline_colour: string;
 };
 
-// angle/distance are owned by the point and mutated while dragging
+/** angle/distance are owned by the point and mutated while dragging */
 export type LabelState = {
   readonly text_value: string | undefined;
   readonly aesthetics: LabelAesthetics;
@@ -38,7 +38,7 @@ export type LabelGeometry = {
   readonly marker_offset: number;
 };
 
-// Returns undefined when the position is not finite; any finite position, including the origin, renders
+/** Returns undefined when the position is not finite; any finite position, including the origin, renders */
 export function labelGeometry(label: LabelState, pointX: number, pointY: number,
                               plotHeight: number, bottomPadding: number): LabelGeometry | undefined {
   const aesthetics = label.aesthetics;
@@ -61,6 +61,14 @@ export function labelGeometry(label: LabelState, pointX: number, pointY: number,
   const x = pointX + side_length * Math.cos(theta * Math.PI / 180);
   const y = pointY + side_length * Math.sin(theta * Math.PI / 180);
 
-  if (!isValidNumber(x) || !isValidNumber(y)) return undefined;
-  return { x, y, theta, line_offset, marker_offset };
+  if (!isValidNumber(x) || !isValidNumber(y)) {
+    return undefined;
+  }
+  return {
+    x,
+    y,
+    theta,
+    line_offset,
+    marker_offset
+  };
 }

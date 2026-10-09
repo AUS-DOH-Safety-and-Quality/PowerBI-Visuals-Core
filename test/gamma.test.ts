@@ -139,7 +139,7 @@ describe("gamma support functions", () => {
     expect(log1pmx(0)).toBe(0);
   });
 
-  // Finding 27: the small-x polynomial follows R's coefficient order.
+  // The small-x polynomial follows R's coefficient order.
   it("log1pmx small-x polynomial agrees with the series -x^2/2 + x^3/3 - ... to 1e-13 relative", () => {
     // 1e-2 itself takes the continued-fraction branch, so both sides of the boundary are checked.
     const xs = [1e-2, 9.9e-3, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, -1e-2, -9.9e-3, -5e-3, -1e-3, -1e-4, -1e-6];

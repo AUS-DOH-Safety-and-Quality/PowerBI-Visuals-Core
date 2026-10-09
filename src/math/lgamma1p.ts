@@ -3,7 +3,7 @@ import log1pmx from "./log1pmx";
 import logcf from "./logcf";
 import { EULER } from "./constants";
 
-// ln(gamma(1 + a)), accurate for small a; adapted from R's lgamma1p.
+/** ln(gamma(1 + a)), accurate for small a; adapted from R's lgamma1p. */
 export default function lgamma1p(a: number): number {
   if (Math.abs(a) >= 0.5) {
     return lgamma(a + 1);

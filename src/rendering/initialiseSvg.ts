@@ -1,6 +1,6 @@
 import { select } from "d3-selection";
 
-// Builds the fixed layer order every renderer targets; clearing also drops the `.plot` handlers the dots bind
+/** Builds the fixed layer order every renderer targets; clearing also drops the `.plot` handlers the dots bind */
 export function initialiseSvg(svg: SVGSVGElement, removeAll: boolean = false): void {
   const selection = select(svg);
   if (removeAll) {

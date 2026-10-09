@@ -90,7 +90,7 @@ function addPrefixed(group: Record<string, SettingDefinition>, axis: AxisName, d
   }
 }
 
-// An axis card named `<axis>limit_<setting>`; extras sit in the Axis group after the colour
+/** An axis card named `<axis>limit_<setting>`; extras sit in the Axis group after the colour */
 export default function createAxisCard<const A extends AxisName, E extends Record<string, SettingDefinition> = Record<never, never>>(
   axis: A, options: AxisCardOptions, extras?: E) {
   const axisGroup: Record<string, SettingDefinition> = {};
@@ -114,7 +114,16 @@ export default function createAxisCard<const A extends AxisName, E extends Recor
   const grid: Record<string, SettingDefinition> = {};
   addPrefixed(grid, axis, gridDefinitions());
   const name = `${axis.toUpperCase()} Axis Settings`;
-  const card = defineCard({ displayName: name, description: name, settingsGroups: { Axis: axisGroup, Ticks: ticks, Label: label, Gridlines: grid } });
+  const card = defineCard({
+    displayName: name,
+    description: name,
+    settingsGroups: {
+      Axis: axisGroup,
+      Ticks: ticks,
+      Label: label,
+      Gridlines: grid
+    }
+  });
   type Groups = AxisCard<A, E>["settingsGroups"];
   return card as unknown as AxisCard<A, E> & MergeUnions<Groups[keyof Groups]>;
 }

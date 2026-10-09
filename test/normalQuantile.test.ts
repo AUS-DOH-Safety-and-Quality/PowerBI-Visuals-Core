@@ -10,28 +10,13 @@ describe("normalQuantile", () => {
         });
 
         it("should return correct values for common probabilities", () => {
-            // qnorm(0.025) = -1.959964
             expect(normalQuantile(0.025, 0, 1, true, false)).toBeCloseTo(-1.959964, 5);
-
-            // qnorm(0.05) = -1.644854
             expect(normalQuantile(0.05, 0, 1, true, false)).toBeCloseTo(-1.644854, 5);
-
-            // qnorm(0.1) = -1.281552
             expect(normalQuantile(0.1, 0, 1, true, false)).toBeCloseTo(-1.281552, 5);
-
-            // qnorm(0.9) = 1.281552
             expect(normalQuantile(0.9, 0, 1, true, false)).toBeCloseTo(1.281552, 5);
-
-            // qnorm(0.95) = 1.644854
             expect(normalQuantile(0.95, 0, 1, true, false)).toBeCloseTo(1.644854, 5);
-
-            // qnorm(0.975) = 1.959964
             expect(normalQuantile(0.975, 0, 1, true, false)).toBeCloseTo(1.959964, 5);
-
-            // qnorm(0.99) = 2.326348
             expect(normalQuantile(0.99, 0, 1, true, false)).toBeCloseTo(2.326348, 5);
-
-            // qnorm(0.999) = 3.090232
             expect(normalQuantile(0.999, 0, 1, true, false)).toBeCloseTo(3.090232, 5);
         });
 
@@ -50,18 +35,15 @@ describe("normalQuantile", () => {
         });
 
         it("should correctly transform from standard normal", () => {
-            // qnorm(p, mu, sigma) = mu + sigma * qnorm(p, 0, 1)
             const p = 0.95;
-            const mu = 10, sigma = 2;
+            const mu = 10;
+            const sigma = 2;
             const z = normalQuantile(p, 0, 1, true, false);
             expect(normalQuantile(p, mu, sigma, true, false)).toBeCloseTo(mu + sigma * z, 10);
         });
 
         it("should handle various parameter combinations", () => {
-            // qnorm(0.975, 100, 15) = 129.3994
             expect(normalQuantile(0.975, 100, 15, true, false)).toBeCloseTo(129.3994, 3);
-
-            // qnorm(0.025, 50, 10) = 30.40036
             expect(normalQuantile(0.025, 50, 10, true, false)).toBeCloseTo(30.40036, 3);
         });
     });
@@ -106,35 +88,22 @@ describe("normalQuantile", () => {
 
     describe("extreme probabilities", () => {
         it("should handle very small probabilities", () => {
-            // qnorm(1e-10) = -6.361341
             expect(normalQuantile(1e-10, 0, 1, true, false)).toBeCloseTo(-6.361341, 4);
-
-            // qnorm(1e-20) = -9.262340
             expect(normalQuantile(1e-20, 0, 1, true, false)).toBeCloseTo(-9.262340, 4);
-
-            // qnorm(1e-100) = -21.27344
             const q = normalQuantile(1e-100, 0, 1, true, false);
             expect(q).toBeCloseTo(-21.27344, 3);
         });
 
         it("should handle probabilities very close to 1", () => {
-            // qnorm(1 - 1e-10) = 6.361341
             expect(normalQuantile(1 - 1e-10, 0, 1, true, false)).toBeCloseTo(6.361341, 4);
-
-            // qnorm(1e-20, lower.tail=FALSE) = 9.262340
             expect(normalQuantile(1e-20, 0, 1, false, false)).toBeCloseTo(9.262340, 5);
         });
     });
 
     describe("log scale", () => {
         it("should handle log-scale probabilities", () => {
-            // qnorm(log(0.5), log.p=TRUE) = 0
             expect(normalQuantile(Math.log(0.5), 0, 1, true, true)).toBeCloseTo(0, 8);
-
-            // qnorm(log(0.975), log.p=TRUE) = 1.959964
             expect(normalQuantile(Math.log(0.975), 0, 1, true, true)).toBeCloseTo(1.959964, 5);
-
-            // qnorm(log(0.025), log.p=TRUE) = -1.959964
             expect(normalQuantile(Math.log(0.025), 0, 1, true, true)).toBeCloseTo(-1.959964, 5);
         });
 
@@ -142,13 +111,11 @@ describe("normalQuantile", () => {
             // log(1e-100) = -230.2585
             const q = normalQuantile(-230.2585, 0, 1, true, true);
             expect(q).toBeCloseTo(-21.27344, 3);
-
-            // qnorm(-690.7755, log.p=TRUE) = -37.04710
             expect(normalQuantile(-690.7755, 0, 1, true, true)).toBeCloseTo(-37.04710, 4);
         });
 
         it("should return NaN for positive log probabilities", () => {
-            expect(normalQuantile(0.1, 0, 1, true, true)).toBeNaN();  // log(p) > 0 is invalid
+            expect(normalQuantile(0.1, 0, 1, true, true)).toBeNaN();
         });
 
         it("should return -Infinity for log(p) = -Infinity", () => {
@@ -158,10 +125,7 @@ describe("normalQuantile", () => {
 
     describe("upper tail", () => {
         it("should return correct upper tail quantiles", () => {
-            // qnorm(0.05, lower.tail=FALSE) = qnorm(0.95) = 1.644854
             expect(normalQuantile(0.05, 0, 1, false, false)).toBeCloseTo(1.644854, 5);
-
-            // qnorm(0.025, lower.tail=FALSE) = qnorm(0.975) = 1.959964
             expect(normalQuantile(0.025, 0, 1, false, false)).toBeCloseTo(1.959964, 5);
         });
 
@@ -193,7 +157,7 @@ describe("normalQuantile", () => {
             // Intermediate tail (r <= 5)
             expect(normalQuantile(0.001, 0, 1, true, false)).toBeCloseTo(-3.090232, 5);
 
-            // Far tail (r <= 27): qnorm(1e-50) = -14.93334
+            // Far tail (r <= 27)
             expect(normalQuantile(1e-50, 0, 1, true, false)).toBeCloseTo(-14.93334, 5);
         });
     });

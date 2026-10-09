@@ -27,7 +27,14 @@ export function svgElement(width = 500, height = 400): SVGSVGElement {
 
 export function frame(overrides: Partial<Parameters<typeof createPlotFrame>[0]> = {}): PlotFrame {
   return createPlotFrame({
-    width: 500, height: 400, displayPlot: true, x: { lower: 0, upper: 10 }, y: { lower: 0, upper: 100 }, settings, palette, ...overrides
+    width: 500,
+    height: 400,
+    displayPlot: true,
+    x: { lower: 0, upper: 10 },
+    y: { lower: 0, upper: 100 },
+    settings,
+    palette,
+    ...overrides
   });
 }
 
@@ -38,17 +45,38 @@ export type TestPoint = {
   identity: powerbi.visuals.ISelectionId;
   tooltip: powerbi.extensibility.VisualTooltipDataItem[];
   highlighted: boolean;
-  label: { text_value: string | undefined; aesthetics: typeof settings.labels; angle: number | undefined; distance: number | undefined };
+  label: {
+    text_value: string | undefined;
+    aesthetics: typeof settings.labels;
+    angle: number | undefined;
+    distance: number | undefined;
+  };
 };
 
 export function host(): powerbi.extensibility.visual.IVisualHost {
   const result = keyedHost();
   // The mock host exposes these as getters, so they are redefined rather than assigned
-  Object.defineProperty(result, "tooltipService", { value: { show: vi.fn(), hide: vi.fn(), move: vi.fn(), enabled: () => true }, configurable: true });
-  Object.defineProperty(result, "downloadService", { value: {
-    exportVisualsContent: vi.fn(() => Promise.resolve(true)), exportVisualsContentExtended: vi.fn(() => Promise.resolve({ downloadCompleted: true }))
-  }, configurable: true });
-  Object.defineProperty(result, "hostCapabilities", { value: { allowInteractions: true }, configurable: true, writable: true });
+  Object.defineProperty(result, "tooltipService", {
+    value: {
+      show: vi.fn(),
+      hide: vi.fn(),
+      move: vi.fn(),
+      enabled: () => true
+    },
+    configurable: true
+  });
+  Object.defineProperty(result, "downloadService", {
+    value: {
+      exportVisualsContent: vi.fn(() => Promise.resolve(true)),
+      exportVisualsContentExtended: vi.fn(() => Promise.resolve({ downloadCompleted: true }))
+    },
+    configurable: true
+  });
+  Object.defineProperty(result, "hostCapabilities", {
+    value: { allowInteractions: true },
+    configurable: true,
+    writable: true
+  });
   return result;
 }
 
@@ -58,10 +86,18 @@ export function points(visualHost: powerbi.extensibility.visual.IVisualHost, val
   const result = new Array<TestPoint>(values.length);
   for (let i = 0; i < values.length; i++) {
     result[i] = {
-      x: i, value: values[i], aesthetics: { ...settings.scatter }, highlighted: false,
+      x: i,
+      value: values[i],
+      aesthetics: { ...settings.scatter },
+      highlighted: false,
       identity: visualHost.createSelectionIdBuilder().withCategory(column, i).createSelectionId(),
       tooltip: [{ displayName: "Value", value: String(values[i]) }],
-      label: { text_value: labels[i], aesthetics: { ...settings.labels }, angle: undefined, distance: undefined }
+      label: {
+        text_value: labels[i],
+        aesthetics: { ...settings.labels },
+        angle: undefined,
+        distance: undefined
+      }
     };
   }
   return result;
@@ -69,13 +105,29 @@ export function points(visualHost: powerbi.extensibility.visual.IVisualHost, val
 
 export function context(visualHost: powerbi.extensibility.visual.IVisualHost, plotPoints: readonly TestPoint[], overrides: Partial<PlotContext<TestPoint>> = {}): PlotContext<TestPoint> {
   return {
-    frame: frame(), points: plotPoints, palette, settings, host: visualHost, selectionManager: visualHost.createSelectionManager(),
-    onSelectionChange: vi.fn(), headless: false, frontend: true, ...overrides
+    frame: frame(),
+    points: plotPoints,
+    palette,
+    settings,
+    host: visualHost,
+    selectionManager: visualHost.createSelectionManager(),
+    onSelectionChange: vi.fn(),
+    headless: false,
+    frontend: true,
+    ...overrides
   };
 }
 
-// Client coordinates of a point in the svg's user space, for synthetic mouse events
+/** Client coordinates of a point in the svg's user space, for synthetic mouse events */
 export function client(svg: SVGSVGElement, x: number, y: number): { clientX: number; clientY: number } {
   const rect = svg.getBoundingClientRect();
   return { clientX: rect.left + x, clientY: rect.top + y };
+}
+
+export function pluck<T, K extends keyof T>(items: ArrayLike<T>, key: K): T[K][] {
+  const result = new Array<T[K]>(items.length);
+  for (let i = 0; i < items.length; i++) {
+    result[i] = items[i][key];
+  }
+  return result;
 }

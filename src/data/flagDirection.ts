@@ -13,7 +13,7 @@ const directionMaps: Record<ImprovementDirection, Record<"lower" | "upper", Flag
   neutral: { lower: "neutral_low", upper: "neutral_high" }
 };
 
-// Maps which limit was crossed to a change type, then filters by the type the user wants flagged
+/** Maps which limit was crossed to a change type, then filters by the type the user wants flagged */
 export default function checkFlagDirection(outlierStatus: OutlierStatus, flagSettings: FlagSettings): FlagDirection {
   if (outlierStatus === "none") {
     return "none";

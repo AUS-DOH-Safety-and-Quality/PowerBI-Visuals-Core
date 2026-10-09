@@ -1,8 +1,23 @@
 import { describe, expect, it, vi } from "vitest";
-import { drawValueLabels, drawPlotValueLabels, labelGeometry } from "../src/rendering/index";
-import { svgElement, frame, host, points, context, client, settings } from "./browserHelpers";
+import { drawValueLabels, drawPlotValueLabels, labelGeometry, type PlotFrame } from "../src/rendering/index";
+import type { ValueLabelOptions } from "../src/rendering/drawValueLabels";
+import { svgElement, frame, host, points, context, client, settings, type TestPoint } from "./browserHelpers";
 
 const line = { colour: "#123456", width: 2, type: "2 5" };
+
+function labelOptions(plotPoints: readonly TestPoint[], f: PlotFrame, overrides: Partial<ValueLabelOptions> = {}): ValueLabelOptions {
+  return {
+    visible: true,
+    points: plotPoints,
+    xScale: f.xScale,
+    yScale: f.yScale,
+    plotHeight: 400,
+    bottomPadding: 10,
+    line,
+    interactive: false,
+    ...overrides
+  };
+}
 
 describe("value labels", () => {
   it("draws text, connector and marker for each labelled point from its geometry", () => {
@@ -10,7 +25,7 @@ describe("value labels", () => {
     const visualHost = host();
     const plotPoints = points(visualHost, [10, 20, 30], ["first", "", undefined]);
     const f = frame();
-    drawValueLabels(svg, { visible: true, points: plotPoints, xScale: f.xScale, yScale: f.yScale, plotHeight: 400, bottomPadding: 10, line, interactive: false });
+    drawValueLabels(svg, labelOptions(plotPoints, f));
     const groups = svg.querySelectorAll<SVGGElement>(".text-labels > .text-group-inner");
     expect(groups).toHaveLength(1);
     const text = groups[0].querySelector("text")!;
@@ -40,7 +55,7 @@ describe("value labels", () => {
     const plotPoints = points(visualHost, [10], ["a"]);
     plotPoints[0].label.aesthetics = { ...plotPoints[0].label.aesthetics, label_marker_show: false };
     const f = frame();
-    const options = { visible: true, points: plotPoints, xScale: f.xScale, yScale: f.yScale, plotHeight: 400, bottomPadding: 10, line, interactive: false };
+    const options = labelOptions(plotPoints, f);
     drawValueLabels(svg, options);
     expect(svg.querySelector(".text-group-inner path")).toBeNull();
     drawValueLabels(svg, { ...options, visible: false });
@@ -55,7 +70,7 @@ describe("value labels", () => {
       const visualHost = host();
       const plotPoints = points(visualHost, [50], ["drag me"]);
       const f = frame();
-      drawValueLabels(svg, { visible: true, points: plotPoints, xScale: f.xScale, yScale: f.yScale, plotHeight: 400, bottomPadding: 10, line, interactive: true });
+      drawValueLabels(svg, labelOptions(plotPoints, f, { interactive: true }));
       const group = svg.querySelector<SVGGElement>(".text-group-inner")!;
       expect(group.style.touchAction).toBe("none");
       const pointX = f.xScale(0);

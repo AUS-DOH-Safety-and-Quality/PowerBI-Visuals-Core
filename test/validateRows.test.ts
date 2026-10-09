@@ -17,7 +17,10 @@ describe("row validation", () => {
     expect(validateRows(3, [{ fails: () => true, message: "Bad", all: "All bad!" }])).toEqual({
       status: 1, messages: ["Bad", "Bad", "Bad"], error: "All bad!"
     });
-    expect(validateRows(3, [{ fails: i => i === 0, message: "First", all: "All first!" }, { fails: i => i > 0, message: "Later", all: "All later!" }])).toEqual({
+    expect(validateRows(3, [
+      { fails: i => i === 0, message: "First", all: "All first!" },
+      { fails: i => i > 0, message: "Later", all: "All later!" }
+    ])).toEqual({
       status: 1, messages: ["First", "Later", "Later"], error: "No valid data found!"
     });
     expect(validateRows(0, rules)).toEqual({ status: 1, messages: [], error: "No valid data found!" });

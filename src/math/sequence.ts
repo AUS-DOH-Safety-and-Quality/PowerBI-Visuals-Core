@@ -1,5 +1,7 @@
-// Exactly `count` values from `start` by repeated addition of `step`. A count of zero or less
-// yields an empty array; count must be an integer (a fractional count throws RangeError).
+/**
+ * Exactly `count` values from `start` by repeated addition of `step`. A count of zero or less
+ * yields an empty array; count must be an integer (a fractional count throws RangeError).
+ */
 export default function sequence(start: number, count: number, step: number): number[] {
   if (!(count > 0)) {
     return [];

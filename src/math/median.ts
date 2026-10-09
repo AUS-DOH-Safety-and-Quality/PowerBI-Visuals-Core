@@ -1,4 +1,4 @@
-// Sorts an owned copy; returns NaN for empty input.
+/** Sorts an owned copy; returns NaN for empty input. */
 export default function median(values: readonly number[]): number {
   const n = values.length;
   if (n === 0) {

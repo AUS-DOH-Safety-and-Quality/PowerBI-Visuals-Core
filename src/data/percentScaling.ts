@@ -3,7 +3,7 @@ export type PercentScaling = {
   readonly percentLabels: boolean;
 };
 
-// "Yes" forces a 100 multiplier; proportions default to 100 unless "No"; "Automatic" labels only a 100-scaled proportion
+/** "Yes" forces a 100 multiplier; proportions default to 100 unless "No"; "Automatic" labels only a 100-scaled proportion */
 export default function resolvePercentScaling(isProportion: boolean, percentSetting: string, multiplier: number): PercentScaling {
   if (percentSetting === "Yes") {
     multiplier = 100;

@@ -6,11 +6,15 @@ export function indexColumnsByRole<T extends RoleColumn>(columns: readonly T[]):
   for (let i = 0; i < columns.length; i++) {
     const column = columns[i];
     const roles = column.source.roles;
-    if (roles === undefined) continue;
+    if (roles === undefined) {
+      continue;
+    }
     const names = Object.keys(roles);
     for (let j = 0; j < names.length; j++) {
       const name = names[j];
-      if (!roles[name]) continue;
+      if (!roles[name]) {
+        continue;
+      }
       (result[name] ??= []).push(column);
     }
   }

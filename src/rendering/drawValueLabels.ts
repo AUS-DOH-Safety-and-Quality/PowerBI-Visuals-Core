@@ -16,7 +16,7 @@ export type ValueLabelOptions = {
   readonly plotHeight: number;
   readonly bottomPadding: number;
   readonly line: LabelLineStyle;
-  // Drag handlers are attached only when true (headless rendering passes false)
+  /** Drag handlers are attached only when true (headless rendering passes false) */
   readonly interactive: boolean;
 };
 
@@ -44,12 +44,16 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
   for (let i = 0; i < points.length; i++) {
     const point = points[i];
     const text = point.label.text_value ?? "";
-    if (text === "") continue;
+    if (text === "") {
+      continue;
+    }
 
     const pointX = options.xScale(point.x);
     const pointY = options.yScale(point.value);
     const geometry = labelGeometry(point.label, pointX, pointY, options.plotHeight, options.bottomPadding);
-    if (geometry === undefined) continue;
+    if (geometry === undefined) {
+      continue;
+    }
 
     const aesthetics = point.label.aesthetics;
     const top = aesthetics.label_position === "top";
@@ -89,7 +93,9 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
       pathElement.style.setProperty("stroke", aesthetics.label_marker_outline_colour);
     }
 
-    if (!options.interactive) continue;
+    if (!options.interactive) {
+      continue;
+    }
 
     // Marker distance along the drag angle; matches the initial draw's offset from the point
     const dragMarkerOffset = aesthetics.label_marker_offset + aesthetics.label_size / 2;
@@ -97,7 +103,9 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
     group.addEventListener("pointerdown", (event: PointerEvent) => {
       group.setPointerCapture(event.pointerId);
       const onMove = (move: PointerEvent) => {
-        const { x, y } = screenToSvg(svg, move.clientX, move.clientY);
+        const pointer = screenToSvg(svg, move.clientX, move.clientY);
+        const x = pointer.x;
+        const y = pointer.y;
         const dragAngle = Math.atan2(y - pointY, x - pointX) * 180 / Math.PI;
         point.label.angle = dragAngle;
         point.label.distance = Math.sqrt(Math.pow(y - pointY, 2) + Math.pow(x - pointX, 2));

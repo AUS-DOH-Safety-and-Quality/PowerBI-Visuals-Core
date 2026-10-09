@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { labelGeometry, trianglePath, type LabelAesthetics, type LabelState } from "../src/rendering/index.js";
+import { labelGeometry, trianglePath, axisLabelPlacement, type LabelAesthetics, type LabelState } from "../src/rendering/index.js";
 
 const aesthetics: LabelAesthetics = {
   label_position: "top", label_y_offset: 20, label_line_offset: 5, label_angle_offset: 0,
@@ -72,5 +72,17 @@ describe("triangle marker path", () => {
     [100, "M0,-8.774L7.598,4.387L-7.598,4.387Z"]
   ])("matches d3 for size %s", (size, expected) => {
     expect(trianglePath(size)).toBe(expected);
+  });
+});
+
+describe("axis label placement", () => {
+  it("anchors left and bottom at the start, right and top at the end", () => {
+    expect(axisLabelPlacement("left", 60, 480)).toEqual({ position: 60, anchor: "start" });
+    expect(axisLabelPlacement("right", 60, 480)).toEqual({ position: 480, anchor: "end" });
+    // Centred on the plot area, not the canvas, so uneven padding does not skew it
+    expect(axisLabelPlacement("center", 60, 480)).toEqual({ position: 270, anchor: "middle" });
+    // The rotated y label runs upward, so its start is the bottom of the plot
+    expect(axisLabelPlacement("bottom", 490, 10)).toEqual({ position: 490, anchor: "start" });
+    expect(axisLabelPlacement("top", 490, 10)).toEqual({ position: 10, anchor: "end" });
   });
 });

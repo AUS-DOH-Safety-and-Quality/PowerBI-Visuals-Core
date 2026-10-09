@@ -65,9 +65,17 @@ export default function readSettingsRows<T extends SettingCard>(
   const messages = new Array<string[]>(rawRowIndices.length);
   let anyValid = false;
   let firstMessage: string | undefined;
+  // Rows without their own card objects all read the same way, so reuse the first
+  let defaultRow: { values: CardValues<T>; messages: string[] } | undefined;
   for (let i = 0; i < rawRowIndices.length; i++) {
-    const row: Record<string, SettingValue> = {};
     const objects = category.objects?.[rawRowIndices[i]]?.[cardName];
+    if (objects == null && defaultRow !== undefined) {
+      values[i] = { ...defaultRow.values };
+      messages[i] = defaultRow.messages.slice();
+      anyValid ||= defaultRow.messages.length === 0;
+      continue;
+    }
+    const row: Record<string, SettingValue> = {};
     const rowMessages: string[] = [];
     for (let j = 0; j < entries.length; j++) {
       const { name, definition, defaultValue } = entries[j];
@@ -83,6 +91,9 @@ export default function readSettingsRows<T extends SettingCard>(
     values[i] = row as CardValues<T>;
     messages[i] = rowMessages;
     anyValid ||= rowMessages.length === 0;
+    if (objects == null) {
+      defaultRow = { values: values[i], messages: rowMessages };
+    }
   }
   return { values, validation: !anyValid && firstMessage !== undefined
     ? { status: 1, messages, error: firstMessage } : { status: 0, messages } };

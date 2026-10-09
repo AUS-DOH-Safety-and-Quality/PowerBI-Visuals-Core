@@ -12,3 +12,5 @@ export { drawErrorMessage } from "./errorMessage.js";
 export type { ErrorKind, ErrorMessageOptions } from "./errorMessage.js";
 export { drawCrosshairs } from "./crosshairs.js";
 export type { CrosshairOptions, Crosshairs } from "./crosshairs.js";
+export { drawGridlines, axisLabelPlacement } from "./axis.js";
+export type { GridlineOptions, AxisLabelAlign, AxisLabelPlacement } from "./axis.js";

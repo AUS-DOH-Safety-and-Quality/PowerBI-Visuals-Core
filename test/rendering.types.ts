@@ -72,3 +72,13 @@ missingKind.kind;
 const crosshairs = drawCrosshairs({ vertical: lineElement, horizontal: lineElement, left: 0, right: 10, top: 0, bottom: 10, colour: "#000" });
 crosshairs.show(1, 2);
 crosshairs.hide();
+
+import { drawGridlines, axisLabelPlacement, type AxisLabelAlign } from "../src/rendering/index.js";
+
+declare const align: AxisLabelAlign;
+const anchor: "start" | "middle" | "end" = axisLabelPlacement(align, 0, 100).anchor;
+void anchor;
+drawGridlines({ container: group, className: "xgridline", orientation: "vertical", values: [1, 2], scale: v => v, from: 0, to: 10, colour: "#000", width: 1 });
+
+// @ts-expect-error Alignment is a literal choice, not any string.
+axisLabelPlacement("middle", 0, 100);

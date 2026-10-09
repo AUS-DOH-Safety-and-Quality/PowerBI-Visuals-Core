@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createCanvasCard, createLabelsCard, createDefaultValues, defineCard,
-  dropdownOption, numberOption, textOption, toggleOption
+  dropdownOption, fontStyleOption, numberOption, textOption, toggleOption
 } from "../src/settings/index.js";
 
 describe("setting definitions", () => {
@@ -76,5 +76,12 @@ describe("setting definitions", () => {
     expect(second.items).toEqual([
       { displayName: "One", value: "first" }, { displayName: "Two", value: "second" }
     ]);
+  });
+});
+
+it("offers a normal/italic font style dropdown", () => {
+  expect(fontStyleOption("Style")).toEqual({
+    displayName: "Style", type: "Dropdown", default: "normal", valid: ["normal", "italic"],
+    items: [{ displayName: "Normal", value: "normal" }, { displayName: "Italic", value: "italic" }]
   });
 });

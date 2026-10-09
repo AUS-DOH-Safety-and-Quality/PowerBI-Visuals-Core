@@ -130,3 +130,15 @@ it("keeps text blank while resetting erased non-text controls", () => {
   expect(result.values[0]).toEqual({ ...defaults, title: "" });
   expect(result.validation).toEqual({ status: 0, messages: [[]] });
 });
+
+it("gives rows without card objects independent copies of the shared defaults", () => {
+  const result = readSettingsRows(card, "example", defaults, { objects: [{}, undefined, { other: { count: 1 } }] }, [0, 1, 2, 0]);
+  expect(result.values).toEqual([defaults, defaults, defaults, defaults]);
+  expect(result.validation).toEqual({ status: 0, messages: [[], [], [], []] });
+  result.values[0].count = 9;
+  result.validation.messages[0].push("local");
+  expect(result.values[1].count).toBe(2);
+  expect(result.values[3].count).toBe(2);
+  expect(result.validation.messages[1]).toEqual([]);
+  expect(defaults.count).toBe(2);
+});

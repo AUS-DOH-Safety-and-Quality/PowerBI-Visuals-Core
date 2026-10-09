@@ -198,6 +198,10 @@ function fontWeightOption(displayName: string) {
   )
 }
 
+function fontStyleOption(displayName: string) {
+  return dropdownOption(displayName, "normal", ["normal", "italic"], "sentence");
+}
+
 function textTransformOption(displayName: string) {
   return dropdownOption(
     displayName,
@@ -257,6 +261,6 @@ export {
   FormattingComponent, type FormattingComponentKeys, type MergeUnions,
   paddingOption, colourOption, fontOption, fontSizeOption, lineTypeOption,
   toggleOption, numberOption, textOption, lineLabelPositionOption, dropdownOption,
-  borderStyleOption, borderWidthOption, alignmentOption, fontWeightOption, textTransformOption,
+  borderStyleOption, borderWidthOption, alignmentOption, fontWeightOption, fontStyleOption, textTransformOption,
   defineCard, createDefaultValues
 };

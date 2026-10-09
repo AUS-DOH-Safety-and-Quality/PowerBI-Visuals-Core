@@ -27,3 +27,5 @@ export { fitPlotToOverflow } from "./overflow";
 export { highlightPlot } from "./highlight";
 export type { PlotContext } from "./plotContext";
 export { valueTickFormat, drawPlotAxes, drawPlotTooltips, drawPlotValueLabels, drawPlotDots, drawPlotDownload } from "./drawPlot";
+export { select, selectAll } from "d3-selection";
+export type { Selection, BaseType } from "d3-selection";

@@ -20,16 +20,16 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@types/d3-axis": "3.0.6",
-    "@types/d3-selection": "3.0.11",
-    "@types/d3-shape": "3.1.8",
-    "@vitest/browser-playwright": "4.1.10",
+    "@vitest/browser-playwright": "5.0.3",
     "powerbi-visuals-api": "5.1.0",
     "powerbi-visuals-utils-testutils": "7.0.1",
-    "typescript": "6.0.3",
-    "vitest": "4.1.10"
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
   },
   "dependencies": {
+    "@types/d3-axis": "3.0.6",
+    "@types/d3-selection": "3.0.12",
+    "@types/d3-shape": "3.2.0",
     "d3-axis": "3.0.0",
     "d3-selection": "3.0.0",
     "d3-shape": "3.2.0"

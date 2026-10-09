@@ -5,20 +5,19 @@ export type ContextMenuOptions<I> = {
   readonly show: (identity: I, position: { readonly x: number; readonly y: number }) => void;
 };
 
-const listeners = new WeakMap<Element, (event: Event) => void>();
+const listeners = new WeakMap<GlobalEventHandlers, (event: MouseEvent) => void>();
 
 // Rebinding replaces the previous listener, so redraws never stack handlers
-export default function bindContextMenu<I>(root: Element, options: ContextMenuOptions<I>): void {
+export default function bindContextMenu<I>(root: GlobalEventHandlers, options: ContextMenuOptions<I>): void {
   const previous = listeners.get(root);
   if (previous !== undefined) {
     root.removeEventListener("contextmenu", previous);
     listeners.delete(root);
   }
   if (!options.enabled) return;
-  const listener = (event: Event) => {
-    const mouse = event as MouseEvent;
-    options.show(options.identity(mouse.target), { x: mouse.clientX, y: mouse.clientY });
-    mouse.preventDefault();
+  const listener = (event: MouseEvent) => {
+    options.show(options.identity(event.target), { x: event.clientX, y: event.clientY });
+    event.preventDefault();
   };
   root.addEventListener("contextmenu", listener);
   listeners.set(root, listener);

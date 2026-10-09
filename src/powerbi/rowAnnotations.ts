@@ -1,16 +1,17 @@
 import type powerbi from "powerbi-visuals-api";
 import type { CardValues, SettingCard } from "../settings/definitions";
 import readSettingsRows from "./readSettingsRows";
-import { formatPrimitiveValue, type RoleColumns } from "./columns";
+import { formatPrimitiveValue, type PrimitiveValue, type RoleColumns } from "./columns";
 
 type VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 
+// Row-aligned with the kept rows; absent roles read as blank, and the any* flags say whether the role carried data
 export type RowAnnotations<S, L> = {
-  labels: (string | undefined)[] | undefined;
+  labels: (string | undefined)[];
   anyLabels: boolean;
-  highlights: (Exclude<powerbi.PrimitiveValue, null> | undefined)[] | undefined;
+  highlights: Exclude<PrimitiveValue, null>[];
   anyHighlights: boolean;
-  tooltips: VisualTooltipDataItem[][] | undefined;
+  tooltips: VisualTooltipDataItem[][];
   scatter_formatting: S[];
   label_formatting: L[];
 };
@@ -29,16 +30,16 @@ export function readRowAnnotations<S extends SettingCard, L extends SettingCard>
 ): RowAnnotations<CardValues<S>, CardValues<L>> {
   const { categories } = sources;
   const labels = sources.values.labels?.[0];
-  const tooltips = sources.values.tooltips;
-  const highlights = sources.categorical.values?.[0]?.highlights;
+  const tooltips = sources.values.tooltips ?? [];
+  const highlights: readonly PrimitiveValue[] | undefined = sources.categorical.values?.[0]?.highlights;
   const scatter = readSettingsRows(sources.cards.scatter, "scatter", sources.defaults.scatter, categories, rows).values;
   const labelSettings = readSettingsRows(sources.cards.labels, "labels", sources.defaults.labels, categories, rows).values;
   const result: RowAnnotations<CardValues<S>, CardValues<L>> = {
-    labels: labels === undefined ? undefined : new Array<string | undefined>(kept.length),
+    labels: new Array<string | undefined>(kept.length),
     anyLabels: false,
-    highlights: highlights === undefined ? undefined : new Array<Exclude<powerbi.PrimitiveValue, null> | undefined>(kept.length),
+    highlights: new Array<Exclude<PrimitiveValue, null>>(kept.length),
     anyHighlights: false,
-    tooltips: tooltips === undefined ? undefined : new Array<VisualTooltipDataItem[]>(kept.length),
+    tooltips: new Array<VisualTooltipDataItem[]>(kept.length),
     scatter_formatting: new Array<CardValues<S>>(kept.length),
     label_formatting: new Array<CardValues<L>>(kept.length)
   };
@@ -47,23 +48,17 @@ export function readRowAnnotations<S extends SettingCard, L extends SettingCard>
     const row = rows[position];
     result.scatter_formatting[k] = scatter[position];
     result.label_formatting[k] = labelSettings[position];
-    if (result.labels !== undefined && labels !== undefined) {
-      const label = formatPrimitiveValue(labels.values[row]);
-      result.labels[k] = label;
-      result.anyLabels ||= label !== undefined && label !== "";
+    const label = labels === undefined ? undefined : formatPrimitiveValue(labels.values[row]);
+    result.labels[k] = label;
+    result.anyLabels ||= label !== undefined && label !== "";
+    const highlight = highlights === undefined ? undefined : highlights[row] ?? undefined;
+    result.highlights[k] = highlight;
+    result.anyHighlights ||= highlight !== undefined;
+    const rowTooltips = new Array<VisualTooltipDataItem>(tooltips.length);
+    for (let j = 0; j < tooltips.length; j++) {
+      rowTooltips[j] = { displayName: tooltips[j].source.displayName, value: formatPrimitiveValue(tooltips[j].values[row]) ?? "" };
     }
-    if (result.highlights !== undefined && highlights !== undefined) {
-      const highlight = highlights[row] ?? undefined;
-      result.highlights[k] = highlight;
-      result.anyHighlights ||= highlight !== undefined;
-    }
-    if (result.tooltips !== undefined && tooltips !== undefined) {
-      const rowTooltips = new Array<VisualTooltipDataItem>(tooltips.length);
-      for (let j = 0; j < tooltips.length; j++) {
-        rowTooltips[j] = { displayName: tooltips[j].source.displayName, value: formatPrimitiveValue(tooltips[j].values[row]) ?? "" };
-      }
-      result.tooltips[k] = rowTooltips;
-    }
+    result.tooltips[k] = rowTooltips;
   }
   return result;
 }

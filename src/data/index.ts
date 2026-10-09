@@ -4,7 +4,7 @@ export { default as isNullOrUndefined } from "./isNullOrUndefined";
 export { default as isValidNumber } from "./isValidNumber";
 export { default as groupBy } from "./groupBy";
 export { default as checkFlagDirection } from "./flagDirection";
-export type { OutlierStatus } from "./flagDirection";
+export type { OutlierStatus, FlagDirection, FlagSettings, FlagType, ImprovementDirection } from "./flagDirection";
 export { default as createValueFormatter } from "./valueFormatter";
 export { default as resolvePercentScaling } from "./percentScaling";
 export { default as toCsv } from "./toCsv";

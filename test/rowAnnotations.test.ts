@@ -10,11 +10,9 @@ function categorical(withLabels: boolean): powerbi.DataViewCategorical {
   const values = [
     { source: { displayName: "Numerator", roles: { numerators: true } }, values: [1, 2, 3], highlights: [null, 2, 3] },
     { source: { displayName: "Note", roles: { tooltips: true } }, values: ["n0", null, "n2"] },
-    { source: { displayName: "Site", roles: { tooltips: true } }, values: [10, 20, 30] }
+    { source: { displayName: "Site", roles: { tooltips: true } }, values: [10, 20, 30] },
+    ...(withLabels ? [{ source: { displayName: "Label", roles: { labels: true } }, values: ["", "L1", "L2"] }] : [])
   ];
-  if (withLabels) {
-    values.push({ source: { displayName: "Label", roles: { labels: true } }, values: ["", "L1", "L2"] });
-  }
   return {
     categories: [{
       source: { displayName: "Date", roles: { key: true } }, values: ["A", "B", "C"],
@@ -44,9 +42,9 @@ describe("row annotations", () => {
     expect(result.label_formatting).toEqual([defaults.labels, { ...defaults.labels, label_size: 14 }]);
   });
 
-  it("follows the row order given and leaves absent columns undefined", () => {
+  it("follows the row order given and reads absent columns as blank", () => {
     const result = readRowAnnotations(sources(false), [2, 1], [1, 0]);
-    expect(result.labels).toBeUndefined();
+    expect(result.labels).toEqual([undefined, undefined]);
     expect(result.anyLabels).toBe(false);
     expect(result.highlights).toEqual([2, 3]);
     expect(result.scatter_formatting[0]).toEqual({ ...defaults.scatter, size: 9 });

@@ -10,8 +10,14 @@
     "types": [],
     "strict": true,
     "strictNullChecks": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "test/**/*.types.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

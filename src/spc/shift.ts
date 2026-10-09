@@ -13,7 +13,7 @@ import sum from "../math/sum";
  * @param n - Number of consecutive points required to trigger shift detection
  * @returns Array indicating outlier direction: "upper", "lower", or "none" for each point
  */
-export default function shift(val: readonly number[], targets: readonly number[], n: number): OutlierStatus[] {
+export default function shift(val: readonly number[], targets: readonly (number | undefined)[], n: number): OutlierStatus[] {
   const length: number = val.length;
 
   // Calculate sign of difference from target for each point (+1, -1, or 0)
@@ -21,7 +21,8 @@ export default function shift(val: readonly number[], targets: readonly number[]
   let shift_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
 
   for (let i: number = 0; i < length; i++) {
-    lagged_sign[i] = Math.sign(val[i] - targets[i]);
+    const target = targets[i];
+    lagged_sign[i] = target === undefined ? NaN : Math.sign(val[i] - target);
     const lagged_sign_sum: number = sum(lagged_sign.slice(Math.max(0, i - (n - 1)), i + 1));
     if (Math.abs(lagged_sign_sum) >= n) {
       shift_detected[i] = lagged_sign_sum >= n ? "upper" : "lower";

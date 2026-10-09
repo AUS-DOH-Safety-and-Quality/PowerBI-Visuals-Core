@@ -77,13 +77,11 @@ export function limitTooltips(settings: LimitTooltipSettings, row: LimitTooltipR
 
 // Flagged patterns as one item, then the report's own tooltip columns
 export function appendPatternTooltips(tooltip: VisualTooltipDataItem[], patterns: readonly string[],
-                                      custom: readonly VisualTooltipDataItem[] | undefined): void {
+                                      custom: readonly VisualTooltipDataItem[]): void {
   if (patterns.length > 0) {
     tooltip.push({ displayName: "Pattern(s)", value: patterns.join("\n") });
   }
-  if (custom !== undefined) {
-    for (let i = 0; i < custom.length; i++) {
-      tooltip.push(custom[i]);
-    }
+  for (let i = 0; i < custom.length; i++) {
+    tooltip.push(custom[i]);
   }
 }

@@ -33,7 +33,7 @@ describe("tooltip helpers", () => {
 
   it("appends the patterns as one item before the custom columns", () => {
     const tooltip = [{ displayName: "A", value: "1" }];
-    appendPatternTooltips(tooltip, [], undefined);
+    appendPatternTooltips(tooltip, [], []);
     expect(tooltip).toHaveLength(1);
     appendPatternTooltips(tooltip, ["Trend", "Shift"], [{ displayName: "Extra", value: "x" }]);
     expect(tooltip.slice(1)).toEqual([{ displayName: "Pattern(s)", value: "Trend\nShift" }, { displayName: "Extra", value: "x" }]);

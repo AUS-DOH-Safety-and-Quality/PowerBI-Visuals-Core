@@ -1,11 +1,13 @@
 export type OutlierStatus = "lower" | "upper" | "none";
 export type FlagDirection = "none" | "improvement" | "deterioration" | "neutral_low" | "neutral_high";
+export type ImprovementDirection = "increase" | "decrease" | "neutral";
+export type FlagType = "both" | "improvement" | "deterioration";
 export type FlagSettings = {
-  readonly process_flag_type: string;
-  readonly improvement_direction: string;
+  readonly process_flag_type: FlagType;
+  readonly improvement_direction: ImprovementDirection;
 };
 
-const directionMaps: Record<string, Record<"lower" | "upper", FlagDirection>> = {
+const directionMaps: Record<ImprovementDirection, Record<"lower" | "upper", FlagDirection>> = {
   increase: { upper: "improvement", lower: "deterioration" },
   decrease: { lower: "improvement", upper: "deterioration" },
   neutral: { lower: "neutral_low", upper: "neutral_high" }

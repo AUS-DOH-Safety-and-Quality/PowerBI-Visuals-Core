@@ -14,13 +14,15 @@ import sum from "../math/sum";
  * @param highlight_series - If true, highlight all points in sequence; if false, only those outside 95% limits
  * @returns Array indicating outlier direction: "upper", "lower", or "none" for each point
  */
-export default function twoInThree(val: readonly number[], ll95: readonly number[], ul95: readonly number[], highlight_series: boolean): OutlierStatus[] {
+export default function twoInThree(val: readonly number[], ll95: readonly (number | undefined)[], ul95: readonly (number | undefined)[], highlight_series: boolean): OutlierStatus[] {
   const length: number = val.length;
   let outside95: number[] = new Array<number>(length);
   let two_in_three_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
   for (let i: number = 0; i < length; i++) {
+    const lower = ll95[i];
+    const upper = ul95[i];
     // Map each point to +1 (above upper), -1 (below lower), or 0 (within limits)
-    outside95[i] = val[i] > ul95[i] ? 1 : (val[i] < ll95[i] ? -1 : 0);
+    outside95[i] = upper !== undefined && val[i] > upper ? 1 : (lower !== undefined && val[i] < lower ? -1 : 0);
 
     // Calculate rolling sum of last 3 points (including current)
     const lagged_sign_sum: number = sum(outside95.slice(Math.max(0, i - 2), i + 1));

@@ -13,14 +13,16 @@ import between from "../math/between"
  * @param ul99 - Array of upper 99% control limits
  * @returns Array indicating outlier direction: "upper", "lower", or "none" for each point
  */
-export default function astronomical(val: readonly number[], ll99: readonly number[], ul99: readonly number[]): OutlierStatus[] {
+export default function astronomical(val: readonly number[], ll99: readonly (number | undefined)[], ul99: readonly (number | undefined)[]): OutlierStatus[] {
   const n: number = val.length;
   let rtn: OutlierStatus[] = new Array<OutlierStatus>(n);
 
   for (let i = 0; i < n; i++) {
-    // Check if point is outside 99% control limits
-    if (!between(val[i], ll99[i], ul99[i])) {
-      rtn[i] = val[i] > ul99[i] ? "upper" : "lower";
+    const lower = ll99[i];
+    const upper = ul99[i];
+    // Check if point is outside 99% control limits; a blank limit flags nothing
+    if (lower !== undefined && upper !== undefined && !between(val[i], lower, upper)) {
+      rtn[i] = val[i] > upper ? "upper" : "lower";
     } else {
       rtn[i] = "none";
     }

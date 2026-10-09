@@ -111,4 +111,12 @@ describe("astronomical", () => {
 
         expect(result).toEqual(["none", "none", "none", "none", "upper"]);
     });
+
+    it("should flag against a limit defined on one side only", () => {
+        const val = [-5, 5, 15];
+
+        expect(astronomical(val, [undefined, undefined, undefined], [10, 10, 10])).toEqual(["none", "none", "upper"]);
+        expect(astronomical(val, [0, 0, 0], [undefined, undefined, undefined])).toEqual(["lower", "none", "none"]);
+        expect(astronomical(val, [undefined, undefined, undefined], [undefined, undefined, undefined])).toEqual(["none", "none", "none"]);
+    });
 });

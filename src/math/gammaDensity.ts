@@ -1,4 +1,4 @@
-import poissonDensity from "./poissonDensity.js";
+import poissonDensity from "./poissonDensity";
 
 /**
  * Calculates the gamma density function.

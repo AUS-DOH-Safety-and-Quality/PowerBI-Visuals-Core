@@ -1,7 +1,7 @@
-import lgamma from "./lgamma.js";
-import gammaCDFImpl from "./gammaCDFImpl.js";
-import gammaNewtonIter from "./gammaNewtonIter.js";
-import chisqQuantileApprox from "./chisqQuantileApprox.js";
+import lgamma from "./lgamma";
+import gammaCDFImpl from "./gammaCDFImpl";
+import gammaNewtonIter from "./gammaNewtonIter";
+import chisqQuantileApprox from "./chisqQuantileApprox";
 
 /**
  * Computes the quantile function (inverse CDF) of the gamma distribution.

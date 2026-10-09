@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readSettingsRows, buildFormattingModel } from "../src/powerbi/index.js";
-import { defineCard, createDefaultValues, numberOption } from "../src/settings/index.js";
+import { readSettingsRows, buildFormattingModel } from "../src/powerbi/index";
+import { defineCard, createDefaultValues, numberOption } from "../src/settings/index";
 
 const card = defineCard({
   displayName: "Subset", description: "Subset settings",

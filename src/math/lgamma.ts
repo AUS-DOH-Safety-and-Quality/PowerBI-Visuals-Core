@@ -1,7 +1,7 @@
-import gamma from "./gamma.js";
-import lgammaCorrection from "./lgammaCorrection.js";
-import sinpi from "./sinpi.js";
-import { LOG_SQRT_TWO_PI, LOG_SQRT_PI_DIV_2 } from "./constants.js";
+import gamma from "./gamma";
+import lgammaCorrection from "./lgammaCorrection";
+import sinpi from "./sinpi";
+import { LOG_SQRT_TWO_PI, LOG_SQRT_PI_DIV_2 } from "./constants";
 
 // ln|gamma(x)|; +Infinity at non-positive integers; adapted from R's lgammafn.
 export default function lgamma(x: number): number {

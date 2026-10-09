@@ -1,4 +1,4 @@
-import chebyshevPolynomial from "./chebyshevPolynomial.js";
+import chebyshevPolynomial from "./chebyshevPolynomial";
 
 // Stirling correction term for ln(gamma(x)), x >= 10; adapted from R's lgammacor.
 export default function lgammaCorrection(x: number): number {

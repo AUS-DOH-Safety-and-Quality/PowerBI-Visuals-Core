@@ -1,1 +1,1 @@
-export { default as keyedHost } from "./keyedHost.js";
+export { default as keyedHost } from "./keyedHost";

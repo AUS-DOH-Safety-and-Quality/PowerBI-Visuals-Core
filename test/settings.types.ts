@@ -1,6 +1,6 @@
 import {
   createDefaultValues, defineCard, dropdownOption, numberOption, textOption, toggleOption
-} from "../src/settings/index.js";
+} from "../src/settings/index";
 
 const schema = { data: defineCard({
   displayName: "Data", description: "Data", settingsGroups: {

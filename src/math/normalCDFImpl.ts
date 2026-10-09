@@ -1,5 +1,5 @@
-import { SQRT_THIRTY_TWO, ONE_DIV_SQRT_TWO_PI } from "./constants.js";
-import ldexp from "./ldexp.js";
+import { SQRT_THIRTY_TWO, ONE_DIV_SQRT_TWO_PI } from "./constants";
+import ldexp from "./ldexp";
 
 /**
  * Implementation of the normal cumulative distribution function (CDF).

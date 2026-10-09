@@ -1,5 +1,5 @@
-import { pickRows, formatNumber } from "../src/data/index.js";
-import { formatPrimitiveValue, indexColumnsByRole } from "../src/powerbi/index.js";
+import { pickRows, formatNumber } from "../src/data/index";
+import { formatPrimitiveValue, indexColumnsByRole } from "../src/powerbi/index";
 const selected = pickRows([1, 2] as const, [1, 4]);
 // @ts-expect-error Requested cells may be absent.
 const required: number[] = selected;

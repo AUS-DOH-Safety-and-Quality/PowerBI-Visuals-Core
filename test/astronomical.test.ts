@@ -1,4 +1,4 @@
-import { astronomical } from "../src/spc/index.js";
+import { astronomical } from "../src/spc/index";
 import { describe, it, expect } from "vitest";
 
 describe("astronomical", () => {

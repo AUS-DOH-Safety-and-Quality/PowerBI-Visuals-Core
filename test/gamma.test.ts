@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   gamma, lgamma, lgamma1p, lgammaCorrection, stirlingError, chebyshevPolynomial, sinpi, log1pmx, ldexp
-} from "../src/math/index.js";
+} from "../src/math/index";
 
 describe("gamma", () => {
   it("returns factorials for positive integers", () => {

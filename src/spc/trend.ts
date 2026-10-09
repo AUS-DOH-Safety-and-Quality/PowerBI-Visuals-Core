@@ -1,5 +1,5 @@
-import type { OutlierStatus } from "../data/flagDirection.js";
-import sum from "../math/sum.js";
+import type { OutlierStatus } from "../data/flagDirection";
+import sum from "../math/sum";
 
 /**
  * Detects trend rule violations (n consecutive points consistently increasing or decreasing).

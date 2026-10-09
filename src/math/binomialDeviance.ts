@@ -1,6 +1,6 @@
-import log1pmx from "./log1pmx.js";
-import ldexp from "./ldexp.js";
-import frexp from "./frexp.js";
+import log1pmx from "./log1pmx";
+import ldexp from "./ldexp";
+import frexp from "./frexp";
 
 const bd0_scale: readonly [number, number, number, number][] = [
   [0.69314718246459961, -1.9046542121259336e-09, -8.7831837385893394e-17, 3.0618407385293692e-24],

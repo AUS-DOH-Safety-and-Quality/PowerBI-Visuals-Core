@@ -1,5 +1,5 @@
-import type { OutlierStatus } from "../data/flagDirection.js";
-import sum from "../math/sum.js";
+import type { OutlierStatus } from "../data/flagDirection";
+import sum from "../math/sum";
 
 /**
  * Detects two-in-three rule violations (2 out of 3 consecutive points outside 95% limits).

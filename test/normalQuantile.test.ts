@@ -1,4 +1,4 @@
-import { normalQuantile } from "../src/math/index.js";
+import { normalQuantile } from "../src/math/index";
 import { describe, it, expect } from "vitest";
 
 describe("normalQuantile", () => {

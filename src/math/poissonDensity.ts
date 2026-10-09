@@ -1,8 +1,8 @@
-import lgamma1p from "./lgamma1p.js";
-import stirlingError from "./stirlingError.js";
-import { DBL_MIN } from "./constants.js";
-import binomialDeviance from "./binomialDeviance.js";
-import { TWO_PI, SQRT_TWO_PI } from "./constants.js";
+import lgamma1p from "./lgamma1p";
+import stirlingError from "./stirlingError";
+import { DBL_MIN } from "./constants";
+import binomialDeviance from "./binomialDeviance";
+import { TWO_PI, SQRT_TWO_PI } from "./constants";
 
 /**
  * Calculates the Poisson density function for a given continuous x and lambda.

@@ -1,4 +1,4 @@
-import gammaCDF from "./gammaCDF.js";
+import gammaCDF from "./gammaCDF";
 
 /**
  * Calculates the cumulative distribution function (CDF) for the chi-squared distribution.

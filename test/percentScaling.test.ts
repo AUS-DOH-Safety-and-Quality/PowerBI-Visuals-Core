@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolvePercentScaling } from "../src/data/index.js";
+import { resolvePercentScaling } from "../src/data/index";
 
 describe("percent scaling", () => {
   it.each([

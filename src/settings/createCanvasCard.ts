@@ -1,4 +1,4 @@
-import { defineCard, paddingOption, toggleOption } from "./definitions.js";
+import { defineCard, paddingOption, toggleOption } from "./definitions";
 
 export default function createCanvasCard() {
   return defineCard({

@@ -1,4 +1,4 @@
-import formatNumber from "./formatNumber.js";
+import formatNumber from "./formatNumber";
 
 export type ValueFormatter = (value: number | undefined, name: "integer" | "value") => string;
 

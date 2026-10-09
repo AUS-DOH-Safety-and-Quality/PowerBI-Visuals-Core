@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { keyedHost } from "../src/testing/index.js";
+import { keyedHost } from "../src/testing/index";
 
 describe("keyed test host", () => {
   it("gives rows distinct selection keys", () => {

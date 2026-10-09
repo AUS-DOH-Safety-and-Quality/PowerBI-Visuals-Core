@@ -215,6 +215,7 @@ type MergeUnions<T> = (T extends unknown ? (value: T) => void : never) extends (
   ? { [K in keyof Result]: Result[K] } : never;
 
 type SettingMembers<T extends SettingCard> = MergeUnions<T["settingsGroups"][keyof T["settingsGroups"]]>;
+export type ColourName = keyof typeof defaultColours;
 export type CardValues<T extends SettingCard> = {
   [K in keyof SettingMembers<T>]: SettingMembers<T>[K] extends { default: infer Value extends SettingValue } ? Value : never;
 };

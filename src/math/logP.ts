@@ -1,4 +1,4 @@
-import log1mExp from "./log1mExp.js";
+import log1mExp from "./log1mExp";
 
 /**
  * Return the probability or its complement in log scale

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readColourPalette } from "../src/powerbi/index.js";
+import { readColourPalette } from "../src/powerbi/index";
 
 describe("colour palette", () => {
   it("flattens the host palette values", () => {

@@ -1,4 +1,4 @@
-import logcf from "./logcf.js";
+import logcf from "./logcf";
 
 // log(1 + x) - x, accurate for small x; adapted from R's log1pmx (src/nmath/pgamma.c).
 export default function log1pmx(x: number): number {

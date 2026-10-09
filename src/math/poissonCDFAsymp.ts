@@ -1,6 +1,6 @@
-import log1pmx from "./log1pmx.js";
-import normalCDF from "./normalCDF.js";
-import normalDensity from "./normalDensity.js";
+import log1pmx from "./log1pmx";
+import normalCDF from "./normalCDF";
+import normalDensity from "./normalDensity";
 
 /**
  * Asymptotic expansion for the Poisson CDF for large lambda and x

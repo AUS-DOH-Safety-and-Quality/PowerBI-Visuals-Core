@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createCanvasCard, createLabelsCard, createDefaultValues, defineCard,
   dropdownOption, fontStyleOption, numberOption, textOption, toggleOption
-} from "../src/settings/index.js";
+} from "../src/settings/index";
 
 describe("setting definitions", () => {
   it("preserves explicit unset defaults and zero bounds", () => {

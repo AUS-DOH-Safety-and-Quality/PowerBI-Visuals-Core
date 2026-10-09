@@ -1,5 +1,5 @@
-import { LOG_TWO_PI } from "./constants.js";
-import ldexp from "./ldexp.js";
+import { LOG_TWO_PI } from "./constants";
+import ldexp from "./ldexp";
 
 /**
  * Evaluates a rational polynomial P(x)/Q(x) using Horner's method.

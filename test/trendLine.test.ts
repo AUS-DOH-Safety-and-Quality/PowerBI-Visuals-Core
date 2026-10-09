@@ -1,4 +1,4 @@
-import { calculateTrendLine } from "../src/math/index.js";
+import { calculateTrendLine } from "../src/math/index";
 import { describe, it, expect } from "vitest";
 
 describe("calculateTrendLine", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { labelGeometry, trianglePath, axisLabelPlacement, type LabelAesthetics, type LabelState } from "../src/rendering/index.js";
+import { labelGeometry, trianglePath, axisLabelPlacement, type LabelAesthetics, type LabelState } from "../src/rendering/index";
 
 const aesthetics: LabelAesthetics = {
   label_position: "top", label_y_offset: 20, label_line_offset: 5, label_angle_offset: 0,

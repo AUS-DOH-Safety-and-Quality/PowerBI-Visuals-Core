@@ -1,4 +1,4 @@
-import { formatPrimitiveValue, type PrimitiveValue } from "./columns.js";
+import { formatPrimitiveValue, type PrimitiveValue } from "./columns";
 
 export type CategoryGroups = { rows: number[][]; names: string[][]; keys: string[] };
 

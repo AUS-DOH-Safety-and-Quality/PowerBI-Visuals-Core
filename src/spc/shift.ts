@@ -1,5 +1,5 @@
-import type { OutlierStatus } from "../data/flagDirection.js";
-import sum from "../math/sum.js";
+import type { OutlierStatus } from "../data/flagDirection";
+import sum from "../math/sum";
 
 /**
  * Detects shift rule violations (n consecutive points on same side of target/centerline).

@@ -1,5 +1,5 @@
-import { readSettingsGroups } from "../src/powerbi/index.js";
-import { defineCard, dropdownOption, numberOption } from "../src/settings/index.js";
+import { readSettingsGroups } from "../src/powerbi/index";
+import { defineCard, dropdownOption, numberOption } from "../src/settings/index";
 
 const schema = { data: defineCard({ displayName: "Data", description: "", settingsGroups: { all: {
   size: numberOption("Size", undefined), mode: dropdownOption("Mode", "first", ["first", "second"])

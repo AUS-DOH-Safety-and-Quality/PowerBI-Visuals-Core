@@ -1,4 +1,4 @@
-import isValidNumber from "../data/isValidNumber.js";
+import isValidNumber from "../data/isValidNumber";
 
 export type LabelAesthetics = {
   readonly label_position: "top" | "bottom";

@@ -1,51 +1,36 @@
 {
   "name": "powerbi-visuals-core",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "private": true,
   "type": "module",
   "files": [
-    "dist"
+    "src"
   ],
   "exports": {
-    "./math": {
-      "types": "./dist/math/index.d.ts",
-      "import": "./dist/math/index.js"
-    },
-    "./settings": {
-      "types": "./dist/settings/index.d.ts",
-      "import": "./dist/settings/index.js"
-    },
-    "./powerbi": {
-      "types": "./dist/powerbi/index.d.ts",
-      "import": "./dist/powerbi/index.js"
-    },
-    "./data": {
-      "types": "./dist/data/index.d.ts",
-      "import": "./dist/data/index.js"
-    },
-    "./rendering": {
-      "types": "./dist/rendering/index.d.ts",
-      "import": "./dist/rendering/index.js"
-    },
-    "./testing": {
-      "types": "./dist/testing/index.d.ts",
-      "import": "./dist/testing/index.js"
-    },
-    "./spc": {
-      "types": "./dist/spc/index.d.ts",
-      "import": "./dist/spc/index.js"
-    }
+    "./math": "./src/math/index.ts",
+    "./settings": "./src/settings/index.ts",
+    "./powerbi": "./src/powerbi/index.ts",
+    "./data": "./src/data/index.ts",
+    "./rendering": "./src/rendering/index.ts",
+    "./testing": "./src/testing/index.ts",
+    "./spc": "./src/spc/index.ts"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.types.json",
-    "test": "vitest run",
-    "prepare": "npm run build"
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "devDependencies": {
+    "@types/d3-axis": "3.0.6",
+    "@types/d3-selection": "3.0.11",
+    "@types/d3-shape": "3.1.8",
     "powerbi-visuals-api": "5.1.0",
     "powerbi-visuals-utils-testutils": "7.0.1",
     "typescript": "6.0.3",
     "vitest": "4.1.10"
+  },
+  "dependencies": {
+    "d3-axis": "3.0.0",
+    "d3-selection": "3.0.0",
+    "d3-shape": "3.2.0"
   }
 }

@@ -1,5 +1,5 @@
-import poissonDensity from "./poissonDensity.js";
-import lgamma from "./lgamma.js";
+import poissonDensity from "./poissonDensity";
+import lgamma from "./lgamma";
 
 /**
  * Computes the Poisson density for the previous value (x_plus_1 - 1).

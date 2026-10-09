@@ -1,6 +1,6 @@
-import { DBL_MIN } from "./constants.js";
-import gammaCDF from "./gammaCDF.js";
-import gammaDensity from "./gammaDensity.js";
+import { DBL_MIN } from "./constants";
+import gammaCDF from "./gammaCDF";
+import gammaDensity from "./gammaDensity";
 
 /**
  * Performs Newton-Raphson iterations to refine the estimate of the quantile function

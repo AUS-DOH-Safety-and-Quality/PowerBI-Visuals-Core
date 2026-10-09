@@ -1,4 +1,4 @@
-import normalCDFImpl from "./normalCDFImpl.js";
+import normalCDFImpl from "./normalCDFImpl";
 
 /**
  * Normal cumulative distribution function (CDF).

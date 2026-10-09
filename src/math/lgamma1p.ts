@@ -1,7 +1,7 @@
-import lgamma from "./lgamma.js";
-import log1pmx from "./log1pmx.js";
-import logcf from "./logcf.js";
-import { EULER } from "./constants.js";
+import lgamma from "./lgamma";
+import log1pmx from "./log1pmx";
+import logcf from "./logcf";
+import { EULER } from "./constants";
 
 // ln(gamma(1 + a)), accurate for small a; adapted from R's lgamma1p.
 export default function lgamma1p(a: number): number {

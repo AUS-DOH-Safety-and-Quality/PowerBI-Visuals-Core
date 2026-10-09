@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { frexp } from "../src/math/index.js";
-import { gammaDensity } from "../src/math/index.js";
-import { gammaCDF } from "../src/math/index.js";
-import { gammaQuantile } from "../src/math/index.js";
-import { chisqCDF } from "../src/math/index.js";
-import { poissonDensity } from "../src/math/index.js";
+import { frexp } from "../src/math/index";
+import { gammaDensity } from "../src/math/index";
+import { gammaCDF } from "../src/math/index";
+import { gammaQuantile } from "../src/math/index";
+import { chisqCDF } from "../src/math/index";
+import { poissonDensity } from "../src/math/index";
 
 // Reference values from R 4.6.0 (Core finding 28). Tolerances are relative.
 function expectRel(actual: number, expected: number, tol: number): void {

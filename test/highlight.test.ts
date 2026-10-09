@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { highlightOpacity } from "../src/rendering/index.js";
+import { highlightOpacity } from "../src/rendering/index";
 
 const opacities = { opacity: 1, opacity_selected: 0.9, opacity_unselected: 0.2 };
 

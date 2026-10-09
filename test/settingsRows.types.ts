@@ -1,5 +1,5 @@
-import { readSettingsRows, type SettingsValidation } from "../src/powerbi/index.js";
-import { defineCard, createDefaultValues, numberOption, dropdownOption, textOption } from "../src/settings/index.js";
+import { readSettingsRows, type SettingsValidation } from "../src/powerbi/index";
+import { defineCard, createDefaultValues, numberOption, dropdownOption, textOption } from "../src/settings/index";
 
 const card = defineCard({ displayName: "Data", description: "", settingsGroups: { all: {
   count: numberOption("Count", 1),

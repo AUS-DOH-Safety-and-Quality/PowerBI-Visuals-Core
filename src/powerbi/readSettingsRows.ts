@@ -1,4 +1,4 @@
-import { FormattingComponent, type SettingCard, type SettingDefinition, type SettingValue, type CardValues } from "../settings/definitions.js";
+import { FormattingComponent, type SettingCard, type SettingDefinition, type SettingValue, type CardValues } from "../settings/definitions";
 
 export type SettingsValidation =
   | { status: 0; messages: string[][]; error?: undefined }

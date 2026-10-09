@@ -1,4 +1,4 @@
-import { FormattingComponent, type SettingCard, type SettingDefinition, type SettingValue, type SettingsValues } from "../settings/definitions.js";
+import { FormattingComponent, type SettingCard, type SettingDefinition, type SettingValue, type SettingsValues } from "../settings/definitions";
 
 export type FormattingDescriptor = {
   objectName: string;

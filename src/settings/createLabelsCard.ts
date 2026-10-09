@@ -2,7 +2,7 @@ import { defineCard,
   fontOption, toggleOption,
   colourOption, fontSizeOption, lineTypeOption,
   numberOption, dropdownOption
- } from "./definitions.js";
+ } from "./definitions";
 
 export default function createLabelsCard() {
   return defineCard({

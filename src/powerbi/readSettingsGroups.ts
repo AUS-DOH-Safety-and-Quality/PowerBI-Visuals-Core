@@ -1,5 +1,5 @@
-import { createDefaultValues, type SettingCard, type SettingsValues } from "../settings/definitions.js";
-import readSettingsRows, { type SettingsCategory, type SettingsValidation } from "./readSettingsRows.js";
+import { createDefaultValues, type SettingCard, type SettingsValues } from "../settings/definitions";
+import readSettingsRows, { type SettingsCategory, type SettingsValidation } from "./readSettingsRows";
 
 export default function readSettingsGroups<T extends Record<string, SettingCard>>(
   schema: T, category: SettingsCategory, groups: readonly (readonly number[])[]

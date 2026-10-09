@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createValueFormatter } from "../src/data/index.js";
+import { createValueFormatter } from "../src/data/index";
 
 describe("value formatter", () => {
   it("applies decimal places and suffix to values and integer places without suffix", () => {

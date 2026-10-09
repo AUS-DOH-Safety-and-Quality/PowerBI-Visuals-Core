@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildFormattingModel } from "../src/powerbi/index.js";
-import { defineCard, createDefaultValues, numberOption, toggleOption, dropdownOption, colourOption, textOption, fontOption, alignmentOption } from "../src/settings/index.js";
+import { buildFormattingModel } from "../src/powerbi/index";
+import { defineCard, createDefaultValues, numberOption, toggleOption, dropdownOption, colourOption, textOption, fontOption, alignmentOption } from "../src/settings/index";
 
 const schema = { example: defineCard({
   displayName: "Example card", description: "Example settings",

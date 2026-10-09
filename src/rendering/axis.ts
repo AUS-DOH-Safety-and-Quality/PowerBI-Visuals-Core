@@ -32,6 +32,41 @@ export function axisLabelPlacement(align: AxisLabelAlign, start: number, end: nu
   return { position: (start + end) / 2, anchor: "middle" };
 }
 
+export type TickLabelOffsets = {
+  readonly anchor: "start" | "middle" | "end";
+  readonly dx: string;
+  readonly dy: string;
+};
+
+// Rotated tick labels hang from their rotated end; unrotated ones keep d3's centred placement
+export function xTickLabelOffsets(rotation: number): TickLabelOffsets {
+  if (rotation < 0) {
+    return { anchor: "end", dx: "-.8em", dy: "-.15em" };
+  }
+  if (rotation > 0) {
+    return { anchor: "start", dx: ".8em", dy: ".15em" };
+  }
+  return { anchor: "middle", dx: "0em", dy: ".71em" };
+}
+
+export type AxisTitleSide = "bottom" | "left";
+
+// Bottom titles sit midway between the axis and the canvas edge, left titles at 0.7 of the axis offset;
+// without a measurement the title sits a label size in from the edge
+export function axisTitleOffset(side: AxisTitleSide, canvasExtent: number, axisEdge: number | undefined, labelSize: number): number {
+  if (side === "bottom") {
+    return axisEdge === undefined ? canvasExtent - labelSize / 2 : canvasExtent - (canvasExtent - axisEdge) / 2;
+  }
+  return axisEdge === undefined ? labelSize * 1.5 : axisEdge * 0.7;
+}
+
+// The axis's outer edge in the SVG's coordinates: bottom of a horizontal axis, left of a vertical one
+export function measureAxisEdge(svg: SVGSVGElement, axis: Element, side: AxisTitleSide): number {
+  const svgRect = svg.getBoundingClientRect();
+  const axisRect = axis.getBoundingClientRect();
+  return side === "bottom" ? axisRect.bottom - svgRect.top : axisRect.left - svgRect.left;
+}
+
 export function drawGridlines(options: GridlineOptions): void {
   const { container, className } = options;
   const existing = container.querySelectorAll(`.${className}`);

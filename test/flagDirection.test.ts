@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkFlagDirection } from "../src/data/index.js";
+import { checkFlagDirection } from "../src/data/index";
 
 describe("flag direction", () => {
   it("returns none for a non-outlier whatever the settings", () => {

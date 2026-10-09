@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildFormattingModel, groupCategoryRows, readSettingsGroups } from "../src/powerbi/index.js";
-import { defineCard, dropdownOption, numberOption, textOption } from "../src/settings/index.js";
+import { buildFormattingModel, groupCategoryRows, readSettingsGroups } from "../src/powerbi/index";
+import { defineCard, dropdownOption, numberOption, textOption } from "../src/settings/index";
 
 describe("category grouping", () => {
   it("preserves first-seen groups and raw rows for interleaved tuples", () => {

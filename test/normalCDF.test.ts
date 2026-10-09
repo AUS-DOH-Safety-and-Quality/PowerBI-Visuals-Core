@@ -1,4 +1,4 @@
-import { normalCDF } from "../src/math/index.js";
+import { normalCDF } from "../src/math/index";
 import { describe, it, expect } from "vitest";
 
 describe("normalCDF", () => {

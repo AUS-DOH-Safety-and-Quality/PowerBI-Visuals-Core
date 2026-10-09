@@ -1,5 +1,5 @@
-import type { OutlierStatus } from "../data/flagDirection.js";
-import between from "../math/between.js"
+import type { OutlierStatus } from "../data/flagDirection";
+import between from "../math/between"
 
 /**
  * Detects astronomical points (single points outside 99% control limits).

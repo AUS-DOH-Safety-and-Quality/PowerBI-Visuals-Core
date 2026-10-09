@@ -1,4 +1,4 @@
-import { drawValueLabels, labelGeometry, type LabelPoint, type ValueLabelOptions } from "../src/rendering/index.js";
+import { drawValueLabels, labelGeometry, type LabelPoint, type ValueLabelOptions } from "../src/rendering/index";
 
 type LocalPoint = {
   x: number;
@@ -40,7 +40,7 @@ missing.visible;
 const loose: LabelPoint = { x: 0, value: 0, label: { text_value: "A", angle: undefined, distance: undefined, aesthetics: { ...local[0].label.aesthetics, label_position: "left" } } };
 loose.x;
 
-import { drawLineLabels, drawErrorMessage, drawCrosshairs, type LineLabel, type ErrorMessageOptions } from "../src/rendering/index.js";
+import { drawLineLabels, drawErrorMessage, drawCrosshairs, type LineLabel, type ErrorMessageOptions } from "../src/rendering/index";
 
 declare const group: SVGGElement;
 declare const lineElement: SVGLineElement;
@@ -73,7 +73,7 @@ const crosshairs = drawCrosshairs({ vertical: lineElement, horizontal: lineEleme
 crosshairs.show(1, 2);
 crosshairs.hide();
 
-import { drawGridlines, axisLabelPlacement, type AxisLabelAlign } from "../src/rendering/index.js";
+import { drawGridlines, axisLabelPlacement, type AxisLabelAlign } from "../src/rendering/index";
 
 declare const align: AxisLabelAlign;
 const anchor: "start" | "middle" | "end" = axisLabelPlacement(align, 0, 100).anchor;

@@ -1,4 +1,4 @@
-import gammaCDFImpl from "./gammaCDFImpl.js";
+import gammaCDFImpl from "./gammaCDFImpl";
 
 /**
  * Calculates the cumulative distribution function (CDF) of the gamma distribution.

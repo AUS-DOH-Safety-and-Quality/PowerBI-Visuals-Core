@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toCsv } from "../src/data/index.js";
+import { toCsv } from "../src/data/index";
 
 describe("csv export", () => {
   it("writes the first row's keys as the header and blanks missing values", () => {

@@ -1,4 +1,4 @@
-import isNullOrUndefined from "../data/isNullOrUndefined.js";
+import isNullOrUndefined from "../data/isNullOrUndefined";
 
 // Inclusive bounds; a null or undefined bound is unbounded.
 export default function between<T>(x: T, lower: T, upper: T): boolean {

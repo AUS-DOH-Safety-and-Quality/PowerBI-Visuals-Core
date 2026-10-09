@@ -1,10 +1,10 @@
-import poissonDensity from "./poissonDensity.js";
-import lgamma1p from "./lgamma1p.js";
-import { DBL_MIN } from "./constants.js";
-import poissonDensityPrev from "./poissonDensityPrev.js";
-import gammaContFrac from "./gammaContFrac.js";
-import poissonCDFAsymp from "./poissonCDFAsymp.js";
-import log1mExp from "./log1mExp.js";
+import poissonDensity from "./poissonDensity";
+import lgamma1p from "./lgamma1p";
+import { DBL_MIN } from "./constants";
+import poissonDensityPrev from "./poissonDensityPrev";
+import gammaContFrac from "./gammaContFrac";
+import poissonCDFAsymp from "./poissonCDFAsymp";
+import log1mExp from "./log1mExp";
 
 /**
  * Calculates the cumulative distribution function (CDF) of the gamma distribution.

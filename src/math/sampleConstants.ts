@@ -1,4 +1,4 @@
-import lgamma from "./lgamma.js";
+import lgamma from "./lgamma";
 
 /**
  * Calculates the c4 bias correction factor for sample standard deviation.

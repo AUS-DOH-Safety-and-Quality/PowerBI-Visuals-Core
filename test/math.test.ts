@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mean, median, min, max, rep, between, clamp } from "../src/math/index.js";
+import { mean, median, min, max, rep, between, clamp } from "../src/math/index";
 
 describe("mean and median", () => {
   it("return NaN for empty input", () => {

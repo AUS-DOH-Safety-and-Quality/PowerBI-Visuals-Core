@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adjustPaddingForOverflow } from "../src/rendering/index.js";
+import { adjustPaddingForOverflow } from "../src/rendering/index";
 
 const padding = { left: 10, right: 20, top: 30, bottom: 40 };
 

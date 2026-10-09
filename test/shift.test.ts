@@ -1,4 +1,4 @@
-import { shift } from "../src/spc/index.js";
+import { shift } from "../src/spc/index";
 import { describe, it, expect } from "vitest";
 
 describe("shift", () => {

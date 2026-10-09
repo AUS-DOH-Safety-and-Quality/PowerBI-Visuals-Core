@@ -1,6 +1,6 @@
-import lgamma1p from "./lgamma1p.js";
-import normalQuantile from "./normalQuantile.js";
-import logP from "./logP.js";
+import lgamma1p from "./lgamma1p";
+import normalQuantile from "./normalQuantile";
+import logP from "./logP";
 
 /**
  * Compute an approximate quantile for the chi-squared distribution

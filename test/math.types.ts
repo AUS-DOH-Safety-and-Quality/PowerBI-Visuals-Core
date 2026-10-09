@@ -1,5 +1,5 @@
-import { min, max, mean, between, rep, clamp } from "../src/math/index.js";
-import { isValidNumber, isNullOrUndefined, groupBy } from "../src/data/index.js";
+import { min, max, mean, between, rep, clamp } from "../src/math/index";
+import { isValidNumber, isNullOrUndefined, groupBy } from "../src/data/index";
 
 const frozen: readonly number[] = Object.freeze([1, 2]);
 min(frozen);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isNullOrUndefined, isValidNumber, groupBy } from "../src/data/index.js";
+import { isNullOrUndefined, isValidNumber, groupBy } from "../src/data/index";
 
 describe("missing-value and finite-number predicates", () => {
   it("isNullOrUndefined accepts only null and undefined", () => {

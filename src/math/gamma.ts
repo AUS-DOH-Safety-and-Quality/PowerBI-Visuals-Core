@@ -1,8 +1,8 @@
-import chebyshevPolynomial from "./chebyshevPolynomial.js";
-import sinpi from "./sinpi.js";
-import lgammaCorrection from "./lgammaCorrection.js";
-import stirlingError from "./stirlingError.js";
-import { LOG_SQRT_TWO_PI } from "./constants.js";
+import chebyshevPolynomial from "./chebyshevPolynomial";
+import sinpi from "./sinpi";
+import lgammaCorrection from "./lgammaCorrection";
+import stirlingError from "./stirlingError";
+import { LOG_SQRT_TWO_PI } from "./constants";
 
 // gamma(x); NaN at zero and negative integers; adapted from R's gammafn.
 export default function gamma(x: number): number {

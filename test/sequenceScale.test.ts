@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sequence, scaleLinear } from "../src/math/index.js";
+import { sequence, scaleLinear } from "../src/math/index";
 
 describe("sequence", () => {
   it("produces exactly count values by repeated addition", () => {

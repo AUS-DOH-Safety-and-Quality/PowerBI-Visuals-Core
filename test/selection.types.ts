@@ -1,5 +1,5 @@
-import { identitySelected, selectedKeys } from "../src/powerbi/index.js";
-import { bindContextMenu } from "../src/rendering/index.js";
+import { identitySelected, selectedKeys } from "../src/powerbi/index";
+import { bindContextMenu } from "../src/rendering/index";
 
 type HostId = { getKey(): string; equals(other: HostId): boolean };
 declare const ids: readonly HostId[];

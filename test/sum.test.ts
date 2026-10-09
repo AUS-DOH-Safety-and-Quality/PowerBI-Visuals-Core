@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sum } from "../src/math/index.js";
+import { sum } from "../src/math/index";
 
 describe("sum", () => {
   it("sums readonly input without changing it", () => {

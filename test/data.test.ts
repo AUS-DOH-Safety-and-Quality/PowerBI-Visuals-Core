@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { pickRows, formatNumber } from "../src/data/index.js";
-import { indexColumnsByRole, formatPrimitiveValue } from "../src/powerbi/index.js";
+import { pickRows, formatNumber } from "../src/data/index";
+import { indexColumnsByRole, formatPrimitiveValue } from "../src/powerbi/index";
 
 describe("row and display contracts", () => {
   it("preserves requested order, duplicates, missing cells and out-of-range positions", () => {

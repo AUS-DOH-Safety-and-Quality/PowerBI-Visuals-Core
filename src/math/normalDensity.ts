@@ -1,6 +1,6 @@
-import { ONE_DIV_SQRT_TWO_PI } from "./constants.js";
-import { LOG_SQRT_TWO_PI } from "./constants.js";
-import ldexp from "./ldexp.js";
+import { ONE_DIV_SQRT_TWO_PI } from "./constants";
+import { LOG_SQRT_TWO_PI } from "./constants";
+import ldexp from "./ldexp";
 
 /**
  * Calculates the probability density function (PDF) of the normal distribution.

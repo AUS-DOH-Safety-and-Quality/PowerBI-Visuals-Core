@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lineLabelGeometry, type LineLabelPlacement } from "../src/rendering/index.js";
+import { lineLabelGeometry, type LineLabelPlacement } from "../src/rendering/index";
 
 const base: LineLabelPlacement = { position: "above", lower: false, hpad: 3, vpad: 5, lineWidth: 2, size: 10 };
 

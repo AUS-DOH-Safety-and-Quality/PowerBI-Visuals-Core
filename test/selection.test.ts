@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { identitySelected, selectedKeys, type SelectionKeyed } from "../src/powerbi/index.js";
+import { identitySelected, selectedKeys, type SelectionKeyed } from "../src/powerbi/index";
 
 function id(key: string): SelectionKeyed {
   return { getKey: () => key };

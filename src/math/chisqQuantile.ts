@@ -1,4 +1,4 @@
-import gammaQuantile from "./gammaQuantile.js";
+import gammaQuantile from "./gammaQuantile";
 
 /**
  * Calculates the quantile function for the chi-squared distribution.

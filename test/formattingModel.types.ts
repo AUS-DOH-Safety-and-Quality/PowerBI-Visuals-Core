@@ -1,5 +1,5 @@
-import { buildFormattingModel } from "../src/powerbi/index.js";
-import { defineCard, createDefaultValues, numberOption, toggleOption, dropdownOption } from "../src/settings/index.js";
+import { buildFormattingModel } from "../src/powerbi/index";
+import { defineCard, createDefaultValues, numberOption, toggleOption, dropdownOption } from "../src/settings/index";
 
 const schema = { example: defineCard({ displayName: "Example", description: "", settingsGroups: { all: {
   count: numberOption("Count", undefined),

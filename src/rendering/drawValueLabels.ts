@@ -1,6 +1,6 @@
-import { labelGeometry, type LabelPoint } from "./labelGeometry.js";
-import trianglePath from "./trianglePath.js";
-import screenToSvg from "./screenToSvg.js";
+import { labelGeometry, type LabelPoint } from "./labelGeometry";
+import trianglePath from "./trianglePath";
+import screenToSvg from "./screenToSvg";
 
 export type LabelLineStyle = {
   readonly colour: string;

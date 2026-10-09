@@ -1,3 +1,5 @@
+import { initialiseSvg } from "./initialiseSvg";
+
 export type ErrorKind = "internal" | "settings";
 
 export type ErrorMessageOptions = {
@@ -27,8 +29,9 @@ function addText(group: SVGGElement, x: number, y: number, text: string, colour:
   element.style.setProperty("fill", colour);
 }
 
-// Appends a centred error message group; the caller clears the previous drawing
+// Replaces the plot with a centred error message group
 export function drawErrorMessage(svg: SVGSVGElement, options: ErrorMessageOptions): void {
+  initialiseSvg(svg, true);
   const group = svg.ownerDocument.createElementNS(SVG_NS, "g");
   svg.appendChild(group);
   group.classList.add("errormessage");

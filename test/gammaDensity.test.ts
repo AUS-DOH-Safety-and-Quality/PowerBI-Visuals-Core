@@ -1,4 +1,4 @@
-import { gammaDensity } from "../src/math/index.js";
+import { gammaDensity } from "../src/math/index";
 import { describe, it, expect } from "vitest";
 
 describe("gammaDensity", () => {

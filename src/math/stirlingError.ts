@@ -1,7 +1,7 @@
-import lgamma from "./lgamma.js";
-import ldexp from "./ldexp.js";
-import lgamma1p from "./lgamma1p.js";
-import { LOG_TWO_PI, LOG_SQRT_TWO_PI } from "./constants.js";
+import lgamma from "./lgamma";
+import ldexp from "./ldexp";
+import lgamma1p from "./lgamma1p";
+import { LOG_TWO_PI, LOG_SQRT_TWO_PI } from "./constants";
 
 // Stirling's error term ln(n!) - Stirling(n); adapted from R's stirlerr.
 export default function stirlingError(n: number): number {

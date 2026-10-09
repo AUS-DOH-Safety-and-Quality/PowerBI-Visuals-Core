@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readSettingsRows } from "../src/powerbi/index.js";
-import { defineCard, createDefaultValues, numberOption, toggleOption, dropdownOption, colourOption, textOption, fontOption, alignmentOption } from "../src/settings/index.js";
+import { readSettingsRows } from "../src/powerbi/index";
+import { defineCard, createDefaultValues, numberOption, toggleOption, dropdownOption, colourOption, textOption, fontOption, alignmentOption } from "../src/settings/index";
 
 const card = defineCard({
   displayName: "Example", description: "Example settings",

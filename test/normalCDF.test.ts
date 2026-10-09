@@ -118,15 +118,11 @@ describe("normalCDF", () => {
         });
 
         it("should handle extreme values in log scale", () => {
-            // log(pnorm(-10)) = -23.02585...
-            const logP = normalCDF(-10, 0, 1, true, true);
-            expect(logP).toBeLessThan(-20);
-            expect(Number.isFinite(logP)).toBe(true);
+            // pnorm(-10, log.p=TRUE) = -53.23129
+            expect(normalCDF(-10, 0, 1, true, true)).toBeCloseTo(-53.23129, 5);
 
-            // log(pnorm(-37)) should be finite (would underflow in normal scale)
-            const logPExtreme = normalCDF(-37, 0, 1, true, true);
-            expect(Number.isFinite(logPExtreme)).toBe(true);
-            expect(logPExtreme).toBeLessThan(-500);
+            // pnorm(-37, log.p=TRUE) = -689.0306 (pnorm(-37) itself underflows)
+            expect(normalCDF(-37, 0, 1, true, true)).toBeCloseTo(-689.0306, 4);
         });
     });
 
@@ -148,9 +144,11 @@ describe("normalCDF", () => {
             expect(normalCDF(1, 0, 0)).toBe(1);   // x > mu
         });
 
-        it("should handle infinite sigma", () => {
-            // All probabilities should approach 0.5 as sigma -> infinity
-            // But with infinite sigma, result depends on implementation
+        it("should return 0.5 everywhere for infinite sigma", () => {
+            // pnorm(x, 0, Inf) = 0.5 for every finite x
+            expect(normalCDF(-1, 0, Number.POSITIVE_INFINITY)).toBe(0.5);
+            expect(normalCDF(0, 0, Number.POSITIVE_INFINITY)).toBe(0.5);
+            expect(normalCDF(1e6, 0, Number.POSITIVE_INFINITY)).toBe(0.5);
         });
     });
 

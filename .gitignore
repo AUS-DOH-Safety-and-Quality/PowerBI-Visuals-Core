@@ -2,3 +2,4 @@ node_modules/
 coverage/
 *.md
 !README.md
+.vitest-attachments/

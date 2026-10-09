@@ -35,16 +35,6 @@ describe("twoInThree", () => {
         expect(result).toEqual(["none", "lower", "lower", "none", "none", "none"]);
     });
 
-    it("should detect pattern: outside, outside, inside (3 consecutive with 2 outside)", () => {
-        const val = [5, 11, 11, 5, 5, 5];
-        const ll95 = [0, 0, 0, 0, 0, 0];
-        const ul95 = [10, 10, 10, 10, 10, 10];
-        const highlight_series = false;
-
-        const result = twoInThree(val, ll95, ul95, highlight_series);
-
-        expect(result).toEqual(["none", "upper", "upper", "none", "none", "none"]);
-    });
 
     it("should detect pattern: outside, inside, outside (3 consecutive with 2 outside)", () => {
         const val = [11, 5, 11, 5, 5];
@@ -58,16 +48,6 @@ describe("twoInThree", () => {
         expect(result).toEqual(["upper", "none", "upper", "none", "none"]);
     });
 
-    it("should detect pattern: inside, outside, outside (3 consecutive with 2 outside)", () => {
-        const val = [5, 11, 11, 5, 5];
-        const ll95 = [0, 0, 0, 0, 0];
-        const ul95 = [10, 10, 10, 10, 10];
-        const highlight_series = false;
-
-        const result = twoInThree(val, ll95, ul95, highlight_series);
-
-        expect(result).toEqual(["none", "upper", "upper", "none", "none"]);
-    });
 
     it("should highlight all points in sequence when highlight_series is true", () => {
         const val = [11, 5, 11, 5, 5];
@@ -149,17 +129,6 @@ describe("twoInThree", () => {
         expect(result).toEqual(["none"]);
     });
 
-    it("should handle three points with exactly 2 outside", () => {
-        const val = [5, 11, 11, 5];
-        const ll95 = [0, 0, 0, 0];
-        const ul95 = [10, 10, 10, 10];
-        const highlight_series = false;
-
-        const result = twoInThree(val, ll95, ul95, highlight_series);
-
-        // 2 out of 3 points outside limits
-        expect(result).toEqual(["none", "upper", "upper", "none"]);
-    });
 
     it("should work with varying control limits", () => {
         const val = [5, 25, 25, 35, 45];
@@ -185,16 +154,6 @@ describe("twoInThree", () => {
         expect(result).toEqual(["none", "none", "none", "none", "none"]);
     });
 
-    it("should detect lower two-in-three pattern", () => {
-        const val = [5, -1, -1, 5, 5];
-        const ll95 = [0, 0, 0, 0, 0];
-        const ul95 = [10, 10, 10, 10, 10];
-        const highlight_series = false;
-
-        const result = twoInThree(val, ll95, ul95, highlight_series);
-
-        expect(result).toEqual(["none", "lower", "lower", "none", "none"]);
-    });
 
     it("should handle rolling window correctly (continuous pattern)", () => {
         const val = [5, 11, 11, 5, 11, 5, 5];

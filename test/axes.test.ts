@@ -1,0 +1,98 @@
+import { describe, expect, it } from "vitest";
+import { drawAxis, drawPlotAxes, measureAxisEdge } from "../src/rendering/index";
+import { svgElement, frame, settings, host, points, context } from "./browserHelpers";
+
+describe("axis drawing", () => {
+  it("draws ticks on the padded edge with the settings colours", () => {
+    const svg = svgElement();
+    drawAxis(svg, { axis: "x", frame: frame(), show: true, tickFormat: undefined, labelSize: 10, measure: false });
+    const group = svg.querySelector<SVGGElement>(".xaxisgroup")!;
+    expect(group.getAttribute("transform")).toBe("translate(0, 390)");
+    expect(group.getAttribute("color")).toBe("#000000");
+    const ticks = group.querySelectorAll(".tick");
+    expect(ticks).toHaveLength(11);
+    expect(ticks[0].querySelector("text")!.textContent).toBe("0");
+    expect(ticks[10].querySelector("text")!.textContent).toBe("10");
+    expect(ticks[0].querySelector("text")!.style.fontSize).toBe("10px");
+    expect(ticks[0].querySelector("line")!.style.stroke).toBe("currentcolor");
+    expect(svg.querySelectorAll(".xgridline")).toHaveLength(0);
+  });
+
+  it("draws the y axis on the left padding edge with formatted ticks", () => {
+    const svg = svgElement();
+    drawAxis(svg, { axis: "y", frame: frame(), show: true, tickFormat: value => `${value}%`, labelSize: 10, measure: false });
+    const group = svg.querySelector<SVGGElement>(".yaxisgroup")!;
+    expect(group.getAttribute("transform")).toBe("translate(10, 0)");
+    const labels = Array.from(group.querySelectorAll(".tick text")).map(text => text.textContent);
+    expect(labels[0]).toBe("0%");
+    expect(labels[labels.length - 1]).toBe("100%");
+  });
+
+  it("places the title by alignment and draws gridlines across the plot when asked", () => {
+    const svg = svgElement();
+    const titled = frame({ settings: {
+      ...settings,
+      x_axis: { ...settings.x_axis, xlimit_label: "Date", xlimit_label_align: "right", xlimit_grid_show: true, xlimit_grid_colour: "#ff0000", xlimit_grid_width: 2 }
+    } });
+    drawAxis(svg, { axis: "x", frame: titled, show: true, tickFormat: undefined, labelSize: 10, measure: false });
+    const label = svg.querySelector<SVGTextElement>(".xaxislabel")!;
+    expect(label.textContent).toBe("Date");
+    expect(label.style.textAnchor).toBe("end");
+    expect(label.getAttribute("x")).toBe("490");
+    // Unmeasured: half a label size above the canvas edge
+    expect(label.getAttribute("y")).toBe("395");
+    const gridlines = svg.querySelectorAll<SVGLineElement>(".gridgroup .xgridline");
+    expect(gridlines).toHaveLength(11);
+    // The title reserves its font size below the plot, so the axis edge rises to 380
+    expect(gridlines[0].getAttribute("y1")).toBe("380");
+    expect(gridlines[0].getAttribute("y2")).toBe("10");
+    expect(gridlines[0].style.stroke).toBe("rgb(255, 0, 0)");
+    expect(gridlines[0].style.strokeWidth).toBe("2");
+  });
+
+  it("measures a drawn axis to place the title between it and the canvas edge", () => {
+    const svg = svgElement();
+    drawAxis(svg, { axis: "x", frame: frame(), show: true, tickFormat: undefined, labelSize: 10, measure: true });
+    const group = svg.querySelector<SVGGElement>(".xaxisgroup")!;
+    // Tick labels hang below the axis line at 390, so the measured edge lies beneath it
+    const edge = measureAxisEdge(svg, group, "bottom");
+    expect(edge).toBeGreaterThan(390);
+    expect(Number(svg.querySelector(".xaxislabel")!.getAttribute("y"))).toBeCloseTo(400 - (400 - edge) / 2, 6);
+  });
+
+  it("hides ticks when the axis has none and whites out a hidden plot", () => {
+    const svg = svgElement();
+    const quiet = frame({ displayPlot: false, settings: { ...settings, x_axis: { ...settings.x_axis, xlimit_ticks: false } } });
+    drawAxis(svg, { axis: "x", frame: quiet, show: true, tickFormat: undefined, labelSize: 10, measure: false });
+    expect(svg.querySelectorAll(".xaxisgroup .tick")).toHaveLength(0);
+    expect(svg.querySelector(".xaxisgroup")!.getAttribute("color")).toBe("#FFFFFF");
+  });
+
+  it("removes the axis, its title and gridlines when not shown, and redraws in place afterwards", () => {
+    const svg = svgElement();
+    const gridded = frame({ settings: { ...settings, x_axis: { ...settings.x_axis, xlimit_grid_show: true } } });
+    drawAxis(svg, { axis: "x", frame: gridded, show: true, tickFormat: undefined, labelSize: 10, measure: false });
+    drawAxis(svg, { axis: "x", frame: gridded, show: false, tickFormat: undefined, labelSize: 10, measure: false });
+    expect(svg.querySelector(".xaxisgroup")).toBeNull();
+    expect(svg.querySelector(".xaxislabel")).toBeNull();
+    expect(svg.querySelectorAll(".xgridline")).toHaveLength(0);
+    drawAxis(svg, { axis: "x", frame: gridded, show: true, tickFormat: undefined, labelSize: 10, measure: false });
+    expect(svg.querySelectorAll(".xaxisgroup")).toHaveLength(1);
+    expect(svg.querySelector(".xaxisgroup")!.nextElementSibling!.classList.contains("xaxislabel")).toBe(true);
+    expect(svg.querySelector(".linesgroup")!.previousElementSibling).not.toBeNull();
+  });
+});
+
+describe("plot axes from a context", () => {
+  it("draws both axes from the axis settings and skips measurement for the frontend", () => {
+    const svg = svgElement();
+    const visualHost = host();
+    const ctx = context(visualHost, points(visualHost, [10, 20]), {
+      settings: { ...settings, y_axis: { ...settings.y_axis, ylimit_show: false } }
+    });
+    drawPlotAxes(svg, ctx, { x: value => `d${value}`, y: undefined });
+    expect(svg.querySelector(".xaxisgroup .tick text")!.textContent).toBe("d0");
+    expect(svg.querySelector(".yaxisgroup")).toBeNull();
+    expect(svg.querySelector(".xaxislabel")!.getAttribute("y")).toBe("395");
+  });
+});

@@ -1,4 +1,4 @@
-import { normalQuantile } from "../src/math/index";
+import { normalCDF, normalQuantile } from "../src/math/index";
 import { describe, it, expect } from "vitest";
 
 describe("normalQuantile", () => {
@@ -121,10 +121,8 @@ describe("normalQuantile", () => {
             // qnorm(1 - 1e-10) = 6.361341
             expect(normalQuantile(1 - 1e-10, 0, 1, true, false)).toBeCloseTo(6.361341, 4);
 
-            // For very extreme values close to 1, use upper tail or log scale
-            // qnorm(1e-20, lower.tail=FALSE) = qnorm(1 - 1e-20)
-            const q = normalQuantile(1e-20, 0, 1, false, false);
-            expect(q).toBeGreaterThan(9);
+            // qnorm(1e-20, lower.tail=FALSE) = 9.262340
+            expect(normalQuantile(1e-20, 0, 1, false, false)).toBeCloseTo(9.262340, 5);
         });
     });
 
@@ -145,10 +143,8 @@ describe("normalQuantile", () => {
             const q = normalQuantile(-230.2585, 0, 1, true, true);
             expect(q).toBeCloseTo(-21.27344, 3);
 
-            // log(1e-300) = -690.7755
-            const qExtreme = normalQuantile(-690.7755, 0, 1, true, true);
-            expect(Number.isFinite(qExtreme)).toBe(true);
-            expect(qExtreme).toBeLessThan(-30);
+            // qnorm(-690.7755, log.p=TRUE) = -37.04710
+            expect(normalQuantile(-690.7755, 0, 1, true, true)).toBeCloseTo(-37.04710, 4);
         });
 
         it("should return NaN for positive log probabilities", () => {
@@ -182,13 +178,11 @@ describe("normalQuantile", () => {
         });
 
         it("should be inverse of normalCDF", () => {
-            // For various quantiles, q = Phi^{-1}(p) should satisfy Phi(q) = p
-            const testP = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99];
-            for (const p of testP) {
+            const testP = [1e-12, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99, 1 - 1e-12];
+            for (let i = 0; i < testP.length; i++) {
+                const p = testP[i];
                 const q = normalQuantile(p, 0, 1, true, false);
-                // We can't directly test this without normalCDF, but we can verify
-                // that the quantile is reasonable
-                expect(Number.isFinite(q)).toBe(true);
+                expect(normalCDF(q, 0, 1) / p).toBeCloseTo(1, 9);
             }
         });
 
@@ -199,10 +193,8 @@ describe("normalQuantile", () => {
             // Intermediate tail (r <= 5)
             expect(normalQuantile(0.001, 0, 1, true, false)).toBeCloseTo(-3.090232, 5);
 
-            // Far tail (r <= 27) - use looser precision as algorithm approximates
-            const qFarTail = normalQuantile(1e-50, 0, 1, true, false);
-            expect(qFarTail).toBeLessThan(-14);
-            expect(qFarTail).toBeGreaterThan(-16);
+            // Far tail (r <= 27): qnorm(1e-50) = -14.93334
+            expect(normalQuantile(1e-50, 0, 1, true, false)).toBeCloseTo(-14.93334, 5);
         });
     });
 });

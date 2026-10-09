@@ -12,7 +12,7 @@ describe("gammaQuantile", () => {
             // qgamma(0.5, 2, 1) = 1.678347
             expect(gammaQuantile(0.5, 2, 1)).toBeCloseTo(1.678347, 5);
 
-            // qgamma(0.5, 5, scale=2) - actual implementation value
+            // qgamma(0.5, 5, scale=2) = R qgamma
             expect(gammaQuantile(0.5, 5, 2)).toBeCloseTo(9.341818, 4);
         });
 
@@ -65,27 +65,21 @@ describe("gammaQuantile", () => {
 
     describe("extreme probabilities", () => {
         it("should handle very small probabilities", () => {
-            // qgamma(1e-10, 2, 1) should be very small but positive
-            const result = gammaQuantile(1e-10, 2, 1);
-            expect(result).toBeGreaterThan(0);
-            expect(result).toBeLessThan(1e-4);
+            // qgamma(1e-10, 2, 1) = 1.414220e-05
+            expect(gammaQuantile(1e-10, 2, 1) / 1.414220e-5).toBeCloseTo(1, 6);
         });
 
         it("should handle probabilities very close to 1", () => {
-            // qgamma(1 - 1e-10, 2, 1) should be large but finite
-            const result = gammaQuantile(1 - 1e-10, 2, 1);
-            expect(result).toBeGreaterThan(20);
-            expect(Number.isFinite(result)).toBe(true);
+            // qgamma(1 - 1e-10, 2, 1) = 26.33398
+            expect(gammaQuantile(1 - 1e-10, 2, 1)).toBeCloseTo(26.33398, 4);
         });
 
         it("should handle log-scale probabilities", () => {
             // log(0.5) = -0.6931472
             expect(gammaQuantile(-0.6931472, 2, 1, true, true)).toBeCloseTo(1.678347, 4);
 
-            // Very small p in log scale: log(1e-100)
-            const result = gammaQuantile(-230.2585, 2, 1, true, true);
-            expect(result).toBeGreaterThan(0);
-            expect(Number.isFinite(result)).toBe(true);
+            // qgamma(log(1e-100), 2, 1, log.p=TRUE) = 1.414220e-50
+            expect(gammaQuantile(-230.2585, 2, 1, true, true) / 1.414220e-50).toBeCloseTo(1, 6);
         });
     });
 
@@ -111,26 +105,24 @@ describe("gammaQuantile", () => {
 
     describe("numerical accuracy for various shape parameters", () => {
         it("should be accurate for small shape (alpha < 1)", () => {
-            // qgamma(0.5, 0.5, 1) - actual implementation value
+            // qgamma(0.5, 0.5, 1) = R qgamma
             expect(gammaQuantile(0.5, 0.5, 1)).toBeCloseTo(0.2274682, 4);
 
-            // qgamma(0.5, 0.1, 1) - actual implementation value
+            // qgamma(0.5, 0.1, 1) = R qgamma
             expect(gammaQuantile(0.5, 0.1, 1)).toBeCloseTo(0.0005934, 5);
         });
 
         it("should be accurate for large shape", () => {
-            // qgamma(0.5, 100, 1) - actual implementation value
+            // qgamma(0.5, 100, 1) = R qgamma
             expect(gammaQuantile(0.5, 100, 1)).toBeCloseTo(99.66687, 3);
 
-            // qgamma(0.5, 50, 2) - actual implementation value (50*2 = 100 scaled)
+            // qgamma(0.5, 50, 2) = R qgamma
             expect(gammaQuantile(0.5, 50, 2)).toBeCloseTo(99.33412, 2);
         });
 
         it("should be accurate for very small shape", () => {
-            // qgamma(0.5, 0.01, 1)
-            const result = gammaQuantile(0.5, 0.01, 1);
-            expect(result).toBeGreaterThan(0);
-            expect(result).toBeLessThan(1e-10);
+            // qgamma(0.5, 0.01, 1) = 4.465535e-31
+            expect(gammaQuantile(0.5, 0.01, 1) / 4.465535e-31).toBeCloseTo(1, 6);
         });
     });
 

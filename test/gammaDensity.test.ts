@@ -55,7 +55,7 @@ describe("gammaDensity", () => {
 
     describe("shape parameter < 1", () => {
         it("should return correct values for small shape", () => {
-            // dgamma(0.5, 0.5, scale=1) - actual implementation values
+            // dgamma(0.5, 0.5, scale=1) = R dgamma
             expect(gammaDensity(0.5, 0.5, 1, false)).toBeCloseTo(0.48394145, 6);
 
             // dgamma(1, 0.5, scale=1)
@@ -66,10 +66,8 @@ describe("gammaDensity", () => {
         });
 
         it("should return correct values for very small shape", () => {
-            // dgamma(0.1, 0.1, 1)
-            const d = gammaDensity(0.1, 0.1, 1, false);
-            expect(d).toBeGreaterThan(0);
-            expect(Number.isFinite(d)).toBe(true);
+            // dgamma(0.1, 0.1, 1) = 0.7554920
+            expect(gammaDensity(0.1, 0.1, 1, false)).toBeCloseTo(0.7554920, 6);
         });
     });
 
@@ -83,7 +81,7 @@ describe("gammaDensity", () => {
         });
 
         it("should return correct values for various scales", () => {
-            // dgamma(2, 2, scale=0.5) - actual implementation value
+            // dgamma(2, 2, scale=0.5) = R dgamma
             expect(gammaDensity(2, 2, 0.5, false)).toBeCloseTo(0.14652511, 6);
 
             // dgamma(2, 2, scale=2) = 0.1839397
@@ -101,10 +99,8 @@ describe("gammaDensity", () => {
         });
 
         it("should handle extreme values in log scale", () => {
-            // dgamma(100, 2, 1) is very small but log should be finite
-            const logD = gammaDensity(100, 2, 1, true);
-            expect(Number.isFinite(logD)).toBe(true);
-            expect(logD).toBeLessThan(-90);
+            // dgamma(100, 2, 1, log=TRUE) = log(100) - 100 = -95.39483
+            expect(gammaDensity(100, 2, 1, true)).toBeCloseTo(-95.39483, 5);
         });
 
         it("should be consistent with non-log version", () => {
@@ -141,28 +137,26 @@ describe("gammaDensity", () => {
 
     describe("large parameter values", () => {
         it("should handle large shape parameter", () => {
-            // dgamma(100, 100, scale=1) - actual implementation value
-            expect(gammaDensity(100, 100, 1, false)).toBeCloseTo(0.03986064, 5);
+            // dgamma(100, 100, scale=1) = 0.03986100
+            expect(gammaDensity(100, 100, 1, false)).toBeCloseTo(0.03986100, 7);
 
-            // dgamma(50, 50, scale=1) - actual implementation value
-            expect(gammaDensity(50, 50, 1, false)).toBeCloseTo(0.05632501, 5);
+            // dgamma(50, 50, scale=1) = 0.05632501
+            expect(gammaDensity(50, 50, 1, false)).toBeCloseTo(0.05632501, 7);
         });
 
         it("should handle large x values", () => {
-            // dgamma(50, 2, 1) is very small
-            const d = gammaDensity(50, 2, 1, false);
-            expect(d).toBeGreaterThan(0);
-            expect(d).toBeLessThan(1e-18);
+            // dgamma(50, 2, 1) = 50 * exp(-50) = 9.643749e-21
+            expect(gammaDensity(50, 2, 1, false) / 9.643749e-21).toBeCloseTo(1, 6);
         });
     });
 
     describe("chi-squared relationship", () => {
         it("should match chi-squared density", () => {
             // Chi-squared(df) = Gamma(df/2, scale=2)
-            // dchisq(5, 10) = dgamma(5, 5, 2) - actual implementation value
+            // dchisq(5, 10) = dgamma(5, 5, 2) = R dgamma
             expect(gammaDensity(5, 5, 2, false)).toBeCloseTo(0.06680094, 5);
 
-            // dchisq(10, 4) = dgamma(10, 2, 2) - actual implementation value
+            // dchisq(10, 4) = dgamma(10, 2, 2) = R dgamma
             expect(gammaDensity(10, 2, 2, false)).toBeCloseTo(0.01684487, 6);
         });
     });

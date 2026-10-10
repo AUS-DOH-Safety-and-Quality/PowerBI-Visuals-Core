@@ -6,21 +6,21 @@ const schema = { example: defineCard({
   displayName: "Example card", description: "Example settings",
   settingsGroups: {
     all: {
-      enabled: toggleOption("Enabled", true),
-      colour: colourOption("Colour", "standard"),
-      mode: dropdownOption("Mode", "first", ["first", "second"], "none", ["First choice", "Second choice"]),
-      count: numberOption("Count", undefined, { min: 0, max: 10 })
+      enabled: toggleOption("Enabled", "Description.", true),
+      colour: colourOption("Colour", "Description.", "standard"),
+      mode: dropdownOption("Mode", "Description.", "first", ["first", "second"], "none", ["First choice", "Second choice"]),
+      count: numberOption("Count", "Description.", undefined, { min: 0, max: 10 })
     },
     Text: {
-      title: textOption("Title", "Heading"),
-      font: fontOption("Font"),
-      alignment: alignmentOption("Alignment")
+      title: textOption("Title", "Description.", "Heading"),
+      font: fontOption("Font", "Description."),
+      alignment: alignmentOption("Alignment", "Description.")
     }
   }
 }) };
 
 describe("formatting model", () => {
-  it("preserves card/group/slice order, labels, UIDs and reset descriptors", () => {
+  it("preserves card/group/slice order, labels, info text, UIDs and reset descriptors", () => {
     const model = buildFormattingModel(schema, createDefaultValues(schema));
     expect(model.cards).toHaveLength(1);
     const card = model.cards[0];
@@ -36,6 +36,7 @@ describe("formatting model", () => {
       for (let j = 0; j < names[i].length; j++) {
         const name = names[i][j];
         expect(card.groups[i].slices[j].uid).toBe("example_" + groupName + "_" + name + "_slice_uid");
+        expect(card.groups[i].slices[j].infoIconText).toBe("Description.");
         expect(card.revertToDefaultDescriptors[position++]).toEqual({ objectName: "example", propertyName: name });
       }
     }

@@ -13,6 +13,8 @@ type FormattingComponentKeys = keyof typeof FormattingComponent;
 export type SettingValue = string | number | boolean | undefined;
 export type SettingDefinition = {
   displayName: string;
+  /** What the setting does; shown as the pane's info tooltip and in the settings reference */
+  description: string;
   type: FormattingComponentKeys;
   default: SettingValue;
   valid?: readonly string[];
@@ -42,6 +44,7 @@ const defaultColours = {
 
 type NumberDefinition<T extends number | undefined> = {
   displayName: string;
+  description: string;
   type: typeof FormattingComponent.NumUpDown;
   default: T;
   options?: SettingDefinition["options"];
@@ -50,11 +53,12 @@ type NumberDefinition<T extends number | undefined> = {
 
 type NumberBounds = { min?: number; max?: number; integer?: boolean };
 
-function numberOption(displayName: string, defaultValue: number, minMax?: NumberBounds): NumberDefinition<number>;
-function numberOption(displayName: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined>;
-function numberOption(displayName: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined> {
+function numberOption(displayName: string, description: string, defaultValue: number, minMax?: NumberBounds): NumberDefinition<number>;
+function numberOption(displayName: string, description: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined>;
+function numberOption(displayName: string, description: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined> {
   const result: NumberDefinition<number | undefined> = {
     displayName,
+    description,
     type: FormattingComponent.NumUpDown,
     default: defaultValue
   };
@@ -75,29 +79,32 @@ function numberOption(displayName: string, defaultValue: number | undefined, min
   return result;
 }
 
-function toggleOption(displayName: string, defaultValue: boolean) {
+function toggleOption(displayName: string, description: string, defaultValue: boolean) {
   return {
     displayName: displayName,
+    description,
     type: FormattingComponent.ToggleSwitch,
     default: defaultValue
   }
 }
 
-function paddingOption(displayName: string) {
-  return numberOption(displayName, 10);
+function paddingOption(displayName: string, description: string) {
+  return numberOption(displayName, description, 10);
 }
 
-function colourOption(displayName: string, type: keyof typeof defaultColours) {
+function colourOption(displayName: string, description: string, type: keyof typeof defaultColours) {
   return {
     displayName: displayName,
+    description,
     type: FormattingComponent.ColorPicker,
     default: defaultColours[type]
   }
 }
 
-function fontOption(displayName: string) {
+function fontOption(displayName: string, description: string) {
   return {
     displayName: displayName,
+    description,
     type: FormattingComponent.FontPicker,
     default: "'Arial', sans-serif",
     valid: [
@@ -132,8 +139,8 @@ function fontOption(displayName: string) {
   }
 }
 
-function fontSizeOption(displayName: string) {
-  return numberOption(displayName, 10, { min: 0, max: 100 });
+function fontSizeOption(displayName: string, description: string) {
+  return numberOption(displayName, description, 10, { min: 0, max: 100 });
 }
 
 type DropdownItem<T extends string> = { displayName: string; value: T };
@@ -143,7 +150,7 @@ const valueTransforms = {
 };
 
 function dropdownOption<const Values extends readonly string[]>(
-  displayName: string, defaultValue: NoInfer<Values[number]>, validValues: Values,
+  displayName: string, description: string, defaultValue: NoInfer<Values[number]>, validValues: Values,
   displayTransform: keyof typeof valueTransforms = "none",
   displayNames?: { readonly [K in keyof Values]: string }
 ) {
@@ -157,6 +164,7 @@ function dropdownOption<const Values extends readonly string[]>(
   }
   return {
     displayName,
+    description,
     type: FormattingComponent.Dropdown,
     default: defaultValue,
     valid,
@@ -164,37 +172,41 @@ function dropdownOption<const Values extends readonly string[]>(
   };
 }
 
-function lineTypeOption(displayName: string, defaultValue: "10 0" | "10 10" | "2 5") {
-  return dropdownOption(displayName, defaultValue, ["10 0", "10 10", "2 5"], "none", ["Solid", "Dashed", "Dotted"])
+function lineTypeOption(displayName: string, description: string, defaultValue: "10 0" | "10 10" | "2 5") {
+  return dropdownOption(displayName, description, defaultValue, ["10 0", "10 10", "2 5"], "none", ["Solid", "Dashed", "Dotted"])
 }
 
-function textOption(displayName: string, defaultValue: string) {
+function textOption(displayName: string, description: string, defaultValue: string) {
   return {
     displayName: displayName,
+    description,
     type: FormattingComponent.TextInput,
     default: defaultValue
   }
 }
 
 function lineLabelPositionOption() {
-  return dropdownOption("Position of Value on Line(s)", "beside",
+  return dropdownOption("Position of Value on Line(s)",
+                        "Where the value sits at the line's end. Outside is below lower limits and above other lines; inside is the reverse.",
+                        "beside",
                         ["outside", "inside", "above", "below", "beside"],
                         "sentence");
 }
 
 const borderStyles = ["solid", "dotted", "dashed", "double", "groove", "ridge", "inset", "outset", "none"] as const;
 
-function borderStyleOption(displayName: string, defaultValue: typeof borderStyles[number] = "solid") {
-  return dropdownOption(displayName, defaultValue, borderStyles, "sentence");
+function borderStyleOption(displayName: string, description: string, defaultValue: typeof borderStyles[number] = "solid") {
+  return dropdownOption(displayName, description, defaultValue, borderStyles, "sentence");
 }
 
-function borderWidthOption(displayName: string) {
-  return numberOption(displayName, 1, { min: 0 });
+function borderWidthOption(displayName: string, description: string) {
+  return numberOption(displayName, description, 1, { min: 0 });
 }
 
-function alignmentOption(displayName: string) {
+function alignmentOption(displayName: string, description: string) {
   return {
     displayName: displayName,
+    description,
     type: FormattingComponent.AlignmentGroup,
     default: "center" as "center" | "left" | "right",
     valid: ["center", "left", "right"]
@@ -203,17 +215,18 @@ function alignmentOption(displayName: string) {
 
 const fontWeights = ["normal", "bold", "bolder", "lighter"] as const;
 
-function fontWeightOption(displayName: string, defaultValue: typeof fontWeights[number] = "normal") {
-  return dropdownOption(displayName, defaultValue, fontWeights, "sentence");
+function fontWeightOption(displayName: string, description: string, defaultValue: typeof fontWeights[number] = "normal") {
+  return dropdownOption(displayName, description, defaultValue, fontWeights, "sentence");
 }
 
-function fontStyleOption(displayName: string) {
-  return dropdownOption(displayName, "normal", ["normal", "italic"], "sentence");
+function fontStyleOption(displayName: string, description: string) {
+  return dropdownOption(displayName, description, "normal", ["normal", "italic"], "sentence");
 }
 
-function textTransformOption(displayName: string) {
+function textTransformOption(displayName: string, description: string) {
   return dropdownOption(
     displayName,
+    description,
     "none",
     ["uppercase", "lowercase", "capitalize", "none"],
     "sentence"
@@ -246,6 +259,11 @@ function defineCard<T extends SettingCard>(definition: T): T & SettingMembers<T>
   return card as T & SettingMembers<T>;
 }
 
+/** The "all" group takes its card's name, as in the format pane */
+function groupDisplayName(card: SettingCard, groupName: string): string {
+  return groupName === "all" ? card.displayName : groupName;
+}
+
 function createDefaultValues<T extends Record<string, SettingCard>>(schema: T): SettingsValues<T> {
   const values: Record<string, Record<string, SettingValue>> = {};
   const cards = Object.keys(schema);
@@ -272,5 +290,5 @@ export {
   paddingOption, colourOption, fontOption, fontSizeOption, lineTypeOption,
   toggleOption, numberOption, textOption, lineLabelPositionOption, dropdownOption,
   borderStyleOption, borderWidthOption, alignmentOption, fontWeightOption, fontStyleOption, textTransformOption,
-  defineCard, createDefaultValues
+  defineCard, groupDisplayName, createDefaultValues
 };

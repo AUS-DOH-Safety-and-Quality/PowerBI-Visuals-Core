@@ -2,10 +2,10 @@ import { readSettingsRows, type SettingsValidation } from "../src/powerbi/index"
 import { defineCard, createDefaultValues, numberOption, dropdownOption, textOption } from "../src/settings/index";
 
 const card = defineCard({ displayName: "Data", description: "", settingsGroups: { all: {
-  count: numberOption("Count", 1),
-  optional: numberOption("Optional", undefined),
-  mode: dropdownOption("Mode", "first", ["first", "second"]),
-  title: textOption("Title", "Heading")
+  count: numberOption("Count", "Description.", 1),
+  optional: numberOption("Optional", "Description.", undefined),
+  mode: dropdownOption("Mode", "Description.", "first", ["first", "second"]),
+  title: textOption("Title", "Description.", "Heading")
 } } });
 const defaults = createDefaultValues({ data: card }).data;
 const category = { objects: [{ data: { count: null, title: "" } }] } as const;

@@ -2,8 +2,9 @@
 export default function calculateTrendLine(values: readonly number[]): number[] {
   const n: number = values.length;
 
-  if (n === 0) {
-    return [];
+  // Fewer than two points have no slope; the fit is the points themselves
+  if (n < 2) {
+    return values.slice();
   }
 
   let sumY: number = 0;

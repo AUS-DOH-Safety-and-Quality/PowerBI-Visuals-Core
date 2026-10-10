@@ -4,6 +4,7 @@ export {
   fontStyleOption, textTransformOption, defineCard, createDefaultValues
 } from "./definitions";
 export type { SettingDefinition, SettingsValues } from "./definitions";
+export { default as settingsReference } from "./settingsReference";
 export { default as createCanvasCard } from "./createCanvasCard";
 export { default as createLabelsCard } from "./createLabelsCard";
 export { default as createLineGroup } from "./createLineGroup";
@@ -14,3 +15,5 @@ export type { AxisCard } from "./createAxisCard";
 export { default as createDownloadCard } from "./createDownloadCard";
 export { dotOptions, flagDirectionOptions, scalingOptions, valueTooltipOptions, limitTruncationOptions } from "./sharedOptions";
 export { limitLineKeys, lineSetting, lineStyle, lineOpacity, lineLabel } from "./lineSettings";
+export { default as orderedBoundsError } from "./orderedBounds";
+export type { OrderedBoundsSettings, TruncationSettings } from "./orderedBounds";

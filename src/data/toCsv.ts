@@ -1,6 +1,10 @@
-/** Fields holding a comma, quote or line break are quoted, with embedded quotes doubled */
+/**
+ * Fields holding a comma, quote or line break are quoted, with embedded quotes doubled.
+ * Text a spreadsheet would read as a formula is prefixed with ' (OWASP CSV injection).
+ */
 function csvField(value: unknown): string {
-  const text = String(value ?? "");
+  const raw = String(value ?? "");
+  const text = typeof value === "string" && /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
   if (!/[",\r\n]/.test(text)) {
     return text;
   }

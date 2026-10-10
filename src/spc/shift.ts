@@ -1,27 +1,39 @@
 import type { OutlierStatus } from "../data/flagDirection";
-import sum from "../math/sum";
 
-/** Shift rule: n consecutive points on the same side of the target; flags the whole run. */
+/**
+ * Shift rule: n consecutive points on the same side of the target; flags the whole run.
+ * Points on the target neither add to nor break a shift (Perla et al., 2011); a missing target breaks it.
+ */
 export default function shift(val: readonly number[], targets: readonly (number | undefined)[], n: number): OutlierStatus[] {
   const length: number = val.length;
-
-  let lagged_sign: number[] = new Array<number>(length);
-  let shift_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
+  const shift_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
+  let side: number = 0;
+  let count: number = 0;
+  let unflagged: number = 0;
 
   for (let i: number = 0; i < length; i++) {
+    shift_detected[i] = "none";
     const target = targets[i];
-    lagged_sign[i] = target === undefined ? NaN : Math.sign(val[i] - target);
-    const lagged_sign_sum: number = sum(lagged_sign.slice(Math.max(0, i - (n - 1)), i + 1));
-    if (Math.abs(lagged_sign_sum) >= n) {
-      shift_detected[i] = lagged_sign_sum >= n ? "upper" : "lower";
-    } else {
-      shift_detected[i] = "none";
+    const sign: number = target === undefined ? NaN : Math.sign(val[i] - target);
+    if (Number.isNaN(sign)) {
+      side = 0;
+      continue;
     }
-
-    if (shift_detected[i] !== "none") {
-      for (let j: number = (i - 1); j >= (i - (n - 1)); j--) {
-        shift_detected[j] = shift_detected[i];
+    if (sign === 0) {
+      continue;
+    }
+    if (sign === side) {
+      count++;
+    } else {
+      side = sign;
+      count = 1;
+      unflagged = i;
+    }
+    if (count >= n) {
+      for (let j: number = unflagged; j <= i; j++) {
+        shift_detected[j] = side > 0 ? "upper" : "lower";
       }
+      unflagged = i + 1;
     }
   }
 

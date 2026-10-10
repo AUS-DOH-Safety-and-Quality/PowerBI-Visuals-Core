@@ -12,7 +12,8 @@ describe("sum", () => {
     expect(sum([])).toBe(0);
   });
 
-  it("preserves left-to-right floating-point accumulation", () => {
+  // By design: realistic data never cancels like this, and compensation would shift every result by rounding noise
+  it("adds left to right without compensating for cancellation", () => {
     expect(sum([1e16, -1e16, 1])).toBe(1);
     expect(sum([1e16, 1, -1e16])).toBe(0);
   });

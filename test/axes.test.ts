@@ -80,15 +80,23 @@ describe("axis drawing", () => {
     expect(Number(svg.querySelector(".xaxislabel")!.getAttribute("y"))).toBeCloseTo(400 - (400 - edge) / 2, 6);
   });
 
-  it("hides ticks when the axis has none and whites out a hidden plot", () => {
+  it("draws no ticks when the axis has none", () => {
     const svg = svgElement();
-    const quiet = frame({
-      displayPlot: false,
-      settings: { ...settings, x_axis: { ...settings.x_axis, xlimit_ticks: false } }
-    });
-    drawAxis(svg, axisOptions(quiet));
+    drawAxis(svg, axisOptions(frame({ settings: { ...settings, x_axis: { ...settings.x_axis, xlimit_ticks: false } } })));
     expect(svg.querySelectorAll(".xaxisgroup .tick")).toHaveLength(0);
-    expect(svg.querySelector(".xaxisgroup")!.getAttribute("color")).toBe("#FFFFFF");
+  });
+
+  it("hides the axis, its title and gridlines without a plot, keeping their colours", () => {
+    const svg = svgElement();
+    drawAxis(svg, axisOptions(frame({
+      displayPlot: false,
+      settings: { ...settings, x_axis: { ...settings.x_axis, xlimit_grid_show: true } }
+    })));
+    const group = svg.querySelector(".xaxisgroup");
+    expect(group?.getAttribute("visibility")).toBe("hidden");
+    expect(group?.getAttribute("color")).toBe(settings.x_axis.xlimit_colour);
+    expect(svg.querySelector(".xaxislabel")?.getAttribute("visibility")).toBe("hidden");
+    expect(svg.querySelectorAll(".xgridline")).toHaveLength(0);
   });
 
   it("removes the axis, its title and gridlines when not shown, and redraws in place afterwards", () => {

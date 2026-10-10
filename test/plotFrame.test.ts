@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createPlotFrame, rescalePlotFrame, valueTickFormat } from "../src/rendering/index";
+import { createPlotFrame, rescalePlotFrame, valueTickFormat, axisRangeError } from "../src/rendering/index";
 import { settings, palette } from "./browserHelpers";
 
 const options = {
@@ -49,5 +49,15 @@ describe("plot frame", () => {
   it("formats ticks to fixed decimals, with a percent sign when scaled", () => {
     expect(valueTickFormat(2, false)(1.2345)).toBe("1.23");
     expect(valueTickFormat(0, true)(12.6)).toBe("13%");
+  });
+});
+
+describe("axis range error", () => {
+  it("reports an axis whose lower limit is above its upper limit", () => {
+    expect(axisRangeError({ x: { lower: 0, upper: 10 }, y: { lower: 5, upper: 5 } })).toBeUndefined();
+    expect(axisRangeError({ x: { lower: 50, upper: 10 }, y: { lower: 0, upper: 1 } }))
+      .toBe("The x-axis lower limit (50) is above the upper limit (10)");
+    expect(axisRangeError({ x: { lower: 0, upper: 10 }, y: { lower: 2, upper: -1 } }))
+      .toBe("The y-axis lower limit (2) is above the upper limit (-1)");
   });
 });

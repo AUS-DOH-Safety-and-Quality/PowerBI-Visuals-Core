@@ -21,7 +21,7 @@ export { drawAxis } from "./drawAxis";
 export { drawLines } from "./drawLines";
 export type { PlotLine } from "./drawLines";
 export { drawDots } from "./drawDots";
-export { createPlotFrame, rescalePlotFrame } from "./plotFrame";
+export { createPlotFrame, rescalePlotFrame, axisRangeError } from "./plotFrame";
 export type { AxisBounds } from "./plotFrame";
 export { fitPlotToOverflow } from "./overflow";
 export { highlightPlot } from "./highlight";

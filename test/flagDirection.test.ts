@@ -28,8 +28,11 @@ describe("flag direction", () => {
     ["improvement", "decrease", "upper", "none"],
     ["deterioration", "decrease", "upper", "deterioration"],
     ["deterioration", "decrease", "lower", "none"],
-    ["improvement", "neutral", "upper", "none"],
-    ["deterioration", "neutral", "lower", "none"]
+    // A neutral direction has nothing to filter by, so flags both sides
+    ["improvement", "neutral", "upper", "neutral_high"],
+    ["improvement", "neutral", "lower", "neutral_low"],
+    ["deterioration", "neutral", "upper", "neutral_high"],
+    ["deterioration", "neutral", "lower", "neutral_low"]
   ] as const)("flagging only %s with %s direction and %s outlier gives %s", (type, direction, status, expected) => {
     expect(checkFlagDirection(status, { process_flag_type: type, improvement_direction: direction })).toBe(expected);
   });

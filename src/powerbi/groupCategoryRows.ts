@@ -2,6 +2,19 @@ import { formatPrimitiveValue, type PrimitiveValue } from "./columns";
 
 export type CategoryGroups = { rows: number[][]; names: string[][]; keys: string[] };
 
+function pad(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+/** Local calendar date, with the time unless midnight; String(date) names the viewer's timezone */
+function dateName(date: Date): string {
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
+    return day;
+  }
+  return `${day} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
 export default function groupCategoryRows(
   columns: readonly { values: readonly PrimitiveValue[] }[], rowCount: number
 ): CategoryGroups {
@@ -12,7 +25,7 @@ export default function groupCategoryRows(
     const names = new Array<string>(columns.length);
     for (let j = 0; j < columns.length; j++) {
       const value = columns[j].values[i];
-      names[j] = formatPrimitiveValue(value) ?? "";
+      names[j] = value instanceof Date ? dateName(value) : formatPrimitiveValue(value) ?? "";
       parts[j] = value == null ? ["undefined", ""]
         : value instanceof Date ? ["date", String(value.getTime())] : [typeof value, String(value)];
     }

@@ -156,6 +156,23 @@ describe("plot tooltips", () => {
     expect(vertical.style.strokeOpacity).toBe("0");
   });
 
+  it("skips points outside the axis limits", () => {
+    const svg = svgElement();
+    const visualHost = host();
+    const plotPoints = points(visualHost, [10, 500, 50]);
+    const ctx = context(visualHost, plotPoints);
+    drawPlotTooltips(svg, ctx, false);
+    const f = ctx.frame;
+    svg.dispatchEvent(new MouseEvent("mousemove", { ...client(svg, f.xScale(1) + 5, f.yScale(50)) }));
+    expect(visualHost.tooltipService.show).toHaveBeenCalledWith({
+      dataItems: plotPoints[2].tooltip,
+      identities: [plotPoints[2].identity],
+      coordinates: [f.xScale(2), f.yScale(50)],
+      isTouchEvent: false
+    });
+    expect(svg.querySelector(".ttip-line-x")?.getAttribute("x1")).toBe(String(f.xScale(2)));
+  });
+
   it("includes vertical distance when asked", () => {
     const svg = svgElement();
     const visualHost = host();

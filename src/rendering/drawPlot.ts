@@ -7,6 +7,7 @@ import screenToSvg from "./screenToSvg";
 import drawValueLabels from "./drawValueLabels";
 import { drawDots, type DotText } from "./drawDots";
 import { drawDownloadButton } from "./downloadButton";
+import { inPlot } from "./plotFrame";
 import type { PlotContext, PlotPoint } from "./plotContext";
 
 export type TickFormat = (value: number) => string;
@@ -21,6 +22,18 @@ export type PlotDotsOptions<P extends PlotPoint> = {
   readonly text: ((point: P) => DotText) | undefined;
   readonly onClick: ((point: P) => void) | undefined;
 };
+
+/** Points whose dots are drawn; the rest lie outside the axis limits, so take no label or tooltip */
+function visiblePoints<P extends PlotPoint>(context: PlotContext<P>): P[] {
+  const visible: P[] = [];
+  for (let i = 0; i < context.points.length; i++) {
+    const point = context.points[i];
+    if (inPlot(context.frame, point.x, point.value)) {
+      visible.push(point);
+    }
+  }
+  return visible;
+}
 
 /** Fixed decimals, as a percentage when the values are scaled to one hundred */
 export function valueTickFormat(decimals: number, percent: boolean): TickFormat {
@@ -53,7 +66,7 @@ export function drawPlotAxes(svg: SVGSVGElement, context: PlotContext, formats: 
 /** Crosshairs and the host tooltip follow the nearest point; `.plot` handlers are dropped when the svg is reset */
 export function drawPlotTooltips(svg: SVGSVGElement, context: PlotContext, includeVertical: boolean): void {
   const frame = context.frame;
-  const points = context.points;
+  const points = visiblePoints(context);
   const host = context.host;
   const palette = context.palette;
   const vertical = svg.querySelector<SVGLineElement>(".ttip-line-x");
@@ -109,7 +122,7 @@ export function drawPlotValueLabels(svg: SVGSVGElement, context: PlotContext, an
   const settings = context.settings;
   drawValueLabels(svg, {
     visible: settings.labels.show_labels && anyLabels,
-    points: context.points,
+    points: visiblePoints(context),
     xScale: frame.xScale,
     yScale: frame.yScale,
     plotHeight: frame.height,

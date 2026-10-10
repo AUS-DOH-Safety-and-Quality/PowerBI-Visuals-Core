@@ -19,7 +19,9 @@ export default function checkFlagDirection(outlierStatus: OutlierStatus, flagSet
     return "none";
   }
   const mappedFlag = directionMaps[flagSettings.improvement_direction][outlierStatus];
-  if (flagSettings.process_flag_type !== "both" && mappedFlag !== flagSettings.process_flag_type) {
+  // A neutral direction has no improvement or deterioration to filter by
+  if (flagSettings.improvement_direction !== "neutral" && flagSettings.process_flag_type !== "both"
+      && mappedFlag !== flagSettings.process_flag_type) {
     return "none";
   }
   return mappedFlag;

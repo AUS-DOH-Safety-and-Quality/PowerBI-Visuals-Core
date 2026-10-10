@@ -46,6 +46,10 @@ export function drawLines(group: SVGGElement, options: LinesOptions): void {
       const y = new Array<number>(n);
       const valid = new Array<boolean>(n);
       const styles = new Array<LineStyle>(n);
+      // Drawn length up to each point, so dashes run on across segments
+      const along = new Array<number>(n).fill(0);
+      // Start indices of segments with an end in the plot
+      const segments: number[] = [];
       let anyValid = false;
       let uniform = true;
       for (let i = 0; i < n; i++) {
@@ -58,6 +62,10 @@ export function drawLines(group: SVGGElement, options: LinesOptions): void {
         styles[i] = palette.isHighContrast ? { ...style, colour: palette.foregroundColour } : style;
         if (i > 0) {
           uniform = uniform && sameStyle(styles[i], styles[i - 1]);
+          along[i] = along[i - 1] + (valid[i - 1] && valid[i] ? Math.hypot(x[i] - x[i - 1], y[i] - y[i - 1]) : 0);
+          if (valid[i - 1] || valid[i]) {
+            segments.push(i - 1);
+          }
         }
       }
 
@@ -85,17 +93,17 @@ export function drawLines(group: SVGGElement, options: LinesOptions): void {
       // An invalid endpoint collapses its segment onto the other end; the dash offset keeps the pattern continuous
       container.selectAll("path").remove();
       container
-        .selectAll("line")
-        .data(line.points.slice(1))
+        .selectAll<SVGLineElement, number>("line")
+        .data(segments)
         .join("line")
-        .attr("x1", (_, i) => valid[i] ? x[i] : x[i + 1])
-        .attr("y1", (_, i) => valid[i] ? y[i] : y[i + 1])
-        .attr("x2", (_, i) => valid[i + 1] ? x[i + 1] : x[i])
-        .attr("y2", (_, i) => valid[i + 1] ? y[i + 1] : y[i])
+        .attr("x1", i => valid[i] ? x[i] : x[i + 1])
+        .attr("y1", i => valid[i] ? y[i] : y[i + 1])
+        .attr("x2", i => valid[i + 1] ? x[i + 1] : x[i])
+        .attr("y2", i => valid[i + 1] ? y[i + 1] : y[i])
         .attr("fill", "none")
-        .attr("stroke", (_, i) => styles[i].colour)
-        .attr("stroke-width", (_, i) => styles[i].width)
-        .attr("stroke-dasharray", (_, i) => styles[i].type)
-        .attr("stroke-dashoffset", (_, i) => x[i] - x[0]);
+        .attr("stroke", i => styles[i].colour)
+        .attr("stroke-width", i => styles[i].width)
+        .attr("stroke-dasharray", i => styles[i].type)
+        .attr("stroke-dashoffset", i => along[i]);
     });
 }

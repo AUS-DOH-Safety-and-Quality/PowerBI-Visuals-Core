@@ -35,9 +35,18 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
     }
     for (let j = 0; j < groups.length; j++) {
       const position = firstPositions[j];
-      if (position !== undefined) {
-        values[j][card] = result.values[position];
+      if (position === undefined) {
+        continue;
       }
+      // The group's first row with valid values for this card; otherwise its first row, with defaults
+      let chosen = position;
+      for (let k = position; k < position + groups[j].length; k++) {
+        if (result.validation.messages[k].length === 0) {
+          chosen = k;
+          break;
+        }
+      }
+      values[j][card] = result.values[chosen];
     }
   }
   return { values, validation, messagePositionByRowIndex };

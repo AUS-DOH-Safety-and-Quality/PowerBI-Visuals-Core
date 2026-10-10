@@ -15,7 +15,7 @@ describe("shared setting options", () => {
 
   it("keeps the option order when spread into a group", () => {
     const card = defineCard({ displayName: "Scatter", description: "Scatter", settingsGroups: {
-      all: { show_dots: toggleOption("Show Scatter", true), ...dotOptions() }
+      all: { show_dots: toggleOption("Show Scatter", "Description.", true), ...dotOptions() }
     } });
     expect(Object.keys(card.settingsGroups.all)).toEqual([
       "show_dots", "shape", "size", "colour", "colour_outline", "width_outline", "opacity", "opacity_selected", "opacity_unselected"

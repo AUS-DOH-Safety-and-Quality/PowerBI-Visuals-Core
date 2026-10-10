@@ -28,7 +28,7 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
       return Number.NaN;  // log(p) > 0 means p > 1
     }
     if (p == 0) {
-      return lower_tail ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;  // p = 1
+      return lower_tail ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;  // p = 1
     }
     if (p == Number.NEGATIVE_INFINITY) {
       return lower_tail ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;  // p = 0

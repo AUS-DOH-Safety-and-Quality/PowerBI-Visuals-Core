@@ -3,7 +3,7 @@ function tickSpec(start: number, stop: number, count: number): [number, number, 
   const step = (stop - start) / count;
   const power = Math.floor(Math.log10(step));
   const error = step / Math.pow(10, power);
-  const factor = error >= 7.07 ? 10 : error >= 3.16 ? 5 : error >= 1.41 ? 2 : 1;
+  const factor = error >= Math.sqrt(50) ? 10 : error >= Math.sqrt(10) ? 5 : error >= Math.sqrt(2) ? 2 : 1;
 
   let i1: number;
   let i2: number;
@@ -32,9 +32,6 @@ function tickSpec(start: number, stop: number, count: number): [number, number, 
   }
   if (i2 < i1 && 0.5 <= count && count < 2) {
     return tickSpec(start, stop, count * 2);
-  }
-  if (inc < 0) {
-    inc = 1 / (-inc);
   }
   return [i1, i2, inc];
 }
@@ -115,8 +112,9 @@ export default function scaleLinear(): LinearScale {
     }
     const n = i2 - i1 + 1;
     const ticks = new Array<number>(n);
+    // A negative increment is the reciprocal of a fractional step; dividing by it keeps ticks such as 0.3 exact
     for (let i = 0; i < n; ++i) {
-      ticks[i] = (i1 + i) * inc;
+      ticks[i] = inc < 0 ? (i1 + i) / -inc : (i1 + i) * inc;
     }
     return ticks;
   };

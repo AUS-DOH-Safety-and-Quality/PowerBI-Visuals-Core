@@ -7,8 +7,8 @@ import { createPlotFrame, initialiseSvg, type PlotContext, type PlotFrame } from
 
 export const settings = createDefaultValues({
   canvas: createCanvasCard(),
-  x_axis: createAxisCard("x", { tickRotation: 0 }),
-  y_axis: createAxisCard("y", { tickRotation: 0 }),
+  x_axis: createAxisCard("x", { tickRotation: 0, limitUnits: "a value" }),
+  y_axis: createAxisCard("y", { tickRotation: 0, limitUnits: "a value" }),
   labels: createLabelsCard(),
   download_options: createDownloadCard(),
   scatter: defineCard({ displayName: "Scatter", description: "", settingsGroups: { all: dotOptions() } })

@@ -81,6 +81,17 @@ export function rescalePlotFrame(frame: PlotFrame, padding: PlotPadding): PlotFr
   return scaledFrame(frame.width, frame.height, xAxis, yAxis, frame.displayPlot);
 }
 
+/** An explicit axis limit can still invert against the automatic limit on the other side */
+export function axisRangeError(ranges: { readonly x: AxisBounds; readonly y: AxisBounds }): string | undefined {
+  if (ranges.x.lower > ranges.x.upper) {
+    return `The x-axis lower limit (${ranges.x.lower}) is above the upper limit (${ranges.x.upper})`;
+  }
+  if (ranges.y.lower > ranges.y.upper) {
+    return `The y-axis lower limit (${ranges.y.lower}) is above the upper limit (${ranges.y.upper})`;
+  }
+  return undefined;
+}
+
 /** Whether a point has a value and lies within both axis ranges */
 export function inPlot(frame: PlotFrame, x: number, value: number | null | undefined): boolean {
   return !isNullOrUndefined(value)

@@ -5,11 +5,14 @@ import { palette } from "./browserHelpers";
 
 describe("axis card factory", () => {
   it("builds the x card with a show toggle and no decimal places", () => {
-    const card = createAxisCard("x", { tickRotation: 0 });
+    const card = createAxisCard("x", { tickRotation: 0, limitUnits: "a value" });
     expect(card.displayName).toBe("X Axis Settings");
     expect(Object.keys(card.settingsGroups)).toEqual(["Axis", "Ticks", "Label", "Gridlines"]);
     expect(Object.keys(card.settingsGroups.Axis)).toEqual(["xlimit_show", "xlimit_colour", "xlimit_l", "xlimit_u"]);
-    expect(card.xlimit_show).toEqual({ displayName: "Show X Axis", type: "ToggleSwitch", default: true });
+    expect(card.xlimit_show).toEqual({
+      displayName: "Show X Axis", description: "Draws the axis with its ticks, title and gridlines.", type: "ToggleSwitch", default: true
+    });
+    expect(card.xlimit_l.description).toBe("Lower end of the axis, as a value; blank sets it automatically.");
     expect(Object.keys(card.settingsGroups.Ticks)).toEqual([
       "xlimit_ticks", "xlimit_tick_marks", "xlimit_tick_count", "xlimit_tick_font", "xlimit_tick_size", "xlimit_tick_colour", "xlimit_tick_rotation"
     ]);
@@ -22,7 +25,7 @@ describe("axis card factory", () => {
   });
 
   it("builds the y card with extras after the colour, decimal places and vertical alignment", () => {
-    const card = createAxisCard("y", { tickRotation: -35 }, { limit_multiplier: numberOption("Axis Scaling Factor", 1.5, { min: 0 }) });
+    const card = createAxisCard("y", { tickRotation: -35, limitUnits: "a value" }, { limit_multiplier: numberOption("Axis Scaling Factor", "Description.", 1.5, { min: 0 }) });
     expect(Object.keys(card.settingsGroups.Axis)).toEqual([
       "ylimit_show", "ylimit_colour", "limit_multiplier", "ylimit_sig_figs", "ylimit_l", "ylimit_u"
     ]);
@@ -38,7 +41,7 @@ describe("axis card factory", () => {
 });
 
 describe("axis properties from settings", () => {
-  const settings = createDefaultValues({ x_axis: createAxisCard("x", { tickRotation: -35 }) }).x_axis;
+  const settings = createDefaultValues({ x_axis: createAxisCard("x", { tickRotation: -35, limitUnits: "a value" }) }).x_axis;
   const range = { lower: 0, upper: 10, start_padding: 30, end_padding: 10 };
 
   it("copies the range, sizes in pixels and settings colours", () => {

@@ -7,61 +7,70 @@ export type AxisName = "x" | "y";
 
 export type AxisCardOptions = {
   readonly tickRotation: number;
+  /** What the axis limits are entered as, e.g. "a plotted value" */
+  readonly limitUnits: string;
 };
 
 type Prefixed<A extends AxisName, T> = { [P in keyof T & string as `${A}limit_${P}`]: T[P] };
 
 function showDefinition(axis: AxisName) {
-  return { show: toggleOption(`Show ${axis.toUpperCase()} Axis`, true) };
+  return { show: toggleOption(`Show ${axis.toUpperCase()} Axis`, "Draws the axis with its ticks, title and gridlines.", true) };
 }
 
 function colourDefinition() {
-  return { colour: colourOption("Axis Colour", "standard") };
+  return { colour: colourOption("Axis Colour", "Colour of the axis line and tick marks.", "standard") };
 }
 
 function sigFigsDefinition() {
-  return { sig_figs: numberOption("Tick Decimal Places", undefined, { min: 0, max: 100 }) };
+  return {
+    sig_figs: numberOption("Tick Decimal Places", "Decimal places for the tick values; blank uses Decimals to Report.",
+                           undefined, { min: 0, max: 100, integer: true })
+  };
 }
 
-function limitDefinitions() {
-  return { l: numberOption("Lower Limit", undefined), u: numberOption("Upper Limit", undefined) };
+function limitDefinitions(units: string) {
+  return {
+    l: numberOption("Lower Limit", `Lower end of the axis, as ${units}; blank sets it automatically.`, undefined),
+    u: numberOption("Upper Limit", `Upper end of the axis, as ${units}; blank sets it automatically.`, undefined)
+  };
 }
 
 function tickDefinitions(rotation: number) {
   return {
-    ticks: toggleOption("Draw Ticks", true),
-    tick_marks: toggleOption("Draw Tick Marks", true),
-    tick_count: numberOption("Maximum Ticks", 10, { min: 0, max: 100 }),
-    tick_font: fontOption("Tick Font"),
-    tick_size: fontSizeOption("Tick Font Size"),
-    tick_colour: colourOption("Tick Font Colour", "standard"),
-    tick_rotation: numberOption("Tick Rotation (Degrees)", rotation, { min: -360, max: 360 })
+    ticks: toggleOption("Draw Ticks", "Draws ticks and their values.", true),
+    tick_marks: toggleOption("Draw Tick Marks", "Draws the short tick lines beside the values.", true),
+    tick_count: numberOption("Approximate Tick Count", "Rough number of ticks; nearby round values are chosen. 0 draws none.",
+                             10, { min: 0, max: 100, integer: true }),
+    tick_font: fontOption("Tick Font", "Font of the tick values."),
+    tick_size: fontSizeOption("Tick Font Size", "Font size of the tick values, in pixels."),
+    tick_colour: colourOption("Tick Font Colour", "Colour of the tick values.", "standard"),
+    tick_rotation: numberOption("Tick Rotation (Degrees)", "Rotation of the tick values, in degrees.", rotation, { min: -360, max: 360 })
   };
 }
 
 function labelDefinitions() {
   return {
-    label: textOption("Label", ""),
-    label_font: fontOption("Label Font"),
-    label_size: fontSizeOption("Label Font Size"),
-    label_colour: colourOption("Label Font Colour", "standard"),
-    label_style: fontStyleOption("Label Font Style")
+    label: textOption("Label", "Axis title.", ""),
+    label_font: fontOption("Label Font", "Font of the axis title."),
+    label_size: fontSizeOption("Label Font Size", "Font size of the axis title, in pixels."),
+    label_colour: colourOption("Label Font Colour", "Colour of the axis title.", "standard"),
+    label_style: fontStyleOption("Label Font Style", "Font style of the axis title.")
   };
 }
 
 function xLabelAlign() {
-  return { label_align: dropdownOption("Label Alignment", "center", ["left", "center", "right"], "sentence") };
+  return { label_align: dropdownOption("Label Alignment", "Where the title sits along the axis.", "center", ["left", "center", "right"], "sentence") };
 }
 
 function yLabelAlign() {
-  return { label_align: dropdownOption("Label Alignment", "center", ["bottom", "center", "top"], "sentence") };
+  return { label_align: dropdownOption("Label Alignment", "Where the title sits along the axis.", "center", ["bottom", "center", "top"], "sentence") };
 }
 
 function gridDefinitions() {
   return {
-    grid_show: toggleOption("Show Gridlines", false),
-    grid_colour: colourOption("Gridline Colour", "lightgray"),
-    grid_width: numberOption("Gridline Width", 1, { min: 0 })
+    grid_show: toggleOption("Show Gridlines", "Draws a gridline at each tick.", false),
+    grid_colour: colourOption("Gridline Colour", "Gridline colour.", "lightgray"),
+    grid_width: numberOption("Gridline Width", "Gridline width, in pixels.", 1, { min: 0 })
   };
 }
 
@@ -105,7 +114,7 @@ export default function createAxisCard<const A extends AxisName, E extends Recor
   if (axis === "y") {
     addPrefixed(axisGroup, axis, sigFigsDefinition());
   }
-  addPrefixed(axisGroup, axis, limitDefinitions());
+  addPrefixed(axisGroup, axis, limitDefinitions(options.limitUnits));
   const ticks: Record<string, SettingDefinition> = {};
   addPrefixed(ticks, axis, tickDefinitions(options.tickRotation));
   const label: Record<string, SettingDefinition> = {};

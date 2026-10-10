@@ -62,6 +62,11 @@ describe("scaleLinear", () => {
     expect(scale.ticks()).toEqual([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
     expect(scale.ticks(5)).toEqual([0, 20, 40, 60, 80, 100]);
     expect(scale.ticks(0)).toEqual([]);
-    expect(scaleLinear().domain([0, 0.5]).ticks(5)).toEqual([0, 0.1, 0.2, 0.30000000000000004, 0.4, 0.5]);
+    // d3-array 3.2.4 ticks: fractional steps divide, so decimals are exact
+    expect(scaleLinear().domain([0, 0.5]).ticks(5)).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5]);
+    expect(scaleLinear().domain([0, 1.1]).ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1]);
+    // Step choice uses d3's exact thresholds (sqrt 2, 10, 50): a 1.411 step error stays at factor 1
+    expect(scaleLinear().domain([0.001, 0.0137]).ticks(9))
+      .toEqual([0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.011, 0.012, 0.013]);
   });
 });

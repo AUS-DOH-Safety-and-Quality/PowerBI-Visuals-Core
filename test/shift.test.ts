@@ -52,14 +52,28 @@ describe("shift", () => {
         expect(result).toEqual(["none", "none", "none", "none", "none"]);
     });
 
-    it("should reset when shift is interrupted", () => {
-        const val = [6, 6, 6, 5, 6, 6, 6, 6];
+    it("should reset when a point crosses the target", () => {
+        const val = [6, 6, 6, 4, 6, 6, 6, 6];
         const targets = [5, 5, 5, 5, 5, 5, 5, 5];
         const n = 4;
 
         const result = shift(val, targets, n);
 
         expect(result).toEqual(["none", "none", "none", "none", "upper", "upper", "upper", "upper"]);
+    });
+
+    // Perla et al. (2011): points on the median neither add to nor break a shift
+    it("should neither count nor break the run at points on the target", () => {
+        const targets = [5, 5, 5, 5, 5, 5];
+
+        expect(shift([6, 6, 5, 6, 6], targets, 4)).toEqual(["upper", "upper", "upper", "upper", "upper"]);
+        expect(shift([6, 6, 5, 6, 4], targets, 4)).toEqual(["none", "none", "none", "none", "none"]);
+        // A point on the target after the run is flagged only if the run continues
+        expect(shift([6, 6, 6, 6, 5, 4], targets, 4)).toEqual(["upper", "upper", "upper", "upper", "none", "none"]);
+    });
+
+    it("should break the run at a missing target", () => {
+        expect(shift([6, 6, 6, 6, 6], [5, 5, undefined, 5, 5], 3)).toEqual(["none", "none", "none", "none", "none"]);
     });
 
     it("should work with varying targets", () => {

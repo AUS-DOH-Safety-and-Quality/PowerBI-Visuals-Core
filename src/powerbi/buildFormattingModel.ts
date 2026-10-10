@@ -1,4 +1,4 @@
-import { FormattingComponent, type SettingCard, type SettingDefinition, type SettingValue, type SettingsValues } from "../settings/definitions";
+import { FormattingComponent, groupDisplayName, type SettingCard, type SettingDefinition, type SettingValue, type SettingsValues } from "../settings/definitions";
 
 export type FormattingDescriptor = {
   objectName: string;
@@ -16,7 +16,7 @@ export type FormattingControl = {
     options?: SettingDefinition["options"];
   };
 };
-export type FormattingSlice = { uid: string; displayName: string; control: FormattingControl };
+export type FormattingSlice = { uid: string; displayName: string; infoIconText: string; control: FormattingControl };
 export type FormattingGroup = { uid: string; displayName: string; slices: FormattingSlice[] };
 export type FormattingCard = {
   uid: string;
@@ -79,11 +79,12 @@ export default function buildFormattingModel<T extends Record<string, SettingCar
         slices.push({
           uid: name + "_" + groupName + "_" + settingName + "_slice_uid",
           displayName: setting.displayName,
+          infoIconText: setting.description,
           control
         });
       }
       groups.push({
-        displayName: groupName === "all" ? definition.displayName : groupName,
+        displayName: groupDisplayName(definition, groupName),
         uid: name + "_" + groupName + "_uid",
         slices
       });

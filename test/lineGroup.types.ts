@@ -2,6 +2,7 @@ import { createLineGroup, defineCard, createDefaultValues } from "../src/setting
 
 const withRebaselines = createLineGroup("99", {
   showLabel: "Show",
+  showDescription: "Draws the line.",
   showDefault: true,
   width: 2,
   type: "10 10",
@@ -12,6 +13,7 @@ const withRebaselines = createLineGroup("99", {
 });
 const plain = createLineGroup("target", {
   showLabel: "Show",
+  showDescription: "Draws the line.",
   showDefault: true,
   width: 1.5,
   type: "10 0",

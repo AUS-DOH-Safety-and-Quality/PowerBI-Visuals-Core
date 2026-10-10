@@ -5,11 +5,11 @@ import {
 const schema = { data: defineCard({
   displayName: "Data", description: "Data", settingsGroups: {
     all: {
-      count: numberOption("Count", 1),
-      limit: numberOption("Limit", undefined),
-      from: dropdownOption("From", "Start", ["Start", "End"]),
-      enabled: toggleOption("Enabled", true),
-      text: textOption("Text", "")
+      count: numberOption("Count", "Description.", 1),
+      limit: numberOption("Limit", "Description.", undefined),
+      from: dropdownOption("From", "Description.", "Start", ["Start", "End"]),
+      enabled: toggleOption("Enabled", "Description.", true),
+      text: textOption("Text", "Description.", "")
     }
   }
 }) };
@@ -32,10 +32,10 @@ void missing;
 // @ts-expect-error Dropdown values retain the declared literal union.
 values.data.from = "Middle";
 // @ts-expect-error The initial selection must belong to the valid values.
-dropdownOption("From", "Middle", ["Start", "End"]);
+dropdownOption("From", "Description.", "Middle", ["Start", "End"]);
 // @ts-expect-error Explicit labels must match the choice count.
-dropdownOption("From", "Start", ["Start", "End"], "none", ["First"]);
+dropdownOption("From", "Description.", "Start", ["Start", "End"], "none", ["First"]);
 // @ts-expect-error Numeric settings cannot have text defaults.
-numberOption("Count", "1");
+numberOption("Count", "Description.", "1");
 // @ts-expect-error Null is not an internal missing-setting sentinel.
-numberOption("Count", null);
+numberOption("Count", "Description.", null);

@@ -5,6 +5,7 @@ import { createValueFormatter } from "../src/data/index";
 const lines = createDefaultValues({ lines: defineCard({ displayName: "Lines", description: "Lines", settingsGroups: {
   L99: createLineGroup("99", {
     showLabel: "Show",
+    showDescription: "Draws the line.",
     showDefault: true,
     width: 2,
     type: "10 10",

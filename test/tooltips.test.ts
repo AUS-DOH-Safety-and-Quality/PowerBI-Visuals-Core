@@ -7,6 +7,7 @@ import { pluck } from "./browserHelpers";
 const format = createValueFormatter(2, 0, "%");
 const targetLine = {
   showLabel: "Show",
+  showDescription: "Draws the line.",
   width: 1,
   type: "10 0",
   colour: "standard",
@@ -14,6 +15,7 @@ const targetLine = {
 } as const;
 const limitLine = {
   showLabel: "Show",
+  showDescription: "Draws the line.",
   width: 1,
   colour: "limits",
   rebaselines: false,
@@ -54,7 +56,8 @@ describe("tooltip helpers", () => {
       .toEqual([{ displayName: "Rate", value: "1.00%" }]);
   });
 
-  it("lists upper limits in, the targets, then lower limits out, skipping hidden lines and absent alt targets", () => {
+  // A missing limit is real information (none exists here); an alt. target is only absent when it was never set
+  it("lists upper limits in, the targets, then lower limits out, skipping hidden lines and unset alt targets", () => {
     const limits = limitTooltips(lines, row, format, true);
     expect(pluck(limits, "displayName")).toEqual([
       "Upper 99% Limit", "Upper 95% Limit", "Centerline", "Lower 95% Limit", "Lower 99% Limit"
@@ -62,6 +65,11 @@ describe("tooltip helpers", () => {
     expect(pluck(limits, "value")).toEqual(["9.00%", "8.00%", "5.00%", "2.00%", "1.00%"]);
     const targets = limitTooltips({ ...lines, show_alt_target: true }, { ...row, alt_target: 6 }, format, false);
     expect(pluck(targets, "displayName")).toEqual(["Centerline", "Alt. Target"]);
+  });
+
+  it("keeps a missing limit as an empty row", () => {
+    const limits = limitTooltips(lines, { ...row, ul99: undefined }, format, true);
+    expect(limits[0]).toEqual({ displayName: "Upper 99% Limit", value: "" });
   });
 
   it("appends the patterns as one item before the custom columns", () => {
@@ -79,6 +87,13 @@ describe("tooltip helpers", () => {
     const settings = { messages: [["bad colour"], []], messagePositionByRowIndex: new Map([[4, 0], [6, 1]]) };
     expect(rowWarnings("Date", [4, 5, 6], ["A", "B", "C"], ["", "Numerator missing", ""], settings)).toEqual([
       "Conditional formatting for Date A ignored due to: bad colour.", "Date B removed due to: Numerator missing."
+    ]);
+  });
+
+  it("names a blank key as Power BI does", () => {
+    const settings = { messages: [["bad colour"]], messagePositionByRowIndex: new Map([[1, 0]]) };
+    expect(rowWarnings("Date", [0, 1], [undefined, undefined], ["Numerator missing", ""], settings)).toEqual([
+      "Date (Blank) removed due to: Numerator missing.", "Conditional formatting for Date (Blank) ignored due to: bad colour."
     ]);
   });
 });

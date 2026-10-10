@@ -29,10 +29,8 @@ describe("calculateTrendLine", () => {
         expect(result[2]).toBeCloseTo(2.5);
     });
 
-    it("should return NaN for single element array due to undefined slope", () => {
-         const values = [10];
-         const result = calculateTrendLine(values);
-         expect(result.length).toBe(1);
-         expect(result[0]).toBeNaN();
+    // R: fitted(lm(y ~ x)) for a single point is the point itself
+    it("should return the point itself for a single element, which has no slope", () => {
+         expect(calculateTrendLine([10])).toEqual([10]);
     });
 });

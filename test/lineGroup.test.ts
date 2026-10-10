@@ -5,6 +5,7 @@ describe("line group factory", () => {
   it("orders a full group as show, extras, style, join, tooltip, prefixes, then value labels", () => {
     const group = createLineGroup("68", {
       showLabel: "Show 68% Lines",
+      showDescription: "Draws the line.",
       showDefault: false,
       width: 2,
       type: "2 5",
@@ -12,14 +13,14 @@ describe("line group factory", () => {
       rebaselines: true,
       tooltipLabel: "68% Limit",
       tooltipPrefixes: true
-    }, { extra_68: numberOption("Extra", undefined), multiplier_68: toggleOption("Multiply", false) });
+    }, { extra_68: numberOption("Extra", "Description.", undefined), multiplier_68: toggleOption("Multiply", "Description.", false) });
     expect(Object.keys(group)).toEqual([
       "show_68", "extra_68", "multiplier_68", "width_68", "type_68", "colour_68", "opacity_68", "opacity_unselected_68",
       "join_rebaselines_68", "ttip_show_68", "ttip_label_68", "ttip_label_68_prefix_lower", "ttip_label_68_prefix_upper",
       "plot_label_show_68", "plot_label_show_all_68", "plot_label_show_n_68", "plot_label_position_68",
       "plot_label_vpad_68", "plot_label_hpad_68", "plot_label_font_68", "plot_label_size_68", "plot_label_colour_68", "plot_label_prefix_68"
     ]);
-    expect(group.show_68).toEqual({ displayName: "Show 68% Lines", type: "ToggleSwitch", default: false });
+    expect(group.show_68).toEqual({ displayName: "Show 68% Lines", description: "Draws the line.", type: "ToggleSwitch", default: false });
     expect(group.width_68.default).toBe(2);
     expect(group.type_68.default).toBe("2 5");
     expect(group.colour_68.default).toBe("#6495ED");
@@ -31,6 +32,7 @@ describe("line group factory", () => {
   it("omits re-baseline, tooltip and prefix settings unless asked and prefixes style names", () => {
     const group = createLineGroup("main", {
       showLabel: "Show Main Line",
+      showDescription: "Draws the line.",
       showDefault: true,
       namePrefix: "Main ",
       width: 1,
@@ -52,6 +54,7 @@ describe("line group factory", () => {
     const card = defineCard({ displayName: "Lines", description: "Lines", settingsGroups: {
       Target: createLineGroup("target", {
         showLabel: "Show Target",
+        showDescription: "Draws the line.",
         showDefault: true,
         width: 1.5,
         type: "10 0",

@@ -76,7 +76,8 @@ export function rowWarnings(groupName: string, rows: readonly number[], keys: re
                             rowMessages: readonly string[], settings: RowSettingsMessages): string[] {
   const warnings: string[] = [];
   for (let i = 0; i < rows.length; i++) {
-    const key = keys[i];
+    // Power BI's own label for a blank category
+    const key = keys[i] ?? "(Blank)";
     if (rowMessages[i] !== "") {
       warnings.push(`${groupName} ${key} removed due to: ${rowMessages[i]}.`);
       continue;

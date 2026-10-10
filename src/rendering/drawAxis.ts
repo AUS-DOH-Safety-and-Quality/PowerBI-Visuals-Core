@@ -13,8 +13,6 @@ export type AxisDrawOptions = {
   readonly measure: boolean;
 };
 
-const HIDDEN = "#FFFFFF";
-
 /** Draws one axis with its gridlines and title beneath the lines; a hidden axis is removed entirely */
 export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   const axis = options.axis;
@@ -51,18 +49,20 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
     generator.tickValues([]);
   }
 
-  const colour = (value: string): string => frame.displayPlot ? value : HIDDEN;
+  // Without a plot the axis is hidden but still laid out, so measurements are unchanged
+  const visibility = frame.displayPlot ? null : "hidden";
   // The axis line sits on the bottom padding edge for x and the left for y
   const edge = isX ? frame.height - frame.yAxis.start_padding : frame.xAxis.start_padding;
   const tickText = group
     .call(generator)
-    .attr("color", colour(properties.colour))
+    .attr("color", properties.colour)
+    .attr("visibility", visibility)
     .attr("transform", isX ? `translate(0, ${edge})` : `translate(${edge}, 0)`)
     .selectAll(".tick text")
     .attr("transform", `rotate(${properties.tick_rotation})`)
     .style("font-size", properties.tick_size)
     .style("font-family", properties.tick_font)
-    .style("fill", colour(properties.tick_colour));
+    .style("fill", properties.tick_colour);
   if (isX) {
     const offset = xTickLabelOffsets(properties.tick_rotation);
     tickText.style("text-anchor", offset.anchor).attr("dx", offset.dx).attr("dy", offset.dy);
@@ -75,11 +75,11 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
       container: gridGroup,
       className: `${axis}gridline`,
       orientation: isX ? "vertical" : "horizontal",
-      values: properties.grid_show ? group.selectAll<SVGGElement, number>(".tick").data() : [],
+      values: properties.grid_show && frame.displayPlot ? group.selectAll<SVGGElement, number>(".tick").data() : [],
       scale,
       from: isX ? edge : frame.xAxis.start_padding,
       to: isX ? frame.yAxis.end_padding : frame.width - frame.xAxis.end_padding,
-      colour: colour(properties.grid_colour),
+      colour: properties.grid_colour,
       width: properties.grid_width
     });
   }
@@ -99,5 +99,6 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
     .style("font-size", properties.label_size)
     .style("font-style", properties.label_style)
     .style("font-family", properties.label_font)
-    .style("fill", colour(properties.label_colour));
+    .style("fill", properties.label_colour)
+    .attr("visibility", visibility);
 }

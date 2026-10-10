@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createCanvasCard, createLabelsCard, createDefaultValues, defineCard,
-  dropdownOption, fontStyleOption, numberOption, textOption, toggleOption
+  dropdownOption, fontStyleOption, numberOption, textOption, toggleOption, orderedBoundsError
 } from "../src/settings/index";
 
 describe("setting definitions", () => {
@@ -9,9 +9,9 @@ describe("setting definitions", () => {
     const schema = { data: defineCard({
       displayName: "Data", description: "Data", settingsGroups: {
         all: {
-          limit: numberOption("Limit", undefined, { min: 0, max: 0 }),
-          enabled: toggleOption("Enabled", false),
-          title: textOption("Title", "")
+          limit: numberOption("Limit", "Description.", undefined, { min: 0, max: 0 }),
+          enabled: toggleOption("Enabled", "Description.", false),
+          title: textOption("Title", "Description.", "")
         }
       }
     }) };
@@ -26,8 +26,8 @@ describe("setting definitions", () => {
   it("keeps grouped and flat descriptors aligned without enumerating flat access", () => {
     const definition = {
       displayName: "Data", description: "Data", settingsGroups: {
-        First: { low: numberOption("Low", 0) },
-        Second: { high: numberOption("High", undefined) }
+        First: { low: numberOption("Low", "Description.", 0) },
+        Second: { high: numberOption("High", "Description.", undefined) }
       }
     };
     const card = defineCard(definition);
@@ -66,8 +66,8 @@ describe("setting definitions", () => {
 
   it("owns dropdown arrays and preserves supplied labels and transforms", () => {
     const values: ("first" | "second")[] = ["first", "second"];
-    const first = dropdownOption("Order", "first", values, "sentence");
-    const second = dropdownOption("Order", "second", values, "none", ["One", "Two"]);
+    const first = dropdownOption("Order", "Description.", "first", values, "sentence");
+    const second = dropdownOption("Order", "Description.", "second", values, "none", ["One", "Two"]);
     values[0] = "second";
     expect(first.valid).toEqual(["first", "second"]);
     expect(first.items).toEqual([
@@ -80,11 +80,31 @@ describe("setting definitions", () => {
 });
 
 it("offers a normal/italic font style dropdown", () => {
-  expect(fontStyleOption("Style")).toEqual({
+  expect(fontStyleOption("Style", "Description.")).toEqual({
     displayName: "Style",
+    description: "Description.",
     type: "Dropdown",
     default: "normal",
     valid: ["normal", "italic"],
     items: [{ displayName: "Normal", value: "normal" }, { displayName: "Italic", value: "italic" }]
+  });
+});
+
+describe("ordered bounds", () => {
+  const axes = { x_axis: { xlimit_l: undefined, xlimit_u: undefined }, y_axis: { ylimit_l: undefined, ylimit_u: undefined } };
+  const unset = { ll_truncate: undefined, ul_truncate: undefined };
+
+  it("accepts unset and ordered bounds", () => {
+    expect(orderedBoundsError(axes, unset)).toBeUndefined();
+    expect(orderedBoundsError({ x_axis: { xlimit_l: 1, xlimit_u: 2 }, y_axis: { ylimit_l: 5, ylimit_u: undefined } },
+      { ll_truncate: 0, ul_truncate: 1 })).toBeUndefined();
+  });
+
+  it.each([
+    { truncation: { ll_truncate: 5, ul_truncate: 5 }, settings: axes, error: "ll_truncate (5) must be below ul_truncate (5)" },
+    { truncation: unset, settings: { ...axes, x_axis: { xlimit_l: 6, xlimit_u: 5 } }, error: "xlimit_l (6) must be below xlimit_u (5)" },
+    { truncation: unset, settings: { ...axes, y_axis: { ylimit_l: 6, ylimit_u: 5 } }, error: "ylimit_l (6) must be below ylimit_u (5)" }
+  ])("rejects a lower bound not below its upper: $error", ({ truncation, settings, error }) => {
+    expect(orderedBoundsError(settings, truncation)).toBe(error);
   });
 });

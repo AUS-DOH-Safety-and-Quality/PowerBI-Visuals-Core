@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { drawValueLabels, drawPlotValueLabels, labelGeometry, type PlotFrame } from "../src/rendering/index";
 import type { ValueLabelOptions } from "../src/rendering/drawValueLabels";
-import { svgElement, frame, host, points, context, client, settings, type TestPoint } from "./browserHelpers";
+import { svgElement, frame, host, points, context, client, settings, pluck, type TestPoint } from "./browserHelpers";
 
 const line = { colour: "#123456", width: 2, type: "2 5" };
 
@@ -100,5 +100,14 @@ describe("value labels", () => {
     expect(groups).toHaveLength(2);
     expect(groups[0].style.touchAction).toBe("");
     expect(groups[0].querySelector("line")!.style.strokeWidth).toBe(String(settings.labels.label_line_width));
+  });
+
+  it("labels only the points drawn inside the axis limits", () => {
+    const svg = svgElement();
+    const visualHost = host();
+    // x runs 0-3: b is above the y limits and d beyond the x limits
+    const plotPoints = points(visualHost, [10, 500, 50, 60], ["a", "b", "c", "d"]);
+    drawPlotValueLabels(svg, context(visualHost, plotPoints, { headless: true, frame: frame({ x: { lower: 0, upper: 2 } }) }), true);
+    expect(pluck(svg.querySelectorAll(".text-group-inner text"), "textContent")).toEqual(["a", "c"]);
   });
 });

@@ -83,8 +83,20 @@ describe("trend", () => {
 
         const result = trend(val, n);
 
-        // With n=2, every change from previous point triggers trend
-        expect(result).toEqual(["upper", "lower", "upper", "lower", "lower"]);
+        // With n=2, every change from previous point triggers trend; each turning point stays with the earlier one
+        expect(result).toEqual(["upper", "upper", "lower", "upper", "lower"]);
+    });
+
+    // Perla et al. (2011): like values neither make nor break a trend
+    it("should count repeated values once, flagging them within the trend", () => {
+        expect(trend([1, 2, 3, 3, 4, 5], 5)).toEqual(["upper", "upper", "upper", "upper", "upper", "upper"]);
+        expect(trend([2, 2, 3, 4], 3)).toEqual(["upper", "upper", "upper", "upper"]);
+        expect(trend([1, 2, 2, 3, 4, 5], 6)).toEqual(["none", "none", "none", "none", "none", "none"]);
+    });
+
+    it("should keep a turning point with the earlier trend", () => {
+        expect(trend([1, 2, 3, 2, 1], 3)).toEqual(["upper", "upper", "upper", "lower", "lower"]);
+        expect(trend([1, 2, 3, 3, 2, 1], 3)).toEqual(["upper", "upper", "upper", "lower", "lower", "lower"]);
     });
 
     it("should backfill all points in a long trend sequence (n=7)", () => {

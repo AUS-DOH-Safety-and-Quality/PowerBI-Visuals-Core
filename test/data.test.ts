@@ -32,14 +32,16 @@ describe("row and display contracts", () => {
     expect(formatPrimitiveValue(date)).toBe(String(date));
   });
 
-  it("keeps native decimal rounding and applies only the supplied suffix", () => {
+  it("keeps native decimal rounding, never signs a rounded zero, and applies only the supplied suffix", () => {
     expect(formatNumber(undefined, 2, "%")).toBeUndefined();
     expect(formatNumber(0, 2, "%")).toBe("0.00%");
     expect(formatNumber(12.6, 0, "")).toBe("13");
     expect(formatNumber(12.625, 2, "%")).toBe("12.63%");
-    expect(formatNumber(-0.001, 2, "")).toBe("-0.00");
+    expect(formatNumber(-0.001, 2, "%")).toBe("0.00%");
+    expect(formatNumber(-0.4, 0, "")).toBe("0");
     expect(formatNumber(-0, 2, "")).toBe("0.00");
-    expect(formatNumber(NaN, 2, "")).toBe("NaN");
+    expect(formatNumber(-0.006, 2, "")).toBe("-0.01");
+    expect(formatNumber(NaN, 2, "%")).toBeUndefined();
     expect(formatNumber(Infinity, 2, "")).toBe("Infinity");
   });
 

@@ -121,6 +121,15 @@ describe("normalQuantile", () => {
         it("should return -Infinity for log(p) = -Infinity", () => {
             expect(normalQuantile(Number.NEGATIVE_INFINITY, 0, 1, true, true)).toBe(Number.NEGATIVE_INFINITY);
         });
+
+        // R: qnorm(0, log.p = TRUE) = Inf, qnorm(0, lower.tail = FALSE, log.p = TRUE) = -Inf
+        it("should return +Infinity in the lower tail and -Infinity in the upper tail for log(p) = 0", () => {
+            expect(normalQuantile(0, 0, 1, true, true)).toBe(Number.POSITIVE_INFINITY);
+            expect(normalQuantile(-0, 0, 1, true, true)).toBe(Number.POSITIVE_INFINITY);
+            expect(normalQuantile(0, 5, 2, true, true)).toBe(Number.POSITIVE_INFINITY);
+            expect(normalQuantile(0, 0, 1, false, true)).toBe(Number.NEGATIVE_INFINITY);
+            expect(normalQuantile(Number.NEGATIVE_INFINITY, 0, 1, false, true)).toBe(Number.POSITIVE_INFINITY);
+        });
     });
 
     describe("upper tail", () => {

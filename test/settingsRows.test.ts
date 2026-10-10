@@ -6,14 +6,14 @@ const card = defineCard({
   displayName: "Example", description: "Example settings",
   settingsGroups: {
     all: {
-      count: numberOption("Count", 2, { min: 0, max: 10 }),
-      optional: numberOption("Optional", undefined, { min: 0, max: 10 }),
-      enabled: toggleOption("Enabled", true),
-      mode: dropdownOption("Mode", "first", ["first", "second"]),
-      colour: colourOption("Colour", "standard"),
-      title: textOption("Title", "Heading"),
-      font: fontOption("Font"),
-      alignment: alignmentOption("Alignment")
+      count: numberOption("Count", "Description.", 2, { min: 0, max: 10 }),
+      optional: numberOption("Optional", "Description.", undefined, { min: 0, max: 10 }),
+      enabled: toggleOption("Enabled", "Description.", true),
+      mode: dropdownOption("Mode", "Description.", "first", ["first", "second"]),
+      colour: colourOption("Colour", "Description.", "standard"),
+      title: textOption("Title", "Description.", "Heading"),
+      font: fontOption("Font", "Description."),
+      alignment: alignmentOption("Alignment", "Description.")
     }
   }
 });
@@ -92,7 +92,7 @@ describe("settings row contracts", () => {
 
   it("honours both zero bounds and allows unset optional numbers", () => {
     const bounded = defineCard({ displayName: "Bounds", description: "", settingsGroups: { all: {
-      value: numberOption("Value", undefined, { min: 0, max: 0 })
+      value: numberOption("Value", "Description.", undefined, { min: 0, max: 0 })
     } } });
     const base = createDefaultValues({ bounded }).bounded;
     const result = readSettingsRows(bounded, "bounded", base, {

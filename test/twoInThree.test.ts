@@ -94,6 +94,23 @@ describe("twoInThree", () => {
         expect(result).toEqual(["none", "upper", "upper", "none", "none", "none"]);
     });
 
+    it("should not let a point beyond the other limit cancel a pair", () => {
+        const ll95 = [0, 0, 0, 0];
+        const ul95 = [10, 10, 10, 10];
+
+        expect(twoInThree([11, -1, 11], ll95, ul95, false)).toEqual(["upper", "none", "upper"]);
+        expect(twoInThree([11, 11, -1, -1], ll95, ul95, false)).toEqual(["upper", "upper", "lower", "lower"]);
+    });
+
+    it("should not highlight a point beyond the other limit as part of the pattern", () => {
+        expect(twoInThree([11, -1, 11], [0, 0, 0], [10, 10, 10], true)).toEqual(["upper", "none", "upper"]);
+        expect(twoInThree([11, 5, 11], [0, 0, 0], [10, 10, 10], true)).toEqual(["upper", "upper", "upper"]);
+    });
+
+    it("should flag a pair at the start of the series without writing before it", () => {
+        expect(twoInThree([11, 11, 5], [0, 0, 0], [10, 10, 10], false)).toEqual(["upper", "upper", "none"]);
+    });
+
     it("should detect consecutive two-in-three patterns", () => {
         const val = [5, 11, 11, 5, 11, 11, 5];
         const ll95 = [0, 0, 0, 0, 0, 0, 0];

@@ -13,6 +13,10 @@ function draw(svg: SVGSVGElement, lines: readonly PlotLine[], linePalette = pale
   drawLines(group(svg), { frame: frame(), lines, palette: linePalette });
 }
 
+function ends(segment: Element): (string | null)[] {
+  return [segment.getAttribute("x1"), segment.getAttribute("y1"), segment.getAttribute("x2"), segment.getAttribute("y2")];
+}
+
 function lineLabel(text: string, x: number, y: number, overrides: Partial<LineLabel> = {}): LineLabel {
   return {
     text,
@@ -59,7 +63,7 @@ describe("line drawing", () => {
     expect(d.split("M")).toHaveLength(4);
   });
 
-  it("draws per-segment lines when the style changes along the line, with a continuous dash offset", () => {
+  it("draws per-segment lines when the style changes along the line, with the dash offset at the drawn length", () => {
     const svg = svgElement();
     // A segment takes the style of the point it starts at
     const styles = [style, { ...style, colour: "#ff0000" }, { ...style, colour: "#ff0000" }];
@@ -72,7 +76,27 @@ describe("line drawing", () => {
     expect(segments[1].getAttribute("stroke")).toBe("#ff0000");
     const f = frame();
     expect(segments[1].getAttribute("x1")).toBe(String(f.xScale(2)));
-    expect(segments[1].getAttribute("stroke-dashoffset")).toBe(String(f.xScale(2) - f.xScale(0)));
+    expect(segments[1].getAttribute("stroke-dashoffset")).toBe(String(Math.hypot(f.xScale(2) - f.xScale(0), f.yScale(30) - f.yScale(10))));
+  });
+
+  it("drops per-segment lines with neither end inside the frame", () => {
+    const svg = svgElement();
+    const outside = [
+      { x: 0, line_value: 10 },
+      { x: 2, line_value: 120 },
+      { x: 4, line_value: 130 },
+      { x: 6, line_value: 20 }
+    ];
+    const styles = [style, { ...style, colour: "#ff0000" }, style, style];
+    draw(svg, [{ name: "a", points: outside, style: index => styles[index] }]);
+    const segments = svg.querySelectorAll(".a-linegroup line");
+    const f = frame();
+    // The middle segment is dropped; the others collapse onto their end inside the frame
+    expect(segments).toHaveLength(2);
+    expect(ends(segments[0])).toEqual([String(f.xScale(0)), String(f.yScale(10)), String(f.xScale(0)), String(f.yScale(10))]);
+    expect(ends(segments[1])).toEqual([String(f.xScale(6)), String(f.yScale(20)), String(f.xScale(6)), String(f.yScale(20))]);
+    // Collapsed and dropped segments draw nothing, so add no length
+    expect(segments[1].getAttribute("stroke-dashoffset")).toBe("0");
   });
 
   it("removes a line with no drawable points and drops lines no longer supplied", () => {

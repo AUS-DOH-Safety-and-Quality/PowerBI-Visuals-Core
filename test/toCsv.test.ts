@@ -13,6 +13,13 @@ describe("csv export", () => {
     expect(toCsv([{ date: "1 Jan, 2024", value: 2 }])).toBe('date,value\n"1 Jan, 2024",2');
   });
 
+  // OWASP CSV injection: text a spreadsheet would evaluate is prefixed with ', numbers are left alone
+  it("prefixes text that a spreadsheet would read as a formula", () => {
+    expect(toCsv([{ a: "=SUM(A1:A2)", b: "+1", c: "-cmd", d: "@x", e: "\tx", f: -3, g: "a=b" }]))
+      .toBe("a,b,c,d,e,f,g\n'=SUM(A1:A2),'+1,'-cmd,'@x,'\tx,-3,a=b");
+    expect(toCsv([{ a: "=1,2" }])).toBe("a\n\"'=1,2\"");
+  });
+
   it("gives an empty string for no rows", () => {
     expect(toCsv([])).toBe("");
   });

@@ -2,9 +2,9 @@ import { buildFormattingModel } from "../src/powerbi/index";
 import { defineCard, createDefaultValues, numberOption, toggleOption, dropdownOption } from "../src/settings/index";
 
 const schema = { example: defineCard({ displayName: "Example", description: "", settingsGroups: { all: {
-  count: numberOption("Count", undefined),
-  enabled: toggleOption("Enabled", true),
-  mode: dropdownOption("Mode", "first", ["first", "second"])
+  count: numberOption("Count", "Description.", undefined),
+  enabled: toggleOption("Enabled", "Description.", true),
+  mode: dropdownOption("Mode", "Description.", "first", ["first", "second"])
 } } }) };
 const values = createDefaultValues(schema);
 buildFormattingModel(schema, values);

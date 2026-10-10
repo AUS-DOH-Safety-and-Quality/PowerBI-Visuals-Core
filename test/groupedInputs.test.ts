@@ -17,11 +17,23 @@ describe("category grouping", () => {
     expect(groupCategoryRows([{ values: ["A\u0001B", "A"] }, { values: ["C", "B\u0001C"] }], 2).rows)
       .toEqual([[0], [1]]);
   });
+
+  // Funnels saves a group's key in the report, so its format must not change
+  it("keeps the saved key format and names dates by their local calendar date", () => {
+    const midnight = new Date(2020, 0, 1);
+    const morning = new Date(2020, 0, 1, 9, 30);
+    const groups = groupCategoryRows([{ values: ["A", 1, null, midnight, morning] }], 5);
+    expect(groups.keys).toEqual([
+      '[["string","A"]]', '[["number","1"]]', '[["undefined",""]]',
+      `[["date","${midnight.getTime()}"]]`, `[["date","${morning.getTime()}"]]`
+    ]);
+    expect(groups.names).toEqual([["A"], ["1"], [""], ["2020-01-01"], ["2020-01-01 09:30:00"]]);
+  });
 });
 
 describe("grouped settings", () => {
   const schema = { data: defineCard({ displayName: "Data", description: "", settingsGroups: { all: {
-    size: numberOption("Size", 2, { min: 0 }), title: textOption("Title", "Default")
+    size: numberOption("Size", "Description.", 2, { min: 0 }), title: textOption("Title", "Description.", "Default")
   } } }) };
 
   it("reads each group's first row and aligns warnings to flattened raw positions", () => {
@@ -39,6 +51,16 @@ describe("grouped settings", () => {
     expect(result.values[1].data.size).toBe(4);
   });
 
+  it("takes each group's first valid row for a card, warning about the invalid ones", () => {
+    const result = readSettingsGroups(schema, { objects: [
+      { data: { size: -1, title: "First" } }, { data: { size: 8, title: "Second" } }
+    ] }, [[0, 1]]);
+    expect(result.values).toEqual([{ data: { size: 8, title: "Second" } }]);
+    expect(result.validation.status).toBe(0);
+    expect(result.validation.messages[0]).toHaveLength(1);
+    expect(result.validation.messages[1]).toEqual([]);
+  });
+
   it("reports all-invalid selections and owns fresh empty-group defaults", () => {
     expect(readSettingsGroups(schema, { objects: [{ data: { size: -1 } }] }, [[0]]).validation.status).toBe(1);
     const result = readSettingsGroups(schema, {}, [[], []]);
@@ -50,7 +72,7 @@ describe("grouped settings", () => {
 
 it("builds a constant dropdown with runtime choices and no row selector", () => {
   const schema = { misc: defineCard({ displayName: "MISC", description: "", settingsGroups: { all: {
-    group: { ...dropdownOption("Group", "B", ["A", "B"]), constant: true }
+    group: { ...dropdownOption("Group", "Description.", "B", ["A", "B"]), constant: true }
   } } }) };
   const control = buildFormattingModel(schema, { misc: { group: "B" } }).cards[0].groups[0].slices[0].control;
   expect(control.properties.descriptor).toEqual({ objectName: "misc", propertyName: "group" });

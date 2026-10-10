@@ -2,7 +2,7 @@ import { readSettingsGroups } from "../src/powerbi/index";
 import { defineCard, dropdownOption, numberOption } from "../src/settings/index";
 
 const schema = { data: defineCard({ displayName: "Data", description: "", settingsGroups: { all: {
-  size: numberOption("Size", undefined), mode: dropdownOption("Mode", "first", ["first", "second"])
+  size: numberOption("Size", "Description.", undefined), mode: dropdownOption("Mode", "Description.", "first", ["first", "second"])
 } } }) };
 const result = readSettingsGroups(schema, {}, [[0], [1]] as const);
 const mode: "first" | "second" = result.values[0].data.mode;

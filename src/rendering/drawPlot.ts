@@ -190,7 +190,7 @@ export function drawPlotLineLabels<N extends string>(svg: SVGSVGElement, context
       }
     }
   }
-  drawLineLabels(group, labels);
+  drawLineLabels(group, labels, context.headless);
 }
 
 export function drawPlotValueLabels(svg: SVGSVGElement, context: PlotContext, anyLabels: boolean): void {

@@ -48,7 +48,7 @@ export function lineLabelGeometry(label: LineLabelPlacement, textHeight: number)
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 /** Replaces the group's direct text children; the caller owns label eligibility and text */
-export function drawLineLabels(group: Element, labels: readonly LineLabel[]): void {
+export function drawLineLabels(group: Element, labels: readonly LineLabel[], headless: boolean): void {
   const children = group.children;
   for (let i = children.length - 1; i >= 0; i--) {
     if (children[i].tagName === "text") {
@@ -65,7 +65,7 @@ export function drawLineLabels(group: Element, labels: readonly LineLabel[]): vo
     text.setAttribute("fill", label.colour);
     text.setAttribute("font-size", `${label.size}px`);
     text.setAttribute("font-family", label.font);
-    const geometry = lineLabelGeometry(label, text.getBoundingClientRect().height);
+    const geometry = lineLabelGeometry(label, headless ? label.size : text.getBoundingClientRect().height);
     text.setAttribute("text-anchor", geometry.anchor);
     text.setAttribute("dx", `${geometry.dx}px`);
     text.setAttribute("dy", `${geometry.dy}px`);

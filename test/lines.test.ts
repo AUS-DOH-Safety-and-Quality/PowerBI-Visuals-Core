@@ -119,11 +119,11 @@ describe("line labels", () => {
   it("replaces the group's text children with placed labels", () => {
     const svg = svgElement();
     const target = group(svg);
-    drawLineLabels(target, [lineLabel("old", 0, 0, { hpad: 1, vpad: 1, lineWidth: 1 })]);
+    drawLineLabels(target, [lineLabel("old", 0, 0, { hpad: 1, vpad: 1, lineWidth: 1 })], false);
     drawLineLabels(target, [
       lineLabel("UCL 9.5", 300, 40, { colour: "#123456" }),
       lineLabel("LCL 1.5", 300, 360, { position: "outside", lower: true, colour: "#654321" })
-    ]);
+    ], false);
     const texts = target.querySelectorAll("text");
     expect(texts).toHaveLength(2);
     expect(texts[0].textContent).toBe("UCL 9.5");
@@ -133,7 +133,19 @@ describe("line labels", () => {
     expect(texts[0].getAttribute("dx")).toBe("-3px");
     expect(texts[0].getAttribute("dy")).toBe("-7px");
     expect(texts[1].getAttribute("dy")).toBe("15px");
-    drawLineLabels(target, []);
+    drawLineLabels(target, [], false);
     expect(target.querySelectorAll("text")).toHaveLength(0);
+  });
+
+  it("uses font size for headless labels and measured height in the browser", () => {
+    const svg = svgElement();
+    const target = group(svg);
+    const label = lineLabel("Target", 300, 40, { position: "beside", size: 20, vpad: 0 });
+    drawLineLabels(target, [label], true);
+    expect(target.querySelector("text")!.getAttribute("dy")).toBe("5px");
+    drawLineLabels(target, [label], false);
+    const text = target.querySelector("text")!;
+    expect(text.getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(text.getAttribute("dy")).toBe(`${text.getBoundingClientRect().height / 4}px`);
   });
 });

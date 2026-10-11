@@ -92,7 +92,7 @@ const lineLabel: LineLabel = {
   font: "Arial",
   colour: "#000"
 };
-drawLineLabels(group, [lineLabel]);
+drawLineLabels(group, [lineLabel], false);
 
 // @ts-expect-error Boundary side must be stated so outside/inside can be resolved.
 const unsided: LineLabel = {

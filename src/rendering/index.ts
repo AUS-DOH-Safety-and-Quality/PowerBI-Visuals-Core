@@ -26,6 +26,11 @@ export type { AxisBounds } from "./plotFrame";
 export { fitPlotToOverflow } from "./overflow";
 export { highlightPlot } from "./highlight";
 export type { PlotContext } from "./plotContext";
-export { valueTickFormat, drawPlotAxes, drawPlotTooltips, drawPlotValueLabels, drawPlotDots, drawPlotDownload } from "./drawPlot";
+export {
+  valueTickFormat, drawPlotAxes, drawPlotTooltips, drawPlotValueLabels, drawPlotDots, drawPlotDownload, drawPlotLines, drawPlotLineLabels
+} from "./drawPlot";
+export type { GroupedLine, PlotLineLabelOptions } from "./drawPlot";
+export { PlotVisual } from "./plotVisual";
+export type { ViewModelValidation, PlotViewModel, PlotVisualSettings, PlotVisualPoint, SelectionHighlightState, SvgSelection } from "./plotVisual";
 export { select, selectAll } from "d3-selection";
 export type { Selection, BaseType } from "d3-selection";

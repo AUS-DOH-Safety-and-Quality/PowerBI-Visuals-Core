@@ -1,0 +1,207 @@
+import type powerbi from "powerbi-visuals-api";
+import { select, type Selection } from "d3-selection";
+import { lineOpacity, type LineSettingValues } from "../settings/lineSettings";
+import type { ColourPalette } from "../powerbi/colourPalette";
+import type { FormattingModel } from "../powerbi/buildFormattingModel";
+import type { UpdateOptions } from "../powerbi/updateOptions";
+import { drawErrorMessage, type ErrorKind } from "./errorMessage";
+import { highlightPlot, type HighlightOpacities, type HighlightPoint } from "./highlight";
+import { initialiseSvg } from "./initialiseSvg";
+import { fitPlotToOverflow } from "./overflow";
+import type { PlotContext, PlotPoint, PlotSettings } from "./plotContext";
+import { createPlotFrame, type AxisBounds, type PlotFrame, type PlotFrameSettings } from "./plotFrame";
+
+type IVisualHost = powerbi.extensibility.visual.IVisualHost;
+type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
+
+export type ViewModelValidation =
+  | { status: true; warning?: string }
+  | { status: false; error: string; type?: ErrorKind };
+
+export type PlotVisualSettings = PlotSettings & PlotFrameSettings & {
+  readonly canvas: { readonly show_errors: boolean };
+  readonly lines: LineSettingValues;
+};
+
+export type PlotVisualPoint = PlotPoint & HighlightPoint;
+
+/** What the visual shell reads from its view model */
+export type PlotViewModel<P extends PlotVisualPoint> = {
+  readonly plotPoints: readonly P[];
+  readonly colourPalette: ColourPalette;
+  readonly headless: boolean;
+  readonly frontend: boolean;
+  readonly inputSettings: { getFormattingModel(): FormattingModel };
+  update(options: UpdateOptions, host: IVisualHost): ViewModelValidation;
+};
+
+export type SelectionHighlightState = {
+  readonly active: boolean;
+  readonly selected: ReadonlySet<string>;
+};
+
+export type SvgSelection = Selection<SVGSVGElement, unknown, null, undefined>;
+
+/** The update cycle, error display, plot frame and highlighting shared by the plot visuals */
+export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewModel<P>, S extends PlotVisualSettings>
+  implements powerbi.extensibility.IVisual {
+  readonly element: HTMLElement;
+  host: IVisualHost;
+  svg: SvgSelection;
+  viewModel: VM;
+  selectionManager: powerbi.extensibility.ISelectionManager;
+  private currentPlotProperties: PlotFrame | undefined;
+  /** Line names to their `createLineGroup` keys */
+  protected abstract readonly lineKeys: Readonly<Record<string, string>>;
+
+  get plotProperties(): PlotFrame {
+    if (this.currentPlotProperties === undefined) {
+      throw new Error("Plot properties require validated data.");
+    }
+    return this.currentPlotProperties;
+  }
+
+  constructor(options: VisualConstructorOptions | undefined, createViewModel: (host: IVisualHost) => VM) {
+    if (options === undefined) {
+      throw new Error("Visual constructor options are required.");
+    }
+    this.element = options.element;
+    this.svg = select(options.element).append("svg");
+    this.host = options.host;
+    this.viewModel = createViewModel(this.host);
+    this.selectionManager = this.host.createSelectionManager();
+    this.selectionManager.registerOnSelectCallback(() => this.updateHighlighting());
+    const svg = this.svg.node();
+    if (svg !== null) {
+      initialiseSvg(svg);
+    }
+  }
+
+  /** The settings the plot is drawn from */
+  protected abstract get settings(): S;
+  protected abstract axisRanges(): { x: AxisBounds; y: AxisBounds };
+  abstract drawVisual(): void;
+  abstract updateHighlighting(): void;
+  /** Draws a view in place of the plot and returns true; by default there is none */
+  protected drawAlternate(): boolean {
+    return false;
+  }
+
+  update(options: UpdateOptions): void {
+    try {
+      this.host.eventService.renderingStarted(options);
+      // Remove printed error if refreshing after a previous error run
+      this.svg.select(".errormessage").remove();
+
+      const status = this.viewModel.update(options, this.host);
+      if (!status.status) {
+        this.currentPlotProperties = undefined;
+        this.resizeCanvas(options.viewport.width, options.viewport.height);
+        this.drawErrors(options, status.error, status.type, this.settings.canvas.show_errors);
+        this.host.eventService.renderingFailed(options);
+        return;
+      }
+      if (status.warning) {
+        this.host.displayWarningIcon("Invalid inputs or settings ignored.\n", status.warning);
+      }
+
+      this.resizeCanvas(options.viewport.width, options.viewport.height);
+      if (this.drawAlternate()) {
+        this.currentPlotProperties = undefined;
+        this.updateHighlighting();
+        this.host.eventService.renderingFinished(options);
+        return;
+      }
+      const viewModel = this.viewModel;
+      this.currentPlotProperties = createPlotFrame({
+        width: options.viewport.width,
+        height: options.viewport.height,
+        displayPlot: viewModel.plotPoints.length > 0,
+        ...this.axisRanges(),
+        settings: this.settings,
+        palette: viewModel.colourPalette
+      });
+      this.drawVisual();
+      this.adjustPaddingForOverflow();
+
+      this.updateHighlighting();
+      this.host.eventService.renderingFinished(options);
+    } catch (caught_error) {
+      this.currentPlotProperties = undefined;
+      this.resizeCanvas(options.viewport.width, options.viewport.height);
+      this.drawErrors(options, caught_error instanceof Error ? caught_error.message : String(caught_error), "internal", true);
+      console.error(caught_error);
+      this.host.eventService.renderingFailed(options);
+    }
+  }
+
+  resizeCanvas(width: number, height: number): void {
+    this.svg.attr("width", width).attr("height", height);
+  }
+
+  drawErrors(options: UpdateOptions, message: string, kind: ErrorKind | undefined, show: boolean): void {
+    const svg = this.svg.node();
+    if (svg === null) {
+      return;
+    }
+    drawErrorMessage(svg, {
+      width: options.viewport.width,
+      height: options.viewport.height,
+      message,
+      kind,
+      show,
+      colour: this.viewModel.colourPalette.foregroundColour
+    });
+  }
+
+  plotContext(): PlotContext<P> {
+    const viewModel = this.viewModel;
+    return {
+      frame: this.plotProperties,
+      points: viewModel.plotPoints,
+      palette: viewModel.colourPalette,
+      settings: this.settings,
+      host: this.host,
+      selectionManager: this.selectionManager,
+      onSelectionChange: () => this.updateHighlighting(),
+      headless: viewModel.headless,
+      frontend: viewModel.frontend
+    };
+  }
+
+  /** Fades the plot's lines by their line group's opacities and its dots by the given ones */
+  protected highlightPlotPoints(state: SelectionHighlightState, dotOpacities: (point: P) => HighlightOpacities): void {
+    const svg = this.svg.node();
+    if (svg === null) {
+      return;
+    }
+    highlightPlot<P>(svg, {
+      active: state.active,
+      selected: state.selected,
+      lineOpacity: line => lineOpacity(this.settings.lines, this.lineKeys[line.name], state.active),
+      dotOpacities
+    });
+  }
+
+  adjustPaddingForOverflow(): void {
+    // Headless mode does not render to screen so do not attempt to adjust for overflow
+    if (this.viewModel.headless) {
+      return;
+    }
+    const svg = this.svg.node();
+    if (svg === null) {
+      return;
+    }
+    const fitted = fitPlotToOverflow(svg, this.plotProperties);
+    if (fitted === undefined) {
+      return;
+    }
+    this.currentPlotProperties = fitted;
+    this.drawVisual();
+  }
+
+  getFormattingModel(): powerbi.visuals.FormattingModel {
+    // API 5.1 omits the visual's unset numeric values and legacy option shapes.
+    return this.viewModel.inputSettings.getFormattingModel() as powerbi.visuals.FormattingModel;
+  }
+}

@@ -1,5 +1,5 @@
 import { labelGeometry, type LabelPoint } from "./labelGeometry";
-import trianglePath from "./trianglePath";
+import { trianglePath } from "./symbolPath";
 import screenToSvg from "./screenToSvg";
 
 export type LabelLineStyle = {

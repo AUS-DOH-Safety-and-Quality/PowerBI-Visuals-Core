@@ -41,7 +41,7 @@ function formatRange(setting: SettingDefinition): string {
   return kind;
 }
 
-/** Display names, with the value conditional formatting expects where it differs */
+/** Display names, with the value conditional formatting expects where it differs; choices as bullet lines */
 function formatValues(setting: SettingDefinition): string {
   switch (setting.type) {
     case FormattingComponent.Dropdown: {
@@ -49,7 +49,7 @@ function formatValues(setting: SettingDefinition): string {
       const values = new Array<string>(items.length);
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        values[i] = item.displayName === item.value ? code(item.value) : item.displayName + " (" + code(item.value) + ")";
+        values[i] = "• " + (item.displayName === item.value ? code(item.value) : item.displayName + " (" + code(item.value) + ")");
       }
       return values.join("<br>");
     }
@@ -57,7 +57,7 @@ function formatValues(setting: SettingDefinition): string {
       const valid = setting.valid ?? [];
       const values = new Array<string>(valid.length);
       for (let i = 0; i < valid.length; i++) {
-        values[i] = code(valid[i]);
+        values[i] = "• " + code(valid[i]);
       }
       return values.join("<br>");
     }

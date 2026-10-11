@@ -69,6 +69,60 @@ export function measureAxisEdge(svg: SVGSVGElement, axis: Element, side: AxisTit
   return side === "bottom" ? axisRect.bottom - svgRect.top : axisRect.left - svgRect.left;
 }
 
+export type AxisTicksOptions = {
+  readonly side: "bottom" | "left";
+  /** Pixel extent of the axis line */
+  readonly range: readonly number[];
+  readonly position: (value: number) => number;
+  readonly values: readonly number[];
+  readonly format: (value: number) => string;
+  readonly tickSizeOuter: number;
+};
+
+/** Replaces the group's contents with d3-axis's domain path and .tick groups, half-pixel aligned on standard displays */
+export function drawAxisTicks(group: SVGGElement, options: AxisTicksOptions): void {
+  const bottom = options.side === "bottom";
+  const k = bottom ? 1 : -1;
+  const offset = window.devicePixelRatio > 1 ? 0 : 0.5;
+  const range0 = options.range[0] + offset;
+  const range1 = options.range[options.range.length - 1] + offset;
+  const outer = k * options.tickSizeOuter;
+  const document = group.ownerDocument;
+  group.replaceChildren();
+  const domain = document.createElementNS(SVG_NS, "path");
+  domain.setAttribute("class", "domain");
+  domain.setAttribute("stroke", "currentColor");
+  if (bottom) {
+    domain.setAttribute("d", outer ? `M${range0},${outer}V${offset}H${range1}V${outer}` : `M${range0},${offset}H${range1}`);
+  } else {
+    domain.setAttribute("d", outer ? `M${outer},${range0}H${offset}V${range1}H${outer}` : `M${offset},${range0}V${range1}`);
+  }
+  group.appendChild(domain);
+  for (let i = 0; i < options.values.length; i++) {
+    const value = options.values[i];
+    const tick = document.createElementNS(SVG_NS, "g");
+    tick.setAttribute("class", "tick");
+    tick.setAttribute("opacity", "1");
+    const position = options.position(value) + offset;
+    tick.setAttribute("transform", bottom ? `translate(${position},0)` : `translate(0,${position})`);
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("stroke", "currentColor");
+    line.setAttribute(bottom ? "y2" : "x2", String(k * 6));
+    const text = document.createElementNS(SVG_NS, "text");
+    text.setAttribute("fill", "currentColor");
+    text.setAttribute(bottom ? "y" : "x", String(k * 9));
+    text.setAttribute("dy", bottom ? "0.71em" : "0.32em");
+    text.textContent = options.format(value);
+    tick.appendChild(line);
+    tick.appendChild(text);
+    group.appendChild(tick);
+  }
+  group.setAttribute("fill", "none");
+  group.setAttribute("font-size", "10");
+  group.setAttribute("font-family", "sans-serif");
+  group.setAttribute("text-anchor", bottom ? "middle" : "end");
+}
+
 export function drawGridlines(options: GridlineOptions): void {
   const container = options.container;
   const className = options.className;

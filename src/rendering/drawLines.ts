@@ -1,5 +1,5 @@
 import { select } from "d3-selection";
-import { line as linePath } from "d3-shape";
+import { round3 } from "./symbolPath";
 import type { AxisPalette } from "./axisProperties";
 import { inPlot, type PlotFrame } from "./plotFrame";
 
@@ -29,6 +29,24 @@ export type LinesOptions = {
 
 function sameStyle(a: LineStyle, b: LineStyle): boolean {
   return a.colour === b.colour && a.width === b.width && a.type === b.type;
+}
+
+/** Path through runs of valid points; a run of one point is closed, as d3-shape's line does */
+function linePath(x: readonly number[], y: readonly number[], valid: readonly boolean[]): string {
+  let path = "";
+  let run = 0;
+  for (let i = 0; i <= x.length; i++) {
+    if (i < x.length && valid[i]) {
+      path += `${run === 0 ? "M" : "L"}${round3(x[i])},${round3(y[i])}`;
+      run++;
+    } else {
+      if (run === 1) {
+        path += "Z";
+      }
+      run = 0;
+    }
+  }
+  return path;
 }
 
 /** One group per line bound to its PlotLine: a single path, or per-segment lines when the style varies */
@@ -80,10 +98,7 @@ export function drawLines(group: SVGGElement, options: LinesOptions): void {
           .selectAll("path")
           .data([line.points])
           .join("path")
-          .attr("d", linePath<LinePoint>()
-            .x((_, i) => x[i])
-            .y((_, i) => y[i])
-            .defined((_, i) => valid[i]))
+          .attr("d", linePath(x, y, valid))
           .attr("fill", "none")
           .attr("stroke", styles[0].colour)
           .attr("stroke-width", styles[0].width)

@@ -1,6 +1,5 @@
-import { axisBottom, axisLeft, type Axis } from "d3-axis";
 import { select } from "d3-selection";
-import { drawGridlines, axisLabelPlacement, xTickLabelOffsets, axisTitleOffset, measureAxisEdge } from "./axis";
+import { drawAxisTicks, drawGridlines, axisLabelPlacement, xTickLabelOffsets, axisTitleOffset, measureAxisEdge } from "./axis";
 import type { PlotFrame } from "./plotFrame";
 
 export type AxisDrawOptions = {
@@ -36,17 +35,20 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   const isX = axis === "x";
   const properties = isX ? frame.xAxis : frame.yAxis;
   const scale = isX ? frame.xScale : frame.yScale;
-  const generator: Axis<number> = isX ? axisBottom(scale) : axisLeft(scale);
-  generator.tickSizeOuter(properties.tick_marks ? 6 : 0);
+  let values: number[] = [];
   if (properties.ticks) {
-    if (properties.tick_count) {
-      generator.ticks(properties.tick_count);
-    }
-    if (options.tickFormat !== undefined) {
-      generator.tickFormat(options.tickFormat);
-    }
-  } else {
-    generator.tickValues([]);
+    values = properties.tick_count ? scale.ticks(properties.tick_count) : scale.ticks();
+  }
+  const groupNode = group.node();
+  if (groupNode !== null) {
+    drawAxisTicks(groupNode, {
+      side: isX ? "bottom" : "left",
+      range: scale.range(),
+      position: scale,
+      values,
+      format: options.tickFormat ?? String,
+      tickSizeOuter: properties.tick_marks ? 6 : 0
+    });
   }
 
   // Without a plot the axis is hidden but still laid out, so measurements are unchanged
@@ -54,7 +56,6 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   // The axis line sits on the bottom padding edge for x and the left for y
   const edge = isX ? frame.height - frame.yAxis.start_padding : frame.xAxis.start_padding;
   const tickText = group
-    .call(generator)
     .attr("color", properties.colour)
     .attr("visibility", visibility)
     .attr("transform", isX ? `translate(0, ${edge})` : `translate(${edge}, 0)`)
@@ -75,7 +76,7 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
       container: gridGroup,
       className: `${axis}gridline`,
       orientation: isX ? "vertical" : "horizontal",
-      values: properties.grid_show && frame.displayPlot ? group.selectAll<SVGGElement, number>(".tick").data() : [],
+      values: properties.grid_show && frame.displayPlot ? values : [],
       scale,
       from: isX ? edge : frame.xAxis.start_padding,
       to: isX ? frame.yAxis.end_padding : frame.width - frame.xAxis.end_padding,
@@ -87,7 +88,6 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   const placement = isX
     ? axisLabelPlacement(properties.label_align, frame.xAxis.start_padding, frame.width - frame.xAxis.end_padding)
     : axisLabelPlacement(properties.label_align, frame.height - frame.yAxis.start_padding, frame.yAxis.end_padding);
-  const groupNode = group.node();
   const measured = options.measure && groupNode !== null ? measureAxisEdge(svg, groupNode, isX ? "bottom" : "left") : undefined;
   const offset = axisTitleOffset(isX ? "bottom" : "left", isX ? frame.height : frame.width, measured, options.labelSize);
   label

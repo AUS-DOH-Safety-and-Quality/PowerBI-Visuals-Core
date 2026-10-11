@@ -1,6 +1,6 @@
 import type powerbi from "powerbi-visuals-api";
 import { select } from "d3-selection";
-import { symbol, symbolCircle, symbolCross, symbolDiamond, symbolSquare, symbolStar, symbolTriangle, symbolWye, type SymbolType } from "d3-shape";
+import { symbolPath } from "./symbolPath";
 import screenToSvg from "./screenToSvg";
 import { inPlot, type PlotFrame } from "./plotFrame";
 
@@ -40,16 +40,6 @@ export type DotsOptions<P extends DotPoint> = {
   readonly onClick: ((point: P) => void) | undefined;
 };
 
-const shapes: Record<string, SymbolType> = {
-  Circle: symbolCircle,
-  Cross: symbolCross,
-  Diamond: symbolDiamond,
-  Square: symbolSquare,
-  Star: symbolStar,
-  Triangle: symbolTriangle,
-  Wye: symbolWye
-};
-
 /** Markers (or text) as direct children of the dots group; a point outside the frame is scaled away */
 export function drawDots<P extends DotPoint>(svg: SVGSVGElement, options: DotsOptions<P>): void {
   const frame = options.frame;
@@ -75,8 +65,8 @@ export function drawDots<P extends DotPoint>(svg: SVGSVGElement, options: DotsOp
       .style("fill", point => text(point).colour);
   } else {
     marks
-      // d3.symbol() takes size as area instead of radius
-      .attr("d", point => symbol().type(shapes[point.aesthetics.shape]).size(point.aesthetics.size ** 2 * Math.PI)())
+      // Symbols take size as area instead of radius
+      .attr("d", point => symbolPath(point.aesthetics.shape, point.aesthetics.size ** 2 * Math.PI))
       .style("fill", point => point.aesthetics.colour)
       .style("stroke", point => point.aesthetics.colour_outline)
       .style("stroke-width", point => point.aesthetics.width_outline);

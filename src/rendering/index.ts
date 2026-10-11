@@ -1,6 +1,6 @@
 export { default as drawValueLabels } from "./drawValueLabels";
 export { labelGeometry } from "./labelGeometry";
-export { default as trianglePath } from "./trianglePath";
+export { trianglePath } from "./symbolPath";
 export { default as screenToSvg } from "./screenToSvg";
 export { default as bindContextMenu } from "./contextMenu";
 export { lineLabelGeometry, drawLineLabels } from "./lineLabels";

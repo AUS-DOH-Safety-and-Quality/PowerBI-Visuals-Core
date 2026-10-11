@@ -1,0 +1,42 @@
+# Reusable: packages the calling visual as a development build and publishes it to its "latest" release
+name: Build release
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  build-pbiviz-packages:
+    name: "Pre Release"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup Node 24
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24.x
+
+    - name: Label visual as 'Development'
+      run: |
+        jq '.visual.name += "_DEV" | .visual.displayName += " (Dev)" | .visual.guid += "_DEV"' pbiviz.json > pbiviz.dev.json
+        mv pbiviz.dev.json pbiviz.json
+      shell: bash
+
+    - name: Build
+      run: |
+        npm ci
+        npm install -g powerbi-visuals-tools@6.2.0
+        npm run package
+
+    - name: "Create Release"
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: false
+        title: "Development Build"
+        files: dist/*.pbiviz

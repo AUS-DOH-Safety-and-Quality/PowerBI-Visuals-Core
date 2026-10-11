@@ -1,0 +1,36 @@
+name: Test Core
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup Node 24
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24
+        cache: 'npm'
+
+    - name: Install Package Dependencies
+      run: |
+        npm ci
+
+    - name: Typecheck
+      run: |
+        npm run typecheck
+
+    - name: Run unit tests
+      run: |
+        npx playwright install chromium
+        npm run test

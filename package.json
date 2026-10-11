@@ -4,9 +4,13 @@
   "private": true,
   "type": "module",
   "files": [
-    "src"
+    "src",
+    "config"
   ],
   "exports": {
+    "./config/tsconfig.visual.json": "./config/tsconfig.visual.json",
+    "./config/eslint": "./config/eslint.mjs",
+    "./config/vitest": "./config/vitest.mjs",
     "./math": "./src/math/index.ts",
     "./settings": "./src/settings/index.ts",
     "./powerbi": "./src/powerbi/index.ts",

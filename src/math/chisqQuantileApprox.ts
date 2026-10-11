@@ -7,11 +7,7 @@ export default function chisqQuantileApprox(p: number, nu: number, g: number,
                                             lower_tail: boolean = true,
                                             log_p: boolean = false,
                                             tol: number): number {
-  if (Number.isNaN(p) || Number.isNaN(nu)) {
-    return p + nu;
-  }
-
-  if ((log_p && p > 0) || (!log_p && (p < 0 || p > 1)) || nu <= 0) {
+  if ((log_p && p > 0) || (!log_p && (p < 0 || p > 1))) {
     return Number.NaN;
   }
 

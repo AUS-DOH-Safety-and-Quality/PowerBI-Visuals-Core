@@ -57,9 +57,6 @@ export default function readSettingsRows<T extends SettingCard>(
   cardSchema: T, cardName: string, defaults: NoInfer<CardValues<T>>,
   category: SettingsCategory, rawRowIndices: readonly number[]
 ): SettingsRows<CardValues<T>> {
-  if (rawRowIndices.length === 0) {
-    return { values: [], validation: { status: 0, messages: [] } };
-  }
   const defaultValues: Readonly<Record<string, SettingValue>> = defaults;
   const groups = Object.keys(cardSchema.settingsGroups);
   const entries: { name: string; definition: SettingDefinition; defaultValue: SettingValue }[] = [];

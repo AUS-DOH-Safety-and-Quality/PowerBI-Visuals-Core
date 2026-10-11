@@ -1,13 +1,13 @@
-import { min, max, between, rep, clamp } from "../src/math/index";
+import { max, between, rep, clamp } from "../src/math/index";
 import { isValidNumber, isNullOrUndefined, groupBy } from "../src/data/index";
 
 const frozen: readonly number[] = Object.freeze([1, 2]);
-min(frozen);
 max(frozen);
 // @ts-expect-error Reductions take an explicit array, never a scalar.
-min(1);
+max(1);
 // @ts-expect-error Missing values must be validated before numerical reduction.
 max([1, undefined]);
+// @ts-expect-error Both bounds are numbers; there is no open side.
 between(1, undefined, 2);
 clamp(1, 0, undefined);
 // @ts-expect-error Both bounds must be stated explicitly, even when open.

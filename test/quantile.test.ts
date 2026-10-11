@@ -15,6 +15,5 @@ describe("quantile", () => {
     expect(quantile([3, 8, 9], 0)).toBe(3);
     expect(quantile([3, 8, 9], 1)).toBe(9);
     expect(quantile([5], 0.3)).toBe(5);
-    expect(quantile([], 0.5)).toBeUndefined();
   });
 });

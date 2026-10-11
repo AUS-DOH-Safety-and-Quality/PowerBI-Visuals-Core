@@ -26,3 +26,13 @@ export type PrimitiveValue = string | number | boolean | Date | null | undefined
 export function formatPrimitiveValue(value: PrimitiveValue): string | undefined {
   return value == null ? undefined : String(value);
 }
+
+/** The column's cells at the rows as numbers; blank cells read as undefined */
+export function readNumbers(column: { readonly values: readonly PrimitiveValue[] }, rows: readonly number[]): (number | undefined)[] {
+  const numbers = new Array<number | undefined>(rows.length);
+  for (let i = 0; i < rows.length; i++) {
+    const value = column.values[rows[i]];
+    numbers[i] = value == null ? undefined : Number(value);
+  }
+  return numbers;
+}

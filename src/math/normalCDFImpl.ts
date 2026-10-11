@@ -68,11 +68,7 @@ export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boo
   let lower: boolean;
   let upper: boolean;
 
-  if (Number.isNaN(x)) {
-    return Number.NaN;
-  }
-
-  eps = Number.EPSILON * 0.5;
+  eps =Number.EPSILON * 0.5;
 
   lower = i_tail != 1;
   upper = i_tail != 0;

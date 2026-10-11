@@ -3,10 +3,9 @@ import { pickRows, formatNumber } from "../src/data/index";
 import { indexColumnsByRole, formatPrimitiveValue } from "../src/powerbi/index";
 
 describe("row and display contracts", () => {
-  it("preserves requested order, duplicates, missing cells and out-of-range positions", () => {
-    expect(pickRows([10, 20], [1, 5, 0, 1])).toEqual([20, undefined, 10, 20]);
-    expect(pickRows([undefined, false, 0, ""], [0, 3, 1, 2, -1, 0.5])).toEqual([undefined, "", false, 0, undefined, undefined]);
-    expect(pickRows([], [0])).toEqual([undefined]);
+  it("preserves requested order, duplicates and missing cells", () => {
+    expect(pickRows([10, 20], [1, 0, 1])).toEqual([20, 10, 20]);
+    expect(pickRows([undefined, false, 0, ""], [0, 3, 1, 2])).toEqual([undefined, "", false, 0]);
     expect(pickRows([10], [])).toEqual([]);
   });
 

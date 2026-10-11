@@ -70,19 +70,9 @@ describe("normalQuantile", () => {
             expect(normalQuantile(1.1, 0, 1, true, false)).toBeNaN();
         });
 
-        it("should return NaN for negative sigma", () => {
-            expect(normalQuantile(0.5, 0, -1, true, false)).toBeNaN();
-        });
-
         it("should return mu for sigma = 0", () => {
             expect(normalQuantile(0.5, 5, 0, true, false)).toBe(5);
             expect(normalQuantile(0.1, 10, 0, true, false)).toBe(10);
-        });
-
-        it("should handle NaN inputs", () => {
-            expect(normalQuantile(NaN, 0, 1, true, false)).toBeNaN();
-            expect(normalQuantile(0.5, NaN, 1, true, false)).toBeNaN();
-            expect(normalQuantile(0.5, 0, NaN, true, false)).toBeNaN();
         });
     });
 

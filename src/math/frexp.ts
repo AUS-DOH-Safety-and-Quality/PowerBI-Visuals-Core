@@ -1,10 +1,5 @@
-/** C frexp: value = mantissa * 2^exponent, mantissa in [0.5, 1); zero, infinities and NaN pass through. */
+/** C frexp for finite nonzero value: value = mantissa * 2^exponent, mantissa in [0.5, 1). */
 export default function frexp(value: number): {mantissa: number, exponent: number} {
-  // C frexp returns zero, infinities and NaN unchanged.
-  if (value === 0 || !Number.isFinite(value)) {
-    return {mantissa: value, exponent: 0};
-  }
-
   // Float64 format: 1 sign bit | 11 exponent bits | 52 mantissa bits
   const data: DataView<ArrayBuffer> = new DataView(new ArrayBuffer(8));
   data.setFloat64(0, value);

@@ -16,9 +16,9 @@ export type DataViewValidation<R extends string> =
   | { readonly status: "invalid"; readonly error: string };
 
 /** The first problem wins: no view, no key category, no rows, then each missing value role in order */
-export function validateDataView<R extends string>(dataViews: readonly powerbi.DataView[] | undefined,
+export function validateDataView<R extends string>(dataViews: readonly powerbi.DataView[],
                                                    requiredValueRoles: readonly R[]): DataViewValidation<R> {
-  const dataView = dataViews?.[0];
+  const dataView = dataViews[0];
   if (dataView === undefined) {
     return { status: "invalid", error: "No data present" };
   }

@@ -4,14 +4,6 @@ import ldexp from "./ldexp";
 /** Normal density; adapted from R's dnorm. */
 export default function normalDensity(x: number, mu: number, sigma: number,
                                       log_p: boolean = false): number {
-  if (Number.isNaN(x) || Number.isNaN(mu) || Number.isNaN(sigma)) {
-    return x + mu + sigma;
-  }
-
-  if (sigma < 0) {
-    return Number.NaN;
-  }
-
   const zeroBound: number = log_p ? Number.NEGATIVE_INFINITY : 0;
 
   if (!Number.isFinite(sigma)) {

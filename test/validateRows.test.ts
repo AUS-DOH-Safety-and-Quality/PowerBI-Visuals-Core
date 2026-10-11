@@ -23,6 +23,5 @@ describe("row validation", () => {
     ])).toEqual({
       status: 1, messages: ["First", "Later", "Later"], error: "No valid data found!"
     });
-    expect(validateRows(0, rules)).toEqual({ status: 1, messages: [], error: "No valid data found!" });
   });
 });

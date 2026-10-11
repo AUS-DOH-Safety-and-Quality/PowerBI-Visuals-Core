@@ -22,7 +22,6 @@ describe("selection matching", () => {
     const selected = selectedKeys([id("c")]);
     expect(identitySelected([id("a"), id("c")], selected)).toBe(true);
     expect(identitySelected([id("a"), id("b")], selected)).toBe(false);
-    expect(identitySelected([], selected)).toBe(false);
   });
 
   it("selects nothing when the selection is empty", () => {

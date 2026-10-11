@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultValues, createLineGroup, defineCard, limitLineKeys, lineSetting, lineStyle, lineOpacity, lineLabel } from "../src/settings/index";
+import {
+  createDefaultValues, createLineGroup, defineCard, limitLineNames, lowerLimitLines, standardLineKeys, lineSetting, lineStyle, lineOpacity,
+  lineLabel
+} from "../src/settings/index";
 import { createValueFormatter } from "../src/data/index";
 
 const lines = createDefaultValues({ lines: defineCard({ displayName: "Lines", description: "Lines", settingsGroups: {
@@ -15,16 +18,20 @@ const lines = createDefaultValues({ lines: defineCard({ displayName: "Lines", de
 } }) }).lines;
 
 describe("line settings", () => {
-  it("maps limit lines to their keys and reads suffixed settings", () => {
-    expect(limitLineKeys).toEqual({
+  it("maps the standard lines to their keys and reads suffixed settings", () => {
+    expect(standardLineKeys).toEqual({
       ll99: "99",
       ll95: "95",
       ll68: "68",
       ul68: "68",
       ul95: "95",
-      ul99: "99"
+      ul99: "99",
+      target: "target",
+      alt_target: "alt_target"
     });
-    expect(lineSetting<number>(lines, "plot_label_show_n", limitLineKeys.ul99)).toBe(1);
+    expect(limitLineNames).toEqual(["ll99", "ll95", "ll68", "ul68", "ul95", "ul99"]);
+    expect(Array.from(lowerLimitLines)).toEqual(["ll99", "ll95", "ll68"]);
+    expect(lineSetting<number>(lines, "plot_label_show_n", standardLineKeys.ul99)).toBe(1);
     expect(lineStyle(lines, "99")).toEqual({ colour: "#6495ED", width: 2, type: "10 10" });
     expect(lineOpacity(lines, "99", false)).toBe(1);
     expect(lineOpacity(lines, "99", true)).toBe(0.2);

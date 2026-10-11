@@ -20,9 +20,7 @@ export default function lgammaCorrection(x: number): number {
     .1276642195630062933333333333333e-30
   ];
 
-  if (x < 10) {
-    throw new Error("lgammaCorrection: x must be >= 10");
-  } else if (x < 94906265.62425156) {
+  if (x < 94906265.62425156) {
     const tmp = 10 / x;
     return chebyshevPolynomial(tmp * tmp * 2 - 1, algmcs, 5) / x;
   }

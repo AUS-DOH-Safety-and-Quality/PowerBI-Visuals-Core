@@ -1,6 +1,5 @@
 export { default as sum } from "./sum";
 export { default as median } from "./median";
-export { default as min } from "./min";
 export { default as max } from "./max";
 export { default as rep } from "./rep";
 export { default as between } from "./between";

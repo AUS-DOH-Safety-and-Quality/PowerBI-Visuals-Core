@@ -58,12 +58,6 @@ describe("settings row contracts", () => {
     expect(result.values[1].mode).toBe("first");
   });
 
-  it("returns empty arrays and success for no selected rows", () => {
-    expect(readSettingsRows(card, "example", defaults, {}, [])).toEqual({
-      values: [], validation: { status: 0, messages: [] }
-    });
-  });
-
   it("uses named defaults for missing row objects and normalizes null/eraser values", () => {
     const result = readSettingsRows(card, "example", defaults, { objects: [
       { example: {

@@ -7,10 +7,6 @@ import chisqQuantileApprox from "./chisqQuantileApprox";
 export default function gammaQuantile(p: number, alpha: number, scale: number,
                                       lower_tail: boolean = true,
                                       log_p: boolean = false): number {
-  if (Number.isNaN(p) || Number.isNaN(alpha) || Number.isNaN(scale)) {
-    return p + alpha + scale;
-  }
-
   if (log_p) {
     if (p > 0) {
       return Number.NaN;  // log(p) > 0 means p > 1
@@ -33,7 +29,7 @@ export default function gammaQuantile(p: number, alpha: number, scale: number,
     }
   }
 
-  if (alpha < 0 || scale <= 0) {
+  if (scale === 0) {
     return Number.NaN;
   }
 

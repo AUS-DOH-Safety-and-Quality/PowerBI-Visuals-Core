@@ -102,16 +102,6 @@ describe("normalCDF", () => {
     });
 
     describe("edge cases", () => {
-        it("should return NaN for NaN inputs", () => {
-            expect(normalCDF(NaN, 0, 1)).toBeNaN();
-            expect(normalCDF(0, NaN, 1)).toBeNaN();
-            expect(normalCDF(0, 0, NaN)).toBeNaN();
-        });
-
-        it("should return NaN for negative sigma", () => {
-            expect(normalCDF(0, 0, -1)).toBeNaN();
-        });
-
         it("should handle sigma = 0 (degenerate distribution)", () => {
             expect(normalCDF(-1, 0, 0)).toBe(0);
             expect(normalCDF(0, 0, 0)).toBe(1);

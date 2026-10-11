@@ -2,15 +2,26 @@ import type { ValueFormatter } from "../data/valueFormatter";
 import type { LineLabel, LineLabelPosition } from "../rendering/lineLabels";
 import type { LineStyle } from "../rendering/drawLines";
 
-/** Limit line names to their `createLineGroup` keys; visuals add their own target and value lines */
-export const limitLineKeys = {
+export const limitLineNames = ["ll99", "ll95", "ll68", "ul68", "ul95", "ul99"] as const;
+
+export type LimitLineName = typeof limitLineNames[number];
+
+/** Lower limit lines place their outside labels below the line */
+export const lowerLimitLines: ReadonlySet<string> = new Set(["ll99", "ll95", "ll68"]);
+
+/** The limit and target lines every visual draws, named to their `createLineGroup` keys */
+export const standardLineKeys = {
   ll99: "99",
   ll95: "95",
   ll68: "68",
   ul68: "68",
   ul95: "95",
-  ul99: "99"
+  ul99: "99",
+  target: "target",
+  alt_target: "alt_target"
 } as const;
+
+export type StandardLineName = keyof typeof standardLineKeys;
 
 export type LineSettingValues = Readonly<Record<string, unknown>>;
 

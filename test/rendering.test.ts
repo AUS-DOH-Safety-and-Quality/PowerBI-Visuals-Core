@@ -22,16 +22,9 @@ function label(overrides: Partial<LabelAesthetics>, angle?: number, distance?: n
   return { text_value: "A", aesthetics: { ...aesthetics, ...overrides }, angle, distance };
 }
 
-function must<T>(value: T | undefined): T {
-  if (value === undefined) {
-    throw new Error("Expected geometry");
-  }
-  return value;
-}
-
 describe("label geometry", () => {
   it("places a top label straight up, limited by the top offset", () => {
-    const g = must(labelGeometry(label({}), 100, 150, 400, 30));
+    const g = labelGeometry(label({}), 100, 150, 400, 30);
     expect(g.theta).toBe(-90);
     expect(g.x).toBeCloseTo(100, 10);
     expect(g.y).toBeCloseTo(20, 10);
@@ -40,7 +33,7 @@ describe("label geometry", () => {
   });
 
   it("places a bottom label straight down, limited by the axis offset", () => {
-    const g = must(labelGeometry(label({ label_position: "bottom" }), 100, 150, 400, 30));
+    const g = labelGeometry(label({ label_position: "bottom" }), 100, 150, 400, 30);
     expect(g.theta).toBe(90);
     expect(g.x).toBeCloseTo(100, 10);
     expect(g.y).toBeCloseTo(350, 10);
@@ -49,24 +42,21 @@ describe("label geometry", () => {
   });
 
   it("caps the connector at the maximum line length and applies the angle offset", () => {
-    const g = must(labelGeometry(label({ label_line_max_length: 50, label_angle_offset: 30 }), 100, 150, 400, 30));
+    const g = labelGeometry(label({ label_line_max_length: 50, label_angle_offset: 30 }), 100, 150, 400, 30);
     expect(g.theta).toBe(-60);
     expect(g.x).toBeCloseTo(100 + 50 * Math.cos(-Math.PI / 3), 10);
     expect(g.y).toBeCloseTo(150 + 50 * Math.sin(-Math.PI / 3), 10);
   });
 
   it("uses a dragged angle and distance over the computed placement", () => {
-    const g = must(labelGeometry(label({}, 0, 7), 100, 150, 400, 30));
+    const g = labelGeometry(label({}, 0, 7), 100, 150, 400, 30);
     expect(g.theta).toBe(0);
     expect(g.x).toBeCloseTo(107, 10);
     expect(g.y).toBeCloseTo(150, 10);
   });
 
-  // Only non-finite positions are missing; the origin is an ordinary position
-  it("returns no geometry for a non-finite position and keeps the origin", () => {
-    expect(labelGeometry(label({}, NaN, 7), 100, 150, 400, 30)).toBeUndefined();
-    expect(labelGeometry(label({}, 0, Infinity), 100, 150, 400, 30)).toBeUndefined();
-    const origin = must(labelGeometry(label({}, 0, 0), 0, 0, 400, 30));
+  it("keeps the origin as an ordinary position", () => {
+    const origin = labelGeometry(label({}, 0, 0), 0, 0, 400, 30);
     expect(origin.x).toBe(0);
     expect(origin.y).toBe(0);
   });

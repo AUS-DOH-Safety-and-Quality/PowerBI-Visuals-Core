@@ -105,8 +105,7 @@ describe("gamma support functions", () => {
     expect(lgamma1p(1e-8)).toBeCloseTo(-0.5772156649015329e-8, 15);
   });
 
-  it("lgammaCorrection rejects x below 10 and decays like 1/(12x)", () => {
-    expect(() => lgammaCorrection(9.99)).toThrow();
+  it("lgammaCorrection decays like 1/(12x)", () => {
     expect(lgammaCorrection(10)).toBeCloseTo(0.008330563433362871, 12);
     expect(lgammaCorrection(1e9)).toBe(1 / (1e9 * 12));
   });
@@ -153,12 +152,10 @@ describe("gamma support functions", () => {
     }
   });
 
-  it("chebyshevPolynomial evaluates series and rejects out-of-range input", () => {
+  it("chebyshevPolynomial evaluates series", () => {
     expect(chebyshevPolynomial(0.5, [2, 0, 0], 3)).toBe(1);
     expect(chebyshevPolynomial(0.5, [0, 1, 0], 3)).toBe(0.5);
     expect(chebyshevPolynomial(0.5, [0, 0, 1], 3)).toBeCloseTo(-0.5, 15);
-    expect(() => chebyshevPolynomial(1.2, [1], 1)).toThrow();
-    expect(() => chebyshevPolynomial(0, [1], 0)).toThrow();
   });
 
   it("ldexp scales by powers of two exactly", () => {

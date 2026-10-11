@@ -51,9 +51,6 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
     const pointX = options.xScale(point.x);
     const pointY = options.yScale(point.value);
     const geometry = labelGeometry(point.label, pointX, pointY, options.plotHeight, options.bottomPadding);
-    if (geometry === undefined) {
-      continue;
-    }
 
     const aesthetics = point.label.aesthetics;
     const top = aesthetics.label_position === "top";

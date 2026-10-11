@@ -19,10 +19,6 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
   let r: number;
   let val: number;
 
-  if (Number.isNaN(p) || Number.isNaN(mu) || Number.isNaN(sigma)) {
-    return p + mu + sigma;
-  }
-
   if (log_p) {
     if (p > 0) {
       return Number.NaN;  // log(p) > 0 means p > 1
@@ -43,10 +39,6 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
     if (p == 1) {
       return lower_tail ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
     }
-  }
-
-  if (sigma < 0) {
-    return Number.NaN;
   }
 
   if (sigma == 0) {

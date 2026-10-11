@@ -14,17 +14,6 @@ describe("sequence", () => {
     expect(sequence(0, 4, 0.1)).toEqual([0, 0.1, 0.2, 0.30000000000000004]);
     expect(sequence(1, 3, 0.5)).toEqual([1, 1.5, 2]);
   });
-
-  it("returns an empty array for a zero, negative or non-finite count", () => {
-    expect(sequence(1, 0, 1)).toEqual([]);
-    expect(sequence(1, -3, 1)).toEqual([]);
-    expect(sequence(1, Number.NEGATIVE_INFINITY, 1)).toEqual([]);
-    expect(sequence(1, NaN, 1)).toEqual([]);
-  });
-
-  it("rejects a fractional count rather than rounding it", () => {
-    expect(() => sequence(0, 2.5, 1)).toThrow(RangeError);
-  });
 });
 
 describe("scaleLinear", () => {

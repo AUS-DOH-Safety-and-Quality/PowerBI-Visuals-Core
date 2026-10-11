@@ -4,6 +4,7 @@ export { default as findBy } from "./findBy";
 export { default as must } from "./must";
 export { default as buildDataView, sequentialKeys } from "./buildDataView";
 export type { DataViewColumnInput, DataViewInputs, RowObjects } from "./buildDataView";
+export { default as validatedView } from "./validatedView";
 export { default as createRenderer } from "./renderVisual";
 export type { RenderOptions, Rendered, Renderer } from "./renderVisual";
 export { default as settingsWith } from "./settingsWith";

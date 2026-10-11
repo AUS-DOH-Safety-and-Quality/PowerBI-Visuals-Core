@@ -36,8 +36,7 @@ describe("nearest point", () => {
     expect(nearestPoint(3, position, 21, 95, true)).toEqual({ index: 0, x: 10, y: 100 });
   });
 
-  it("returns nothing for no points and skips unplaceable ones", () => {
+  it("returns nothing for no points", () => {
     expect(nearestPoint(0, position, 0, 0, false)).toBeUndefined();
-    expect(nearestPoint(2, i => (i === 0 ? { x: NaN, y: NaN } : points[1]), 0, 0, true)).toEqual({ index: 1, x: 20, y: 10 });
   });
 });

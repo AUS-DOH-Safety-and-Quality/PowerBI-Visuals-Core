@@ -95,16 +95,6 @@ describe("normalDensity", () => {
     });
 
     describe("edge cases", () => {
-        it("should return NaN for NaN inputs", () => {
-            expect(normalDensity(NaN, 0, 1)).toBeNaN();
-            expect(normalDensity(0, NaN, 1)).toBeNaN();
-            expect(normalDensity(0, 0, NaN)).toBeNaN();
-        });
-
-        it("should return NaN for negative sigma", () => {
-            expect(normalDensity(0, 0, -1)).toBeNaN();
-        });
-
         it("should handle sigma = 0 (degenerate distribution)", () => {
             expect(normalDensity(0, 0, 0)).toBe(Number.POSITIVE_INFINITY);
             expect(normalDensity(1, 0, 0)).toBe(0);

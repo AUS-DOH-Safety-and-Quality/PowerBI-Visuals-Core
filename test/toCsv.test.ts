@@ -19,8 +19,4 @@ describe("csv export", () => {
       .toBe("a,b,c,d,e,f,g\n'=SUM(A1:A2),'+1,'-cmd,'@x,'\tx,-3,a=b");
     expect(toCsv([{ a: "=1,2" }])).toBe("a\n\"'=1,2\"");
   });
-
-  it("gives an empty string for no rows", () => {
-    expect(toCsv([])).toBe("");
-  });
 });

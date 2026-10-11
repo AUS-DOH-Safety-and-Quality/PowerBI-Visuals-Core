@@ -14,6 +14,7 @@ export { default as createAxisCard } from "./createAxisCard";
 export type { AxisCard } from "./createAxisCard";
 export { default as createDownloadCard } from "./createDownloadCard";
 export { dotOptions, flagDirectionOptions, scalingOptions, valueTooltipOptions, limitTruncationOptions } from "./sharedOptions";
-export { limitLineKeys, lineSetting, lineStyle, lineOpacity, lineLabel } from "./lineSettings";
+export { limitLineNames, lowerLimitLines, standardLineKeys, lineSetting, lineStyle, lineOpacity, lineLabel } from "./lineSettings";
+export type { LimitLineName, StandardLineName } from "./lineSettings";
 export { default as orderedBoundsError } from "./orderedBounds";
 export type { OrderedBoundsSettings, TruncationSettings } from "./orderedBounds";

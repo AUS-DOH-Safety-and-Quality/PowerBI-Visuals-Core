@@ -1,5 +1,3 @@
-import isValidNumber from "../data/isValidNumber";
-
 export type LabelAesthetics = {
   readonly label_position: "top" | "bottom";
   readonly label_y_offset: number;
@@ -38,9 +36,8 @@ export type LabelGeometry = {
   readonly marker_offset: number;
 };
 
-/** Returns undefined when the position is not finite; any finite position, including the origin, renders */
 export function labelGeometry(label: LabelState, pointX: number, pointY: number,
-                              plotHeight: number, bottomPadding: number): LabelGeometry | undefined {
+                              plotHeight: number, bottomPadding: number): LabelGeometry {
   const aesthetics = label.aesthetics;
   const top = aesthetics.label_position === "top";
   const label_direction_mult = top ? -1 : 1;
@@ -61,9 +58,6 @@ export function labelGeometry(label: LabelState, pointX: number, pointY: number,
   const x = pointX + side_length * Math.cos(theta * Math.PI / 180);
   const y = pointY + side_length * Math.sin(theta * Math.PI / 180);
 
-  if (!isValidNumber(x) || !isValidNumber(y)) {
-    return undefined;
-  }
   return {
     x,
     y,

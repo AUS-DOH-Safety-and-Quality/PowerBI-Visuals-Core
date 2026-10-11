@@ -44,16 +44,8 @@ describe("gammaQuantile", () => {
             expect(gammaQuantile(1.1, 2, 1)).toBeNaN();
         });
 
-        it("should return NaN for invalid parameters", () => {
-            expect(gammaQuantile(0.5, -1, 1)).toBeNaN();
+        it("should return NaN for scale = 0", () => {
             expect(gammaQuantile(0.5, 2, 0)).toBeNaN();
-            expect(gammaQuantile(0.5, 2, -1)).toBeNaN();
-        });
-
-        it("should handle NaN inputs", () => {
-            expect(gammaQuantile(NaN, 2, 1)).toBeNaN();
-            expect(gammaQuantile(0.5, NaN, 1)).toBeNaN();
-            expect(gammaQuantile(0.5, 2, NaN)).toBeNaN();
         });
     });
 

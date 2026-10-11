@@ -1,6 +1,7 @@
 import type powerbi from "powerbi-visuals-api";
-import { select, type Selection } from "d3-selection";
+import { select, type BaseType, type Selection } from "d3-selection";
 import { lineOpacity, type LineSettingValues } from "../settings/lineSettings";
+import bindContextMenu from "./contextMenu";
 import type { ColourPalette } from "../powerbi/colourPalette";
 import type { FormattingModel } from "../powerbi/buildFormattingModel";
 import type { UpdateOptions } from "../powerbi/updateOptions";
@@ -13,6 +14,10 @@ import { createPlotFrame, type AxisBounds, type PlotFrame, type PlotFrameSetting
 
 type IVisualHost = powerbi.extensibility.visual.IVisualHost;
 type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
+type ISelectionId = powerbi.visuals.ISelectionId;
+
+/** A drawn datum: a point, or a grouped row carrying its rows' identities */
+type ContextMenuDatum = { readonly identity: ISelectionId | ISelectionId[] };
 
 export type ViewModelValidation =
   | { status: true; warning?: string }
@@ -180,6 +185,24 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       selected: state.selected,
       lineOpacity: line => lineOpacity(this.settings.lines, this.lineKeys[line.name], state.active),
       dotOpacities
+    });
+  }
+
+  /** Context menu for the datum under the pointer; grouped rows supply their first identity, the background an empty one */
+  addContextMenu(root: GlobalEventHandlers | null, enabled = this.plotProperties.displayPlot): void {
+    if (root === null) {
+      return;
+    }
+    bindContextMenu(root, {
+      enabled,
+      identity: target => {
+        const datum = select(target as BaseType).datum() as ContextMenuDatum | undefined;
+        if (datum === undefined) {
+          return {} as ISelectionId;
+        }
+        return Array.isArray(datum.identity) ? datum.identity[0] : datum.identity;
+      },
+      show: (identity, position) => this.selectionManager.showContextMenu(identity, position)
     });
   }
 

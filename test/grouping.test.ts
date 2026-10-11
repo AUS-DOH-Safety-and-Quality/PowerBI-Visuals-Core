@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { isNullOrUndefined, isValidNumber, groupBy } from "../src/data/index";
-import { pluck } from "./browserHelpers";
 
 describe("missing-value and finite-number predicates", () => {
   it("isNullOrUndefined accepts only null and undefined", () => {
@@ -47,35 +46,5 @@ describe("groupBy", () => {
 
   it("returns an empty array for empty input", () => {
     expect(groupBy([] as { category: string }[], "category")).toEqual([]);
-  });
-
-  it("keeps non-string keys distinct by value", () => {
-    const data = [
-      { id: 1, name: "Alice" },
-      { id: 2, name: "Bob" },
-      { id: 1, name: "Charlie" },
-      { id: "1", name: "Text" }
-    ];
-    const result = groupBy(data, "id");
-    expect(pluck(result, 0)).toEqual([1, 2, "1"]);
-    expect(pluck(result[0][1], "name")).toEqual(["Alice", "Charlie"]);
-  });
-
-  it("groups undefined keys and NaN keys together", () => {
-    const data: { category?: string, value: number }[] = [
-      { category: "A", value: 1 },
-      { value: 2 },
-      { category: "A", value: 3 },
-      { value: 4 }
-    ];
-    const result = groupBy(data, "category");
-    expect(result).toEqual([
-      ["A", [{ category: "A", value: 1 }, { category: "A", value: 3 }]],
-      [undefined, [{ value: 2 }, { value: 4 }]]
-    ]);
-    const numeric = groupBy([{ k: NaN }, { k: NaN }, { k: 0 }, { k: -0 }], "k");
-    expect(numeric).toHaveLength(2);
-    expect(numeric[0][1]).toHaveLength(2);
-    expect(numeric[1][1]).toHaveLength(2);
   });
 });

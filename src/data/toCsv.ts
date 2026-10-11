@@ -13,9 +13,6 @@ function csvField(value: unknown): string {
 
 /** Header from the first row's keys; missing values are blank */
 export default function toCsv(rows: readonly Readonly<Record<string, unknown>>[]): string {
-  if (rows.length === 0) {
-    return "";
-  }
   const columns = Object.keys(rows[0]);
   const lines = new Array<string>(rows.length + 1);
   const header = new Array<string>(columns.length);

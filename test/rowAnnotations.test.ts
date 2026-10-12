@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type powerbi from "powerbi-visuals-api";
 import { createDefaultValues, createLabelsCard, defineCard, dotOptions } from "../src/settings/index";
-import { indexColumnsByRole, readRowAnnotations } from "../src/powerbi/index";
+import { indexColumnsByRole, labelledMessage, readRowAnnotations } from "../src/powerbi/index";
 
 const cards = {
   scatter: defineCard({ displayName: "Scatter", description: "", settingsGroups: { all: dotOptions() } }),
@@ -70,5 +70,12 @@ describe("row annotations", () => {
     expect(result.highlights).toEqual([undefined]);
     expect(result.anyHighlights).toBe(false);
     expect(result.anyLabels).toBe(false);
+  });
+});
+
+describe("labelled messages", () => {
+  it("leads every line with the group label and leaves unlabelled messages alone", () => {
+    expect(labelledMessage("Site A", "first\nsecond")).toBe("Site A: first\nSite A: second");
+    expect(labelledMessage("", "first\nsecond")).toBe("first\nsecond");
   });
 });

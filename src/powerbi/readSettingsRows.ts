@@ -1,4 +1,6 @@
-import { FormattingComponent, type SettingCard, type SettingDefinition, type SettingValue, type CardValues } from "../settings/definitions";
+import {
+  FormattingComponent, describeRange, type SettingCard, type SettingDefinition, type SettingValue, type CardValues
+} from "../settings/definitions";
 
 export type SettingsValidation =
   | { status: 0; messages: string[][]; error?: undefined }
@@ -43,11 +45,10 @@ function validationMessage(value: unknown, definition: SettingDefinition, name: 
   if (typeof value === "number") {
     const min = definition.options?.minValue?.value;
     const max = definition.options?.maxValue?.value;
-    if (!Number.isFinite(value) || (min !== undefined && value < min) || (max !== undefined && value > max)) {
-      return `${value} is not a valid value for ${name}. Valid values are between ${min} and ${max}`;
-    }
-    if (definition.integer && !Number.isInteger(value)) {
-      return `${value} is not a valid value for ${name}. Valid values are whole numbers`;
+    const belowMin = min !== undefined && (definition.exclusiveMin ? value <= min : value < min);
+    const aboveMax = max !== undefined && (definition.exclusiveMax ? value >= max : value > max);
+    if (!Number.isFinite(value) || belowMin || aboveMax || (definition.integer && !Number.isInteger(value))) {
+      return `${value} is not a valid value for ${name}. Valid values are ${describeRange(definition, definition.integer ? "whole numbers" : "numbers")}`;
     }
   }
   return "";

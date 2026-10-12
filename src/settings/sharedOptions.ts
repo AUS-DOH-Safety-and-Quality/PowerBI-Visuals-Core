@@ -31,7 +31,7 @@ export function flagDirectionOptions() {
 
 export function scalingOptions() {
   return {
-    multiplier: numberOption("Multiplier", "Multiplies plotted values and limits, e.g. 1000 for a rate per 1,000.", 1, { min: 0 }),
+    multiplier: numberOption("Multiplier", "Multiplies plotted values and limits, e.g. 1000 for a rate per 1,000.", 1, { above: 0 }),
     sig_figs: numberOption("Decimals to Report:",
                            "Decimal places for values in tooltips, line labels and the y-axis, unless the y-axis sets its own.",
                            2, { min: 0, max: 20, integer: true }),

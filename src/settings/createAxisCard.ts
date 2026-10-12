@@ -24,7 +24,7 @@ function colourDefinition() {
 function sigFigsDefinition() {
   return {
     sig_figs: numberOption("Tick Decimal Places", "Decimal places for the tick values; blank uses Decimals to Report.",
-                           undefined, { min: 0, max: 100, integer: true })
+                           undefined, { min: 0, max: 20, integer: true })
   };
 }
 
@@ -70,7 +70,7 @@ function gridDefinitions() {
   return {
     grid_show: toggleOption("Show Gridlines", "Draws a gridline at each tick.", false),
     grid_colour: colourOption("Gridline Colour", "Gridline colour.", "lightgray"),
-    grid_width: numberOption("Gridline Width", "Gridline width, in pixels.", 1, { min: 0 })
+    grid_width: numberOption("Gridline Width", "Gridline width, in pixels.", 1, { min: 0, max: 100 })
   };
 }
 

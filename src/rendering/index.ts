@@ -30,6 +30,8 @@ export {
   valueTickFormat, drawPlotAxes, drawPlotTooltips, drawPlotValueLabels, drawPlotDots, drawPlotDownload, drawPlotLines, drawPlotLineLabels
 } from "./drawPlot";
 export type { GroupedLine, PlotLineLabelOptions } from "./drawPlot";
+export { createTableContainer, showTable, drawSummaryTable, highlightTable } from "./summaryTable";
+export type { TableSelection, TableColumn, ColumnKind, TableRow, TableSettingValues, SummaryTableOptions } from "./summaryTable";
 export { PlotVisual } from "./plotVisual";
 export type { ViewModelValidation, PlotViewModel, PlotVisualSettings, PlotVisualPoint, SelectionHighlightState, SvgSelection } from "./plotVisual";
 export { select, selectAll } from "d3-selection";

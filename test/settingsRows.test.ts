@@ -33,8 +33,8 @@ describe("settings row contracts", () => {
     expect(rows.values[2]).toEqual(rows.values[0]);
     expect(rows.values[3]).toEqual(defaults);
     expect(rows.validation.messages).toEqual([
-      ["-1 is not a valid value for optional. Valid values are between 0 and 10"], [],
-      ["-1 is not a valid value for optional. Valid values are between 0 and 10"], []
+      ["-1 is not a valid value for optional. Valid values are numbers from 0 to 10"], [],
+      ["-1 is not a valid value for optional. Valid values are numbers from 0 to 10"], []
     ]);
     expect(rows.validation.status).toBe(0);
     rows.values[0].count = 9;
@@ -45,6 +45,26 @@ describe("settings row contracts", () => {
     expect(category.objects[4]).toEqual({ example: { count: 7, optional: -1, mode: "second" } });
   });
 
+  it("rejects the bound itself when it is exclusive", () => {
+    const bounded = defineCard({
+      displayName: "Bounded", description: "",
+      settingsGroups: { all: {
+        scale: numberOption("Scale", "Description.", 1, { above: 0 }),
+        offset: numberOption("Offset", "Description.", -1, { below: 0 }),
+        share: numberOption("Share", "Description.", 0.5, { above: 0, below: 1 })
+      } }
+    });
+    expect(bounded.scale).toMatchObject({ options: { minValue: { value: 0 } }, exclusiveMin: true });
+    const rows = readSettingsRows(bounded, "bounded", createDefaultValues({ bounded }).bounded,
+      { objects: [{ bounded: { scale: 0, offset: 0, share: 1 } }, { bounded: { scale: 0.1, offset: -0.1, share: 0.1 } }] }, [0, 1]);
+    expect(rows.values).toEqual([{ scale: 1, offset: -1, share: 0.5 }, { scale: 0.1, offset: -0.1, share: 0.1 }]);
+    expect(rows.validation.messages).toEqual([[
+      "0 is not a valid value for scale. Valid values are numbers, above 0",
+      "0 is not a valid value for offset. Valid values are numbers, below 0",
+      "1 is not a valid value for share. Valid values are numbers, above 0 and below 1"
+    ], []]);
+  });
+
   it("reports all-invalid status using only selected rows and their first warning", () => {
     const category = { objects: [
       { example: { count: 0 } }, {}, { example: { mode: "invalid" } }, {},
@@ -52,7 +72,7 @@ describe("settings row contracts", () => {
     ] };
     const result = readSettingsRows(card, "example", defaults, category, [4, 2]);
     expect(result.validation.status).toBe(1);
-    expect(result.validation.error).toBe("-1 is not a valid value for optional. Valid values are between 0 and 10");
+    expect(result.validation.error).toBe("-1 is not a valid value for optional. Valid values are numbers from 0 to 10");
     expect(result.validation.messages).toHaveLength(2);
     expect(result.values[0].optional).toBeUndefined();
     expect(result.values[1].mode).toBe("first");

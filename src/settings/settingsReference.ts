@@ -1,4 +1,4 @@
-import { FormattingComponent, groupDisplayName, type SettingCard, type SettingDefinition } from "./definitions";
+import { FormattingComponent, describeRange, groupDisplayName, type SettingCard, type SettingDefinition } from "./definitions";
 
 function code(value: string): string {
   return "`" + value + "`";
@@ -25,22 +25,6 @@ function formatDefault(setting: SettingDefinition): string {
   return code(value);
 }
 
-function formatRange(setting: SettingDefinition): string {
-  const kind = setting.integer ? "Whole number" : "Number";
-  const min = setting.options?.minValue?.value;
-  const max = setting.options?.maxValue?.value;
-  if (min !== undefined && max !== undefined) {
-    return kind + " from " + min + " to " + max;
-  }
-  if (min !== undefined) {
-    return kind + ", at least " + min;
-  }
-  if (max !== undefined) {
-    return kind + ", at most " + max;
-  }
-  return kind;
-}
-
 /** Display names, with the value conditional formatting expects where it differs; choices as bullet lines */
 function formatValues(setting: SettingDefinition): string {
   switch (setting.type) {
@@ -62,7 +46,7 @@ function formatValues(setting: SettingDefinition): string {
       return values.join("<br>");
     }
     case FormattingComponent.NumUpDown:
-      return formatRange(setting);
+      return describeRange(setting, setting.integer ? "Whole number" : "Number");
     case FormattingComponent.ColorPicker:
       return "Colour";
     case FormattingComponent.FontPicker:

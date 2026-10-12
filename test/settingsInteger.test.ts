@@ -27,7 +27,7 @@ describe("integer settings", () => {
     expect(rows.values).toEqual([{ count: undefined, bounded: 1 }]);
     expect(rows.validation.messages[0]).toEqual([
       "2.5 is not a valid value for count. Valid values are whole numbers",
-      "9.5 is not a valid value for bounded. Valid values are whole numbers"
+      "9.5 is not a valid value for bounded. Valid values are whole numbers from 0 to 10"
     ]);
     expect(rows.validation.status).toBe(1);
   });
@@ -39,8 +39,8 @@ describe("integer settings", () => {
     expect(rows.values[0].ylimit_tick_count).toBe(10);
     expect(rows.values[0].ylimit_sig_figs).toBeUndefined();
     expect(rows.validation.messages[0]).toEqual([
-      "2.5 is not a valid value for ylimit_sig_figs. Valid values are whole numbers",
-      "3.7 is not a valid value for ylimit_tick_count. Valid values are whole numbers"
+      "2.5 is not a valid value for ylimit_sig_figs. Valid values are whole numbers from 0 to 20",
+      "3.7 is not a valid value for ylimit_tick_count. Valid values are whole numbers from 0 to 100"
     ]);
     expect(axis.ylimit_tick_count.displayName).toBe("Approximate Tick Count");
     expect(scalingOptions().sig_figs.integer).toBe(true);

@@ -25,6 +25,16 @@ export function identitySelected(identity: SelectionKeyed | readonly SelectionKe
   return false;
 }
 
+/** One row's identity across the given category columns, so the same key under different groupings stays distinct */
+export function rowIdentity(host: powerbi.extensibility.visual.IVisualHost,
+                            columns: readonly powerbi.DataViewCategoryColumn[], row: number): powerbi.visuals.ISelectionId {
+  const builder = host.createSelectionIdBuilder();
+  for (let i = 0; i < columns.length; i++) {
+    builder.withCategory(columns[i], row);
+  }
+  return builder.createSelectionId();
+}
+
 export type SelectionState = {
   readonly active: boolean;
   readonly selected: ReadonlySet<string>;

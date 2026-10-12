@@ -6,6 +6,8 @@ export type SettingsGroupRule<S> = (settings: S, group: number) => string | unde
 
 export type SettingsGroups<T extends Record<string, SettingCard>> = {
   values: SettingsValues<T>[];
+  /** Each group's rows' own values, for checks across a group's rows */
+  rowValues: SettingsValues<T>[][];
   validation: SettingsValidation;
   messagePositionByRowIndex: Map<number, number>;
 };
@@ -16,14 +18,17 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
   rules: readonly SettingsGroupRule<SettingsValues<T>>[] = []
 ): SettingsGroups<T> {
   const values = new Array<SettingsValues<T>>(groups.length);
+  const rowValues = new Array<SettingsValues<T>[]>(groups.length);
   const rawRows: number[] = [];
   const firstPositions = new Array<number>(groups.length);
   const messagePositionByRowIndex = new Map<number, number>();
   for (let i = 0; i < groups.length; i++) {
     values[i] = createDefaultValues(schema);
     const rows = groups[i];
+    rowValues[i] = new Array<SettingsValues<T>>(rows.length);
     firstPositions[i] = rawRows.length;
     for (let j = 0; j < rows.length; j++) {
+      rowValues[i][j] = {} as SettingsValues<T>;
       messagePositionByRowIndex.set(rows[j], rawRows.length);
       rawRows.push(rows[j]);
     }
@@ -46,6 +51,9 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
     }
     for (let j = 0; j < groups.length; j++) {
       const position = firstPositions[j];
+      for (let k = 0; k < groups[j].length; k++) {
+        rowValues[j][k][card] = result.values[position + k];
+      }
       // The group's first row with valid values for this card; otherwise its first row, with defaults
       let chosen = position;
       for (let k = position; k < position + groups[j].length; k++) {
@@ -65,5 +73,5 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
       }
     }
   }
-  return { values, validation, messagePositionByRowIndex };
+  return { values, rowValues, validation, messagePositionByRowIndex };
 }

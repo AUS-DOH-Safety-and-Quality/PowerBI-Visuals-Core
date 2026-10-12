@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { identitySelected, selectedKeys } from "../src/powerbi/index";
+import { identitySelected, rowIdentity, selectedKeys } from "../src/powerbi/index";
 import type { SelectionKeyed } from "../src/powerbi/selection";
+import { keyedHost } from "../src/testing/index";
 
 function id(key: string): SelectionKeyed {
   return { getKey: () => key };
@@ -28,5 +29,16 @@ describe("selection matching", () => {
     const selected = selectedKeys([]);
     expect(identitySelected(id("a"), selected)).toBe(false);
     expect(identitySelected([id("a")], selected)).toBe(false);
+  });
+});
+
+describe("row identities", () => {
+  it("builds one identity from every column, so a key repeated under another grouping stays distinct", () => {
+    const host = keyedHost();
+    const key = { source: { displayName: "Key" }, values: ["A", "A"] } as never;
+    const group = { source: { displayName: "Group" }, values: ["X", "Y"] } as never;
+    expect(rowIdentity(host, [key, group], 1).getKey()).toBe("Key[1];Group[1];");
+    expect(rowIdentity(host, [key], 0).getKey()).toBe("Key[0];");
+    expect(rowIdentity(host, [key, group], 0).getKey()).not.toBe(rowIdentity(host, [key, group], 1).getKey());
   });
 });

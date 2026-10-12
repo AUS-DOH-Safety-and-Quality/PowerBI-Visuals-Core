@@ -9,4 +9,5 @@ export { default as createRenderer } from "./renderVisual";
 export type { RenderOptions, Rendered, Renderer } from "./renderVisual";
 export { default as settingsWith } from "./settingsWith";
 export type { SettingsOverrides } from "./settingsWith";
-export { settingsReferenceSuite, formattingContractsSuite } from "./suites";
+export { settingsReferenceSuite, formattingContractsSuite, capabilitiesSuite } from "./suites";
+export type { CapabilitiesObjects } from "./capabilities";

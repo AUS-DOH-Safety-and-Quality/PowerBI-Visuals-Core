@@ -21,7 +21,8 @@ describe("settings reference", () => {
             alignment: alignmentOption("Alignment", "Heading alignment."),
             offset: numberOption("Offset", "Shift.", 0.5, { min: 0 }),
             angle: numberOption("Angle", "Tilt.", -5, { max: 0 }),
-            scale: numberOption("Scale", "Size.", 1)
+            scale: numberOption("Scale", "Size.", 1, { above: 0 }),
+            share: numberOption("Share", "Part.", 0.5, { above: 0, below: 1 })
           }
         }
       })
@@ -44,7 +45,8 @@ describe("settings reference", () => {
       + "| Alignment | Heading alignment. | `center` | • `center`<br>• `left`<br>• `right` |\n"
       + "| Offset | Shift. | 0.5 | Number, at least 0 |\n"
       + "| Angle | Tilt. | -5 | Number, at most 0 |\n"
-      + "| Scale | Size. | 1 | Number |\n"
+      + "| Scale | Size. | 1 | Number, above 0 |\n"
+      + "| Share | Part. | 0.5 | Number, above 0 and below 1 |\n"
     );
   });
 

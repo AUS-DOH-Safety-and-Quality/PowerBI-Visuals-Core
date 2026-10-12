@@ -20,6 +20,7 @@
         "module": "es2020",
         "sourceMap": false,
         "moduleResolution": "bundler",
+        "resolveJsonModule": true,
         "declaration": true,
         "lib": [
             "es2020",

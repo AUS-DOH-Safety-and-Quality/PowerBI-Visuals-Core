@@ -90,3 +90,15 @@ export function rowWarnings(groupName: string, rows: readonly number[], keys: re
   }
   return warnings;
 }
+
+/** Each line of a group's message led by the group's label; an unlabelled group's message is unchanged */
+export function labelledMessage(label: string, message: string): string {
+  if (label === "") {
+    return message;
+  }
+  const lines = message.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    lines[i] = `${label}: ${lines[i]}`;
+  }
+  return lines.join("\n");
+}

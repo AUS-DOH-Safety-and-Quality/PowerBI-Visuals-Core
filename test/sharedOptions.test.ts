@@ -33,6 +33,7 @@ describe("shared setting options", () => {
     expect(pluck(flagDirectionOptions().improvement_direction.items, "displayName")).toEqual(["Increase", "Neutral", "Decrease"]);
     expect(Object.keys(scalingOptions())).toEqual(["multiplier", "sig_figs", "perc_labels"]);
     expect(scalingOptions().sig_figs.options).toEqual({ minValue: { value: 0 }, maxValue: { value: 20 } });
+    expect(scalingOptions().multiplier).toMatchObject({ options: { minValue: { value: 0 } }, exclusiveMin: true });
     expect(Object.keys(valueTooltipOptions())).toEqual([
       "ttip_show_numerator", "ttip_label_numerator", "ttip_show_denominator", "ttip_label_denominator", "ttip_show_value", "ttip_label_value"
     ]);

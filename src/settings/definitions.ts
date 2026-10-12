@@ -22,6 +22,9 @@ export type SettingDefinition = {
   options?: { minValue?: { value: number }; maxValue?: { value: number } };
   /** Validation only; not part of the formatting-pane payload. */
   integer?: boolean;
+  /** The pane clamps at the bound, so validation rejects it */
+  exclusiveMin?: boolean;
+  exclusiveMax?: boolean;
   constant?: boolean;
 };
 export type SettingCard = {
@@ -49,9 +52,12 @@ type NumberDefinition<T extends number | undefined> = {
   default: T;
   options?: SettingDefinition["options"];
   integer?: boolean;
+  exclusiveMin?: boolean;
+  exclusiveMax?: boolean;
 };
 
-type NumberBounds = { min?: number; max?: number; integer?: boolean };
+/** `above` and `below` are exclusive bounds */
+type NumberBounds = { min?: number; max?: number; above?: number; below?: number; integer?: boolean };
 
 function numberOption(displayName: string, description: string, defaultValue: number, minMax?: NumberBounds): NumberDefinition<number>;
 function numberOption(displayName: string, description: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined>;
@@ -63,20 +69,45 @@ function numberOption(displayName: string, description: string, defaultValue: nu
     default: defaultValue
   };
   if (minMax !== undefined) {
-    if (minMax.min !== undefined || minMax.max !== undefined) {
+    const min = minMax.min ?? minMax.above;
+    const max = minMax.max ?? minMax.below;
+    if (min !== undefined || max !== undefined) {
       result.options = {};
-      if (minMax.min !== undefined) {
-        result.options.minValue = { value: minMax.min };
+      if (min !== undefined) {
+        result.options.minValue = { value: min };
       }
-      if (minMax.max !== undefined) {
-        result.options.maxValue = { value: minMax.max };
+      if (max !== undefined) {
+        result.options.maxValue = { value: max };
       }
+    }
+    if (minMax.above !== undefined) {
+      result.exclusiveMin = true;
+    }
+    if (minMax.below !== undefined) {
+      result.exclusiveMax = true;
     }
     if (minMax.integer) {
       result.integer = true;
     }
   }
   return result;
+}
+
+/** The accepted range after `kind`, e.g. "Number from 0 to 10", "Number, above 0" */
+function describeRange(setting: SettingDefinition, kind: string): string {
+  const min = setting.options?.minValue?.value;
+  const max = setting.options?.maxValue?.value;
+  if (min !== undefined && max !== undefined && !setting.exclusiveMin && !setting.exclusiveMax) {
+    return `${kind} from ${min} to ${max}`;
+  }
+  const bounds: string[] = [];
+  if (min !== undefined) {
+    bounds.push(`${setting.exclusiveMin ? "above" : "at least"} ${min}`);
+  }
+  if (max !== undefined) {
+    bounds.push(`${setting.exclusiveMax ? "below" : "at most"} ${max}`);
+  }
+  return bounds.length === 0 ? kind : `${kind}, ${bounds.join(" and ")}`;
 }
 
 function toggleOption(displayName: string, description: string, defaultValue: boolean) {
@@ -200,7 +231,7 @@ function borderStyleOption(displayName: string, description: string, defaultValu
 }
 
 function borderWidthOption(displayName: string, description: string) {
-  return numberOption(displayName, description, 1, { min: 0 });
+  return numberOption(displayName, description, 1, { min: 0, max: 100 });
 }
 
 function alignmentOption(displayName: string, description: string) {
@@ -290,5 +321,5 @@ export {
   paddingOption, colourOption, fontOption, fontSizeOption, lineTypeOption,
   toggleOption, numberOption, textOption, lineLabelPositionOption, dropdownOption,
   borderStyleOption, borderWidthOption, alignmentOption, fontWeightOption, fontStyleOption, textTransformOption,
-  defineCard, groupDisplayName, createDefaultValues
+  defineCard, groupDisplayName, createDefaultValues, describeRange
 };

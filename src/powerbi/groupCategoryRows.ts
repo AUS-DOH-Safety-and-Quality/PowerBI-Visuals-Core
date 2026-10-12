@@ -1,6 +1,7 @@
 import { formatPrimitiveValue, type PrimitiveValue } from "./columns";
 
-export type CategoryGroups = { rows: number[][]; names: string[][]; keys: string[] };
+/** `labels` joins each group's names for messages and captions; blank when there are no columns */
+export type CategoryGroups = { rows: number[][]; names: string[][]; keys: string[]; labels: string[] };
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -18,7 +19,7 @@ function dateName(date: Date): string {
 export default function groupCategoryRows(
   columns: readonly { values: readonly PrimitiveValue[] }[], rowCount: number
 ): CategoryGroups {
-  const groups: CategoryGroups = { rows: [], names: [], keys: [] };
+  const groups: CategoryGroups = { rows: [], names: [], keys: [], labels: [] };
   const indexes = new Map<string, number>();
   for (let i = 0; i < rowCount; i++) {
     const parts = new Array<readonly [string, string]>(columns.length);
@@ -37,6 +38,7 @@ export default function groupCategoryRows(
       groups.rows.push([]);
       groups.names.push(names);
       groups.keys.push(key);
+      groups.labels.push(names.join(" / "));
     }
     groups.rows[index].push(i);
   }

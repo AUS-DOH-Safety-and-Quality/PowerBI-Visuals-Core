@@ -36,8 +36,9 @@ export type PlotViewModel<P extends PlotVisualPoint> = {
   readonly colourPalette: ColourPalette;
   readonly headless: boolean;
   readonly frontend: boolean;
-  readonly inputSettings: { getFormattingModel(): FormattingModel };
   update(options: UpdateOptions, host: IVisualHost): ViewModelValidation;
+  /** The formatting pane for the current view, which may depend on the data */
+  getFormattingModel(): FormattingModel;
 };
 
 export type SelectionHighlightState = {
@@ -225,6 +226,6 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
 
   getFormattingModel(): powerbi.visuals.FormattingModel {
     // API 5.1 omits the visual's unset numeric values and legacy option shapes.
-    return this.viewModel.inputSettings.getFormattingModel() as powerbi.visuals.FormattingModel;
+    return this.viewModel.getFormattingModel() as powerbi.visuals.FormattingModel;
   }
 }

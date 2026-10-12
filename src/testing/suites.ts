@@ -4,6 +4,7 @@ import type createCanvasCard from "../settings/createCanvasCard";
 import settingsReference from "../settings/settingsReference";
 import buildFormattingModel from "../powerbi/buildFormattingModel";
 import readSettingsRows from "../powerbi/readSettingsRows";
+import capabilitiesMismatches, { type CapabilitiesObjects } from "./capabilities";
 
 type CanvasModel = Record<string, SettingCard> & { readonly canvas: ReturnType<typeof createCanvasCard> };
 
@@ -17,6 +18,14 @@ export function settingsReferenceSuite(settingsModel: Record<string, SettingCard
         await expect(pages[cards[i]]).toMatchFileSnapshot(`${directory}/${cards[i]}.md`);
       });
     }
+  });
+}
+
+/** Every setting persists under its card with its component's type, beside only the named other objects */
+export function capabilitiesSuite(settingsModel: Record<string, SettingCard>, capabilities: { objects: CapabilitiesObjects },
+                                  otherObjects: readonly string[] = []): void {
+  it("mirrors the settings model in capabilities.json", () => {
+    expect(capabilitiesMismatches(settingsModel, capabilities.objects, otherObjects)).toEqual([]);
   });
 }
 

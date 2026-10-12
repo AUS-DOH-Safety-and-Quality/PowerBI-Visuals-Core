@@ -7,7 +7,10 @@ describe("category grouping", () => {
     const groups = groupCategoryRows([{ values: ["A", "B", "A", "A"] }, { values: [1, 1, 1, 2] }], 4);
     expect(groups.rows).toEqual([[0, 2], [1], [3]]);
     expect(groups.names).toEqual([["A", "1"], ["B", "1"], ["A", "2"]]);
-    expect(groupCategoryRows([], 3).rows).toEqual([[0, 1, 2]]);
+    expect(groups.labels).toEqual(["A / 1", "B / 1", "A / 2"]);
+    const ungrouped = groupCategoryRows([], 3);
+    expect(ungrouped.rows).toEqual([[0, 1, 2]]);
+    expect(ungrouped.labels).toEqual([""]);
   });
 
   it("groups null with undefined but not with blank, and equal dates together", () => {
@@ -55,6 +58,17 @@ describe("grouped settings", () => {
     expect(result.validation.status).toBe(0);
     expect(result.validation.messages[0]).toHaveLength(1);
     expect(result.validation.messages[1]).toEqual([]);
+  });
+
+  it("keeps each group's rows' own values alongside the group's chosen ones", () => {
+    const result = readSettingsGroups(schema, { objects: [
+      { data: { size: 4 } }, { data: { title: "Other" } }, { data: { size: -1 } }
+    ] }, [[1], [0, 2]]);
+    expect(result.rowValues).toEqual([
+      [{ data: { size: 2, title: "Other" } }],
+      [{ data: { size: 4, title: "Default" } }, { data: { size: 2, title: "Default" } }]
+    ]);
+    expect(result.values[1].data.size).toBe(4);
   });
 
   it("reports all-invalid selections", () => {

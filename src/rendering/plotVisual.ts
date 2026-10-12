@@ -37,6 +37,7 @@ export type PlotViewModel<P extends PlotVisualPoint> = {
   readonly headless: boolean;
   readonly frontend: boolean;
   update(options: UpdateOptions, host: IVisualHost): ViewModelValidation;
+  axisRanges(): { x: AxisBounds; y: AxisBounds };
   /** The formatting pane for the current view, which may depend on the data */
   getFormattingModel(): FormattingModel;
 };
@@ -85,7 +86,6 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
 
   /** The settings the plot is drawn from */
   protected abstract get settings(): S;
-  protected abstract axisRanges(): { x: AxisBounds; y: AxisBounds };
   abstract drawVisual(): void;
   abstract updateHighlighting(): void;
   /** Draws a view in place of the plot and returns true; by default there is none */
@@ -123,7 +123,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
         width: options.viewport.width,
         height: options.viewport.height,
         displayPlot: viewModel.plotPoints.length > 0,
-        ...this.axisRanges(),
+        ...viewModel.axisRanges(),
         settings: this.settings,
         palette: viewModel.colourPalette
       });

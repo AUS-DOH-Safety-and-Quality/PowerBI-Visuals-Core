@@ -4,6 +4,8 @@ export { default as readSettingsRows } from "./readSettingsRows";
 export type { SettingsValidation } from "./readSettingsRows";
 export { default as readSettingsGroups } from "./readSettingsGroups";
 export type { SettingsGroupRule, SettingsGroups } from "./readSettingsGroups";
+export { default as SettingsStore } from "./settingsStore";
+export type { GroupSettings } from "./settingsStore";
 export { default as groupCategoryRows } from "./groupCategoryRows";
 export type { CategoryGroups } from "./groupCategoryRows";
 export { indexColumnsByRole, formatPrimitiveValue, readNumbers } from "./columns";

@@ -32,7 +32,7 @@ export type SummaryTableOptions<R extends TableRow> = {
   readonly onSelectionChange: () => void;
 };
 
-type Cell = { readonly column: string; readonly value: string | number | undefined };
+type Cell = { readonly column: string; readonly value: string | number | undefined; readonly settings: TableSettingValues };
 
 const flagLabels: Readonly<Record<string, string>> = {
   none: "",
@@ -182,9 +182,10 @@ function drawTableCells<R extends TableRow>(div: TableSelection, options: Summar
                         .selectAll<HTMLTableRowElement, R>("tr")
                         .selectAll<HTMLTableCellElement, unknown>("td")
                         .data(d => {
+                          const settings = rowSettings(d);
                           const cells = new Array<Cell>(columns.length);
                           for (let i = 0; i < columns.length; i++) {
-                            cells[i] = { column: columns[i].name, value: d.table_row[columns[i].name] };
+                            cells[i] = { column: columns[i].name, value: d.table_row[columns[i].name], settings };
                           }
                           return cells;
                         })
@@ -192,12 +193,11 @@ function drawTableCells<R extends TableRow>(div: TableSelection, options: Summar
 
   tableCells.each(function(d) {
     const cell = select(this);
-    const row = select<HTMLElement | null, R>(this.parentElement).datum();
     const kind = kinds[d.column];
     if (kind !== "icon") {
       cell.text(cellText(d, kind, options.formatValue)).classed("cell-text", true);
     }
-    const tableSettings = rowSettings(row);
+    const tableSettings = d.settings;
     cell.style("background-color", tableSettings.table_body_bg_colour)
         .style("font-weight", tableSettings.table_body_font_weight)
         .style("text-transform", tableSettings.table_body_text_transform)

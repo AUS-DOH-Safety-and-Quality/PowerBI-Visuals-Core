@@ -10,7 +10,7 @@ const rules: RowRule[] = [
 
 describe("row validation", () => {
   it("names each row's first failing rule and passes when any row is valid", () => {
-    expect(validateRows(4, rules)).toEqual({ status: 0, messages: ["", "Missing", "Negative", "Not a number"] });
+    expect(validateRows(4, rules)).toEqual({ status: 0, messages: ["", "Missing", "Negative", "Not a number"], kept: [0] });
   });
 
   it("names a failure shared by every row and reports mixed failures generically", () => {

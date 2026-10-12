@@ -1,4 +1,3 @@
-import rep from "../math/rep";
 import type { LimitLineValues } from "../settings/lineSettings";
 
 export type SigmaLimitSeries = LimitLineValues<number[]> & { target: number[] };
@@ -19,8 +18,9 @@ export default function sigmaLimits(n: number, centre: number, options: SigmaLim
   const sigma = options.sigma;
   const floor = options.floor ?? -Infinity;
   const ceiling = options.ceiling ?? Infinity;
+  const target = options.target ?? centre;
   const limits: SigmaLimitSeries = {
-    target: rep(options.target ?? centre, n),
+    target: new Array<number>(n),
     ll99: new Array<number>(n),
     ll95: new Array<number>(n),
     ll68: new Array<number>(n),
@@ -30,6 +30,7 @@ export default function sigmaLimits(n: number, centre: number, options: SigmaLim
   };
   for (let i = 0; i < n; i++) {
     const s = typeof sigma === "number" ? sigma : sigma(i);
+    limits.target[i] = target;
     limits.ll99[i] = Math.max(floor, centre - 3 * s);
     limits.ll95[i] = Math.max(floor, centre - 2 * s);
     limits.ll68[i] = Math.max(floor, centre - s);

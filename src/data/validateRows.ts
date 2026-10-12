@@ -1,19 +1,9 @@
-export type RowValidation = { status: 0; messages: string[] } | { status: 1; messages: string[]; error: string };
+/** Valid input carries the positions of the rows no rule rejected */
+export type RowValidation = { status: 0; messages: string[]; kept: number[] } | { status: 1; messages: string[]; error: string };
 export type ValidRows = Extract<RowValidation, { status: 0 }>;
 
 /** Extracted input data, or why the whole input was rejected */
 export type InputDataResult<D> = { status: "valid"; data: D } | { status: "invalid"; error: string };
-
-/** Positions of the rows no rule rejected */
-export function keptPositions(messages: readonly string[]): number[] {
-  const kept: number[] = [];
-  for (let i = 0; i < messages.length; i++) {
-    if (messages[i] === "") {
-      kept.push(i);
-    }
-  }
-  return kept;
-}
 
 /** A row fails on its first matching rule; `all` names the error when every row fails the same rule */
 export type RowRule = {
@@ -24,7 +14,7 @@ export type RowRule = {
 
 export default function validateRows(count: number, rules: readonly RowRule[]): RowValidation {
   const messages = new Array<string>(count);
-  let anyValid = false;
+  const kept: number[] = [];
   let sameRule = true;
   let firstRule = -1;
   for (let i = 0; i < count; i++) {
@@ -37,7 +27,7 @@ export default function validateRows(count: number, rules: readonly RowRule[]): 
     }
     messages[i] = failed === -1 ? "" : rules[failed].message;
     if (failed === -1) {
-      anyValid = true;
+      kept.push(i);
     }
     if (i === 0) {
       firstRule = failed;
@@ -45,8 +35,8 @@ export default function validateRows(count: number, rules: readonly RowRule[]): 
       sameRule = false;
     }
   }
-  if (anyValid) {
-    return { status: 0, messages };
+  if (kept.length > 0) {
+    return { status: 0, messages, kept };
   }
   // A single shared failure names it; mixed failures get the generic error
   return { status: 1, messages, error: sameRule ? rules[firstRule].all : "No valid data found!" };

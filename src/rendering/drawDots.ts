@@ -56,13 +56,16 @@ export function drawDots<P extends DotPoint>(svg: SVGSVGElement, options: DotsOp
       ? `translate(${frame.xScale(point.x)}, ${frame.yScale(point.value)})`
       : "translate(0, 0) scale(0)");
   if (text !== undefined) {
-    marks
-      .attr("dy", "0.35em")
-      .text(point => text(point).text)
-      .style("text-anchor", "middle")
-      .style("font-size", point => `${text(point).size}px`)
-      .style("font-family", point => text(point).font)
-      .style("fill", point => text(point).colour);
+    marks.each(function(point) {
+      const label = text(point);
+      select(this)
+        .attr("dy", "0.35em")
+        .text(label.text)
+        .style("text-anchor", "middle")
+        .style("font-size", `${label.size}px`)
+        .style("font-family", label.font)
+        .style("fill", label.colour);
+    });
   } else {
     marks
       // Symbols take size as area instead of radius

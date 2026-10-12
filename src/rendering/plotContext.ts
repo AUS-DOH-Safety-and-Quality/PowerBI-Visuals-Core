@@ -22,6 +22,8 @@ export type PlotSettings = {
 export type PlotContext<P extends PlotPoint = PlotPoint> = {
   readonly frame: PlotFrame;
   readonly points: readonly P[];
+  /** Points inside the axis limits, which alone take a label or tooltip */
+  readonly visible: readonly P[];
   readonly palette: AxisPalette;
   readonly settings: PlotSettings;
   readonly host: powerbi.extensibility.visual.IVisualHost;

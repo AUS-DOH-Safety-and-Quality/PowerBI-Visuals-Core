@@ -11,7 +11,7 @@ import { drawLines, type LinePoint, type LineStyle, type PlotLine } from "./draw
 import { drawLineLabels, type LineLabel } from "./lineLabels";
 import { lineLabel, lineSetting, type LineSettingValues } from "../settings/lineSettings";
 import type { ValueFormatter } from "../data/valueFormatter";
-import { inPlot } from "./plotFrame";
+import { inPlot, type PlotFrame } from "./plotFrame";
 import type { PlotContext, PlotPoint } from "./plotContext";
 
 /** A named line and its points, as `groupBy` returns them */
@@ -42,11 +42,11 @@ export type PlotDotsOptions<P extends PlotPoint> = {
 };
 
 /** Points whose dots are drawn; the rest lie outside the axis limits, so take no label or tooltip */
-function visiblePoints<P extends PlotPoint>(context: PlotContext<P>): P[] {
+export function visiblePoints<P extends PlotPoint>(frame: PlotFrame, points: readonly P[]): P[] {
   const visible: P[] = [];
-  for (let i = 0; i < context.points.length; i++) {
-    const point = context.points[i];
-    if (inPlot(context.frame, point.x, point.value)) {
+  for (let i = 0; i < points.length; i++) {
+    const point = points[i];
+    if (inPlot(frame, point.x, point.value)) {
       visible.push(point);
     }
   }
@@ -84,7 +84,7 @@ export function drawPlotAxes(svg: SVGSVGElement, context: PlotContext, formats: 
 /** Crosshairs and the host tooltip follow the nearest point; `.plot` handlers are dropped when the svg is reset */
 export function drawPlotTooltips(svg: SVGSVGElement, context: PlotContext, includeVertical: boolean): void {
   const frame = context.frame;
-  const points = visiblePoints(context);
+  const points = context.visible;
   const host = context.host;
   const palette = context.palette;
   const vertical = svg.querySelector<SVGLineElement>(".ttip-line-x");
@@ -198,7 +198,7 @@ export function drawPlotValueLabels(svg: SVGSVGElement, context: PlotContext, an
   const settings = context.settings;
   drawValueLabels(svg, {
     visible: settings.labels.show_labels && anyLabels,
-    points: visiblePoints(context),
+    points: context.visible,
     xScale: frame.xScale,
     yScale: frame.yScale,
     plotHeight: frame.height,

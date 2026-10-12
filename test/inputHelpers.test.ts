@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveScaling, keptPositions, keptValues } from "../src/data/index";
+import { deriveScaling, keptValues, missingRule, quantity, validateRows } from "../src/data/index";
 import { readNumbers, readSettingsGroups } from "../src/powerbi/index";
 import { defineCard, numberOption } from "../src/settings/index";
 
@@ -27,9 +27,10 @@ describe("kept rows", () => {
   it("reads numbers with blanks, keeps the unrejected positions and compacts their values", () => {
     const numbers = readNumbers({ values: [1, null, 3, undefined, 5] }, [0, 1, 2, 4]);
     expect(numbers).toEqual([1, undefined, 3, 5]);
-    const kept = keptPositions(["", "Numerator missing", "", ""]);
-    expect(kept).toEqual([0, 2, 3]);
-    expect(keptValues(numbers, kept)).toEqual([1, 3, 5]);
+    const validation = validateRows(4, [missingRule(numbers, quantity.numerator)]);
+    expect(validation).toEqual({ status: 0, messages: ["", "Numerator missing", "", ""], kept: [0, 2, 3] });
+    expect(keptValues(numbers, [0, 2, 3])).toEqual([1, 3, 5]);
+    expect(() => keptValues(numbers, [1])).toThrow("missing value");
   });
 });
 

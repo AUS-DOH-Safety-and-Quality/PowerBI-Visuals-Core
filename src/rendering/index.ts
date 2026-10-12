@@ -27,7 +27,7 @@ export { fitPlotToOverflow } from "./overflow";
 export { highlightPlot } from "./highlight";
 export type { PlotContext } from "./plotContext";
 export {
-  valueTickFormat, drawPlotAxes, drawPlotTooltips, drawPlotValueLabels, drawPlotDots, drawPlotDownload, drawPlotLines, drawPlotLineLabels
+  valueTickFormat, visiblePoints, drawPlotAxes, drawPlotTooltips, drawPlotValueLabels, drawPlotDots, drawPlotDownload, drawPlotLines, drawPlotLineLabels
 } from "./drawPlot";
 export type { GroupedLine, PlotLineLabelOptions } from "./drawPlot";
 export { createTableContainer, showTable, drawSummaryTable, highlightTable } from "./summaryTable";

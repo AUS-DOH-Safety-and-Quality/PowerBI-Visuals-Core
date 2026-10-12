@@ -3,7 +3,7 @@ import type powerbi from "powerbi-visuals-api";
 import { testDom } from "powerbi-visuals-utils-testutils";
 import { keyedHost } from "../src/testing/index";
 import { createAxisCard, createCanvasCard, createDefaultValues, createDownloadCard, createLabelsCard, defineCard, dotOptions } from "../src/settings/index";
-import { createPlotFrame, initialiseSvg, type PlotContext, type PlotFrame } from "../src/rendering/index";
+import { createPlotFrame, initialiseSvg, visiblePoints, type PlotContext, type PlotFrame } from "../src/rendering/index";
 
 export const settings = createDefaultValues({
   canvas: createCanvasCard(),
@@ -103,8 +103,8 @@ export function points(visualHost: powerbi.extensibility.visual.IVisualHost, val
   return result;
 }
 
-export function context(visualHost: powerbi.extensibility.visual.IVisualHost, plotPoints: readonly TestPoint[], overrides: Partial<PlotContext<TestPoint>> = {}): PlotContext<TestPoint> {
-  return {
+export function context(visualHost: powerbi.extensibility.visual.IVisualHost, plotPoints: readonly TestPoint[], overrides: Partial<Omit<PlotContext<TestPoint>, "visible">> = {}): PlotContext<TestPoint> {
+  const base = {
     frame: frame(),
     points: plotPoints,
     palette,
@@ -116,6 +116,7 @@ export function context(visualHost: powerbi.extensibility.visual.IVisualHost, pl
     frontend: true,
     ...overrides
   };
+  return { ...base, visible: visiblePoints(base.frame, base.points) };
 }
 
 /** Client coordinates of a point in the svg's user space, for synthetic mouse events */

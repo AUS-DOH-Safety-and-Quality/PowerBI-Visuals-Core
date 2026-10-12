@@ -14,7 +14,7 @@ import type { PlotContext, PlotPoint, PlotSettings } from "./plotContext";
 import { createPlotFrame, type AxisBounds, type PlotFrame, type PlotFrameSettings } from "./plotFrame";
 import type { LinePoint } from "./drawLines";
 import {
-  drawPlotAxes, drawPlotTooltips, drawPlotLines, drawPlotLineLabels, drawPlotDots, drawPlotDownload, drawPlotValueLabels,
+  drawPlotAxes, drawPlotTooltips, drawPlotLines, drawPlotLineLabels, drawPlotDots, drawPlotDownload, drawPlotValueLabels, visiblePoints,
   type GroupedLine, type PlotDotsOptions, type TickFormats
 } from "./drawPlot";
 
@@ -223,9 +223,11 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
 
   plotContext(): PlotContext<P> {
     const viewModel = this.viewModel;
+    const frame = this.plotProperties;
     return {
-      frame: this.plotProperties,
+      frame,
       points: viewModel.plotPoints,
+      visible: visiblePoints(frame, viewModel.plotPoints),
       palette: viewModel.colourPalette,
       settings: this.settings,
       host: this.host,

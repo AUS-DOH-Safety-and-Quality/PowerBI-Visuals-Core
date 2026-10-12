@@ -1,5 +1,5 @@
 import type powerbi from "powerbi-visuals-api";
-import { keptPositions, type InputDataResult, type RowValidation, type ValidRows } from "../data/validateRows";
+import type { InputDataResult, RowValidation, ValidRows } from "../data/validateRows";
 import {
   readRowAnnotations, rowWarnings, type RowAnnotations, type RowAnnotationSources, type RowSettingsMessages
 } from "./rowAnnotations";
@@ -34,7 +34,7 @@ export default function extractRows<S, L>(
   if (validation.status !== 0) {
     return { status: "invalid", error: validation.error };
   }
-  const kept = keptPositions(validation.messages);
+  const kept = validation.kept;
   const annotations = readRowAnnotations({ categorical: view.categorical, values: view.values, rowSettings: options.rowSettings }, rows, kept);
   return {
     status: "valid",

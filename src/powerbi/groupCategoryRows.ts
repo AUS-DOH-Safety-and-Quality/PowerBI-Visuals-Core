@@ -19,6 +19,14 @@ function dateName(date: Date): string {
 export default function groupCategoryRows(
   columns: readonly { readonly values: readonly PrimitiveValue[] }[], rowCount: number
 ): CategoryGroups {
+  // Without columns every row belongs to one unnamed group
+  if (columns.length === 0) {
+    const rows = new Array<number>(rowCount);
+    for (let i = 0; i < rowCount; i++) {
+      rows[i] = i;
+    }
+    return { rows: [rows], names: [[]], keys: ["[]"], labels: [""] };
+  }
   const groups: CategoryGroups = { rows: [], names: [], keys: [], labels: [] };
   const indexes = new Map<string, number>();
   for (let i = 0; i < rowCount; i++) {

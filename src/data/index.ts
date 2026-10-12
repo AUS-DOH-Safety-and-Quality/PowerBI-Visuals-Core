@@ -14,5 +14,7 @@ export type { ValueFormatter } from "./valueFormatter";
 export { default as validateRows, keptPositions } from "./validateRows";
 export type { RowRule, RowValidation, ValidRows, InputDataResult } from "./validateRows";
 export { default as keptValues } from "./keptValues";
+export { quantity, valueAt, missingRule, nanRule, negativeRule, ratioRule } from "./inputRules";
+export type { NumberSeries, Quantity } from "./inputRules";
 export { default as deriveScaling } from "./deriveScaling";
 export type { DerivedScaling, ScalingOptions, ScalingSettings } from "./deriveScaling";

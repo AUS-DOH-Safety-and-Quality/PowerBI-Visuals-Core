@@ -18,4 +18,6 @@ export type { ValidatedDataView, DataViewValidation } from "./validateDataView";
 export type { ColourPalette } from "./colourPalette";
 export { readRowAnnotations, rowWarnings, labelledMessage } from "./rowAnnotations";
 export type { RowAnnotations } from "./rowAnnotations";
+export { default as extractRows } from "./extractRows";
+export type { InputRows, ExtractedRows, RowExtractionOptions } from "./extractRows";
 export { valueTooltips, limitTooltips, appendPatternTooltips } from "./tooltips";

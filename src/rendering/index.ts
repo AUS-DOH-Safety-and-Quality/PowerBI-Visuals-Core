@@ -35,6 +35,8 @@ export type { TableSelection, TableColumn, ColumnKind, TableRow, TableSettingVal
 export { PlotVisual } from "./plotVisual";
 export { PlotViewModelBase } from "./plotViewModel";
 export type { GroupResults } from "./plotViewModel";
-export type { ViewModelValidation, PlotViewModel, PlotVisualSettings, PlotVisualPoint, SelectionHighlightState, SvgSelection } from "./plotVisual";
+export type {
+  ViewModelValidation, PlotViewModel, PlotVisualSettings, PlotVisualPoint, PlotOptions, SelectionHighlightState, SvgSelection
+} from "./plotVisual";
 export { select, selectAll } from "d3-selection";
 export type { Selection, BaseType } from "d3-selection";

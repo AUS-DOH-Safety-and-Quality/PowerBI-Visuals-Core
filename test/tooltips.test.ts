@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultValues, createLineGroup, defineCard, valueTooltipOptions } from "../src/settings/index";
+import { createDefaultValues, createLineGroup, defineCard, limitColumns, valueTooltipOptions } from "../src/settings/index";
 import { createValueFormatter } from "../src/data/index";
 import { valueTooltips, limitTooltips, appendPatternTooltips, rowWarnings } from "../src/powerbi/index";
 import { pluck } from "./browserHelpers";
@@ -65,6 +65,15 @@ describe("tooltip helpers", () => {
     expect(pluck(limits, "value")).toEqual(["9.00%", "8.00%", "5.00%", "2.00%", "1.00%"]);
     const targets = limitTooltips({ ...lines, show_alt_target: true }, { ...row, alt_target: 6 }, format, false);
     expect(pluck(targets, "displayName")).toEqual(["Centerline", "Alt. Target"]);
+  });
+
+  it("names the table columns in the tooltip's order from the shown lines", () => {
+    expect(limitColumns({ ...lines, show_alt_target: true }, true)).toEqual([
+      { name: "ul99", label: "Upper 99% Limit" }, { name: "ul95", label: "Upper 95% Limit" },
+      { name: "target", label: "Centerline" }, { name: "alt_target", label: "Alt. Target" },
+      { name: "ll95", label: "Lower 95% Limit" }, { name: "ll99", label: "Lower 99% Limit" }
+    ]);
+    expect(pluck(limitColumns(lines, false), "name")).toEqual(["target"]);
   });
 
   it("keeps a missing limit as an empty row", () => {

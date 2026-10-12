@@ -1,10 +1,9 @@
 import type powerbi from "powerbi-visuals-api";
 import isNullOrUndefined from "../data/isNullOrUndefined";
 import type { ValueFormatter } from "../data/valueFormatter";
+import type { LimitLevel as Level, LimitLine as Line, LimitLineSettings, StandardLineValues } from "../settings/lineSettings";
 
 type VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-type Level = "68" | "95" | "99";
-type Line = Level | "target" | "alt_target";
 
 /** The `valueTooltipOptions` values */
 export type ValueTooltipSettings = {
@@ -23,11 +22,9 @@ export type ValueTooltipRow = {
 };
 
 /** The limit and target lines' `createLineGroup` tooltip values */
-export type LimitTooltipSettings =
-  { readonly [K in `show_${Line}` | `ttip_show_${Line}`]: boolean }
-  & { readonly [K in `ttip_label_${Line}` | `ttip_label_${Level}_prefix_lower` | `ttip_label_${Level}_prefix_upper`]: string };
+export type LimitTooltipSettings = LimitLineSettings & { readonly [K in `ttip_show_${Line}`]: boolean };
 
-export type LimitTooltipRow = { readonly [K in `ll${Level}` | `ul${Level}` | "target" | "alt_target"]: number | undefined };
+export type LimitTooltipRow = Readonly<StandardLineValues<number | undefined>>;
 
 /** Value, numerator and denominator; an "Automatic" value label takes the chart's name for it */
 export function valueTooltips(settings: ValueTooltipSettings, row: ValueTooltipRow, automaticLabel: string, format: ValueFormatter): VisualTooltipDataItem[] {

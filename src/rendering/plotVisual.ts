@@ -1,6 +1,7 @@
 import type powerbi from "powerbi-visuals-api";
 import { select, type BaseType, type Selection } from "d3-selection";
-import { lineOpacity, type LineSettingValues } from "../settings/lineSettings";
+import { lineOpacity, lineStyle, type LineSettingValues } from "../settings/lineSettings";
+import type { ValueFormatter } from "../data/valueFormatter";
 import bindContextMenu from "./contextMenu";
 import type { ColourPalette } from "../powerbi/colourPalette";
 import type { FormattingModel } from "../powerbi/buildFormattingModel";
@@ -11,6 +12,11 @@ import { initialiseSvg } from "./initialiseSvg";
 import { fitPlotToOverflow } from "./overflow";
 import type { PlotContext, PlotPoint, PlotSettings } from "./plotContext";
 import { createPlotFrame, type AxisBounds, type PlotFrame, type PlotFrameSettings } from "./plotFrame";
+import type { LinePoint } from "./drawLines";
+import {
+  drawPlotAxes, drawPlotTooltips, drawPlotLines, drawPlotLineLabels, drawPlotDots, drawPlotDownload, drawPlotValueLabels,
+  type GroupedLine, type PlotDotsOptions, type TickFormats
+} from "./drawPlot";
 
 type IVisualHost = powerbi.extensibility.visual.IVisualHost;
 type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -28,11 +34,17 @@ export type PlotVisualSettings = PlotSettings & PlotFrameSettings & {
   readonly lines: LineSettingValues;
 };
 
-export type PlotVisualPoint = PlotPoint & HighlightPoint;
+/** A plot point's table row is what the download exports */
+export type PlotVisualPoint = PlotPoint & HighlightPoint & { readonly table_row: Readonly<Record<string, unknown>> };
 
 /** What the visual shell reads from its view model */
-export type PlotViewModel<P extends PlotVisualPoint> = {
+export type PlotViewModel<P extends PlotVisualPoint, L extends LinePoint = LinePoint> = {
   readonly plotPoints: readonly P[];
+  readonly groupedLines: readonly GroupedLine<string, L>[];
+  /** Positions in every grouped line ending a labelled period */
+  readonly periodEnds: readonly number[];
+  readonly anyLabels: boolean;
+  readonly inputSettings: { readonly derivedSettings: readonly { readonly formatValue: ValueFormatter }[] };
   readonly colourPalette: ColourPalette;
   readonly headless: boolean;
   readonly frontend: boolean;
@@ -40,6 +52,18 @@ export type PlotViewModel<P extends PlotVisualPoint> = {
   axisRanges(): { x: AxisBounds; y: AxisBounds };
   /** The formatting pane for the current view, which may depend on the data */
   getFormattingModel(): FormattingModel;
+};
+
+/** What differs between the visuals' plots */
+export type PlotOptions<P extends PlotVisualPoint, L extends LinePoint> = {
+  readonly tickFormats: TickFormats;
+  /** Whether the crosshair follows the nearest point horizontally as well as vertically */
+  readonly verticalCrosshair: boolean;
+  /** The line settings a line's point is styled from */
+  readonly lineSettings: (points: readonly L[], index: number) => LineSettingValues;
+  /** Lines whose outside labels sit below the line */
+  readonly lowerLines: ReadonlySet<string>;
+  readonly dots: PlotDotsOptions<P>;
 };
 
 export type SelectionHighlightState = {
@@ -50,8 +74,8 @@ export type SelectionHighlightState = {
 export type SvgSelection = Selection<SVGSVGElement, unknown, null, undefined>;
 
 /** The update cycle, error display, plot frame and highlighting shared by the plot visuals */
-export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewModel<P>, S extends PlotVisualSettings>
-  implements powerbi.extensibility.IVisual {
+export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewModel<P, L>, S extends PlotVisualSettings,
+                                 L extends LinePoint = LinePoint> implements powerbi.extensibility.IVisual {
   readonly element: HTMLElement;
   host: IVisualHost;
   svg: SvgSelection;
@@ -86,11 +110,48 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
 
   /** The settings the plot is drawn from */
   protected abstract get settings(): S;
-  abstract drawVisual(): void;
+  protected abstract plotOptions(): PlotOptions<P, L>;
   abstract updateHighlighting(): void;
   /** Draws a view in place of the plot and returns true; by default there is none */
   protected drawAlternate(): boolean {
     return false;
+  }
+  /** Draws any marks over the dots, below the context menu; by default there are none */
+  protected drawMarks(_svg: SVGSVGElement): void {}
+
+  /** Axes, tooltips, lines and their labels, dots, marks, context menu, download and value labels, in that order */
+  drawVisual(): void {
+    const svg = this.svg.node();
+    if (svg === null) {
+      return;
+    }
+    const viewModel = this.viewModel;
+    const context = this.plotContext();
+    const options = this.plotOptions();
+    const lines = viewModel.groupedLines;
+    drawPlotAxes(svg, context, options.tickFormats);
+    drawPlotTooltips(svg, context, options.verticalCrosshair);
+    drawPlotLines(svg, context, lines, (name, points, index) => lineStyle(options.lineSettings(points, index), this.lineKeys[name]));
+    drawPlotLineLabels(svg, context, {
+      lines,
+      settings: this.settings.lines,
+      keys: this.lineKeys,
+      lower: name => options.lowerLines.has(name),
+      format: viewModel.inputSettings.derivedSettings[0].formatValue,
+      periodEnds: viewModel.periodEnds
+    });
+    drawPlotDots(svg, context, options.dots);
+    this.drawMarks(svg);
+    this.addContextMenu(svg);
+    drawPlotDownload(svg, context, () => {
+      const points = context.points;
+      const rows = new Array<P["table_row"]>(points.length);
+      for (let i = 0; i < points.length; i++) {
+        rows[i] = points[i].table_row;
+      }
+      return rows;
+    });
+    drawPlotValueLabels(svg, context, viewModel.anyLabels);
   }
 
   update(options: UpdateOptions): void {

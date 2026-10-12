@@ -1,14 +1,7 @@
 import rep from "../math/rep";
+import type { LimitLineValues } from "../settings/lineSettings";
 
-export type SigmaLimitSeries = {
-  target: number[];
-  ll99: number[];
-  ll95: number[];
-  ll68: number[];
-  ul68: number[];
-  ul95: number[];
-  ul99: number[];
-};
+export type SigmaLimitSeries = LimitLineValues<number[]> & { target: number[] };
 
 export type SigmaLimitOptions = {
   /** One sigma for every point, or each point's own */

@@ -1,10 +1,46 @@
 import type { ValueFormatter } from "../data/valueFormatter";
 import type { LineLabel, LineLabelPosition } from "../rendering/lineLabels";
 import type { LineStyle } from "../rendering/drawLines";
+import type { TableColumn } from "../rendering/summaryTable";
 
 export const limitLineNames = ["ll99", "ll95", "ll68", "ul68", "ul95", "ul99"] as const;
 
 export type LimitLineName = typeof limitLineNames[number];
+
+export type LimitLevel = "68" | "95" | "99";
+export type LimitLine = LimitLevel | "target" | "alt_target";
+
+/** The limit and target lines' `createLineGroup` visibility and label values */
+export type LimitLineSettings =
+  { readonly [K in `show_${LimitLine}`]: boolean }
+  & { readonly [K in `ttip_label_${LimitLine}` | `ttip_label_${LimitLevel}_prefix_lower` | `ttip_label_${LimitLevel}_prefix_upper`]: string };
+
+/** Upper limits from 99% in, the targets, then lower limits from 68% out, as `limitTooltips` orders them */
+export function limitColumns(lines: LimitLineSettings, controlLimits: boolean): TableColumn[] {
+  const columns: TableColumn[] = [];
+  const levels: LimitLevel[] = ["99", "95", "68"];
+  const limit = (level: LimitLevel, side: "upper" | "lower"): void => {
+    if (controlLimits && lines[`show_${level}`]) {
+      columns.push({
+        name: `${side === "upper" ? "ul" : "ll"}${level}`,
+        label: `${lines[`ttip_label_${level}_prefix_${side}`]}${lines[`ttip_label_${level}`]}`
+      });
+    }
+  };
+  for (let i = 0; i < levels.length; i++) {
+    limit(levels[i], "upper");
+  }
+  if (lines.show_target) {
+    columns.push({ name: "target", label: lines.ttip_label_target });
+  }
+  if (lines.show_alt_target) {
+    columns.push({ name: "alt_target", label: lines.ttip_label_alt_target });
+  }
+  for (let i = levels.length - 1; i >= 0; i--) {
+    limit(levels[i], "lower");
+  }
+  return columns;
+}
 
 /** Lower limit lines place their outside labels below the line */
 export const lowerLimitLines: ReadonlySet<string> = new Set(["ll99", "ll95", "ll68"]);
@@ -22,6 +58,12 @@ export const standardLineKeys = {
 } as const;
 
 export type StandardLineName = keyof typeof standardLineKeys;
+
+/** A value per limit line */
+export type LimitLineValues<T> = { [K in LimitLineName]: T };
+
+/** A value per limit and target line */
+export type StandardLineValues<T> = { [K in StandardLineName]: T };
 
 export type LineSettingValues = Readonly<Record<string, unknown>>;
 

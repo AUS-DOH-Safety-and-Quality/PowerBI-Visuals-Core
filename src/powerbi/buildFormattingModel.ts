@@ -19,11 +19,11 @@ export type FormattingControl = {
 export type FormattingSlice = { uid: string; displayName: string; infoIconText: string; control: FormattingControl };
 export type FormattingGroup = { uid: string; displayName: string; slices: FormattingSlice[] };
 export type FormattingCard = {
-  uid: string;
-  description: string;
-  displayName: string;
-  groups: FormattingGroup[];
-  revertToDefaultDescriptors: FormattingDescriptor[];
+  readonly uid: string;
+  readonly description: string;
+  readonly displayName: string;
+  readonly groups: FormattingGroup[];
+  readonly revertToDefaultDescriptors: FormattingDescriptor[];
 };
 export type FormattingModel = { cards: FormattingCard[] };
 

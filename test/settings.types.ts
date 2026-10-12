@@ -1,5 +1,5 @@
 import {
-  createDefaultValues, defineCard, dropdownOption, numberOption, textOption, toggleOption
+  createDefaultValues, defineCard, dropdownOption, numberOption, textOption, toggleOption, type SettingsValues
 } from "../src/settings/index";
 
 const schema = { data: defineCard({
@@ -24,6 +24,10 @@ values.data.limit = undefined;
 values.data.from = "End";
 values.data.enabled = false;
 values.data.text = "Changed";
+// Read settings may be shared between rows, so only the built defaults are writable
+const stored: SettingsValues<typeof schema> = values;
+// @ts-expect-error Stored settings are read-only.
+stored.data.count = 3;
 // @ts-expect-error Required numeric defaults do not admit undefined.
 values.data.count = undefined;
 // @ts-expect-error Optional settings are still named required properties.

@@ -5,13 +5,13 @@ export type SigmaLimitSeries = LimitLineValues<number[]> & { target: number[] };
 
 export type SigmaLimitOptions = {
   /** One sigma for every point, or each point's own */
-  sigma: number | ((index: number) => number);
+  readonly sigma: number | ((index: number) => number);
   /** Drawn as the centreline when it differs from the centre the limits surround */
-  target?: number;
+  readonly target?: number;
   /** Lower limits never fall below this */
-  floor?: number;
+  readonly floor?: number;
   /** Upper limits never rise above this */
-  ceiling?: number;
+  readonly ceiling?: number;
 };
 
 /** Limits one, two and three sigma either side of the centre */

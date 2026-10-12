@@ -1,9 +1,9 @@
 export type ColourPalette = {
-  isHighContrast: boolean;
-  foregroundColour: string;
-  backgroundColour: string;
-  foregroundSelectedColour: string;
-  hyperlinkColour: string;
+  readonly isHighContrast: boolean;
+  readonly foregroundColour: string;
+  readonly backgroundColour: string;
+  readonly foregroundSelectedColour: string;
+  readonly hyperlinkColour: string;
 };
 
 /** The slice of IVisualHost.colorPalette the visuals use, without importing the API */

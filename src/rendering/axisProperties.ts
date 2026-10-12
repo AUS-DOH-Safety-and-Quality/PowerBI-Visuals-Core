@@ -1,27 +1,27 @@
 import type { AxisLabelAlign } from "./axis";
 
 export type AxisProperties = {
-  lower: number;
-  upper: number;
-  start_padding: number;
-  end_padding: number;
-  colour: string;
-  ticks: boolean;
-  tick_marks: boolean;
-  tick_size: string;
-  tick_font: string;
-  tick_colour: string;
-  tick_rotation: number;
-  tick_count: number;
-  label: string;
-  label_size: string;
-  label_font: string;
-  label_colour: string;
-  label_style: string;
-  label_align: AxisLabelAlign;
-  grid_show: boolean;
-  grid_colour: string;
-  grid_width: number;
+  readonly lower: number;
+  readonly upper: number;
+  readonly start_padding: number;
+  readonly end_padding: number;
+  readonly colour: string;
+  readonly ticks: boolean;
+  readonly tick_marks: boolean;
+  readonly tick_size: string;
+  readonly tick_font: string;
+  readonly tick_colour: string;
+  readonly tick_rotation: number;
+  readonly tick_count: number;
+  readonly label: string;
+  readonly label_size: string;
+  readonly label_font: string;
+  readonly label_colour: string;
+  readonly label_style: string;
+  readonly label_align: AxisLabelAlign;
+  readonly grid_show: boolean;
+  readonly grid_colour: string;
+  readonly grid_width: number;
 };
 
 type AxisSettingFields = {

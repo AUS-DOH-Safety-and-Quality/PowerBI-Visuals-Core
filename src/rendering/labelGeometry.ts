@@ -36,7 +36,7 @@ export type LabelGeometry = {
   readonly marker_offset: number;
 };
 
-export function labelGeometry(label: LabelState, pointX: number, pointY: number,
+export function labelGeometry(label: Readonly<LabelState>, pointX: number, pointY: number,
                               plotHeight: number, bottomPadding: number): LabelGeometry {
   const aesthetics = label.aesthetics;
   const top = aesthetics.label_position === "top";

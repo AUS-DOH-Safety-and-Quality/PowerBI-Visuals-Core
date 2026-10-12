@@ -32,9 +32,9 @@ export type SummaryTableOptions<R extends TableRow> = {
   readonly onSelectionChange: () => void;
 };
 
-type Cell = { column: string; value: string | number | undefined };
+type Cell = { readonly column: string; readonly value: string | number | undefined };
 
-const flagLabels: Record<string, string> = {
+const flagLabels: Readonly<Record<string, string>> = {
   none: "",
   improvement: "Improvement",
   deterioration: "Deterioration",

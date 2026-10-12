@@ -17,7 +17,7 @@ function dateName(date: Date): string {
 }
 
 export default function groupCategoryRows(
-  columns: readonly { values: readonly PrimitiveValue[] }[], rowCount: number
+  columns: readonly { readonly values: readonly PrimitiveValue[] }[], rowCount: number
 ): CategoryGroups {
   const groups: CategoryGroups = { rows: [], names: [], keys: [], labels: [] };
   const indexes = new Map<string, number>();

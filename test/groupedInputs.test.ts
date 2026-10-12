@@ -46,8 +46,7 @@ describe("grouped settings", () => {
     expect(result.validation.status).toBe(0);
     expect(result.validation.messages[2][0]).toContain("size");
     expect(result.messagePositionByRowIndex.get(2)).toBe(2);
-    result.values[0].data.size = 9;
-    expect(result.values[1].data.size).toBe(4);
+    expect(result.values[1].data).not.toBe(result.values[0].data);
   });
 
   it("takes each group's first valid row for a card, warning about the invalid ones", () => {
@@ -69,6 +68,15 @@ describe("grouped settings", () => {
       [{ data: { size: 4, title: "Default" } }, { data: { size: 2, title: "Default" } }]
     ]);
     expect(result.values[1].data.size).toBe(4);
+  });
+
+  it("shares the default row across groups and keeps one empty message list for clean rows", () => {
+    const result = readSettingsGroups(schema, { objects: [{}, { data: { size: -1 } }, {}] }, [[0], [1, 2]]);
+    expect(result.rowValues[1][1].data).toBe(result.rowValues[0][0].data);
+    expect(result.values[1].data).toBe(result.rowValues[0][0].data);
+    expect(result.rowValues[1][0].data).not.toBe(result.rowValues[0][0].data);
+    expect(result.validation.messages[2]).toBe(result.validation.messages[0]);
+    expect(result.validation.messages[1]).toHaveLength(1);
   });
 
   it("reports all-invalid selections", () => {

@@ -28,9 +28,9 @@ export type SettingDefinition = {
   constant?: boolean;
 };
 export type SettingCard = {
-  displayName: string;
-  description: string;
-  settingsGroups: Record<string, Record<string, SettingDefinition>>;
+  readonly displayName: string;
+  readonly description: string;
+  readonly settingsGroups: Record<string, Record<string, SettingDefinition>>;
 };
 
 const defaultColours = {
@@ -57,7 +57,7 @@ type NumberDefinition<T extends number | undefined> = {
 };
 
 /** `above` and `below` are exclusive bounds */
-type NumberBounds = { min?: number; max?: number; above?: number; below?: number; integer?: boolean };
+type NumberBounds = { readonly min?: number; readonly max?: number; readonly above?: number; readonly below?: number; readonly integer?: boolean };
 
 function numberOption(displayName: string, description: string, defaultValue: number, minMax?: NumberBounds): NumberDefinition<number>;
 function numberOption(displayName: string, description: string, defaultValue: number | undefined, minMax?: NumberBounds): NumberDefinition<number | undefined>;
@@ -178,7 +178,7 @@ type DropdownItem<T extends string> = { displayName: string; value: T };
 const valueTransforms = {
   none: (value: string) => value,
   sentence: (value: string) => value.toLowerCase().replace(/\b\w/g, (char: string) => char.toUpperCase())
-};
+} as const;
 
 function dropdownOption<const Values extends readonly string[]>(
   displayName: string, description: string, defaultValue: NoInfer<Values[number]>, validValues: Values,
@@ -270,10 +270,15 @@ type MergeUnions<T> = (T extends unknown ? (value: T) => void : never) extends (
 type SettingMembers<T extends SettingCard> = MergeUnions<T["settingsGroups"][keyof T["settingsGroups"]]>;
 export type ColourName = keyof typeof defaultColours;
 export type CardValues<T extends SettingCard> = {
-  [K in keyof SettingMembers<T>]: SettingMembers<T>[K] extends { default: infer Value extends SettingValue } ? Value : never;
+  readonly [K in keyof SettingMembers<T>]: SettingMembers<T>[K] extends { default: infer Value extends SettingValue } ? Value : never;
 };
+/** Read-only, as the store's rows may share one object */
 export type SettingsValues<T extends Record<string, SettingCard>> = {
-  [K in keyof T]: CardValues<T[K]>;
+  readonly [K in keyof T]: CardValues<T[K]>;
+};
+/** The defaults as built, for fixtures to edit before they are read as row objects */
+export type MutableSettingsValues<T extends Record<string, SettingCard>> = {
+  -readonly [K in keyof T]: { -readonly [S in keyof CardValues<T[K]>]: CardValues<T[K]>[S] };
 };
 
 function defineCard<T extends SettingCard>(definition: T): T & SettingMembers<T> {
@@ -295,7 +300,7 @@ function groupDisplayName(card: SettingCard, groupName: string): string {
   return groupName === "all" ? card.displayName : groupName;
 }
 
-function createDefaultValues<T extends Record<string, SettingCard>>(schema: T): SettingsValues<T> {
+function createDefaultValues<T extends Record<string, SettingCard>>(schema: T): MutableSettingsValues<T> {
   const values: Record<string, Record<string, SettingValue>> = {};
   const cards = Object.keys(schema);
   for (let i = 0; i < cards.length; i++) {
@@ -313,7 +318,7 @@ function createDefaultValues<T extends Record<string, SettingCard>>(schema: T): 
     }
     values[name] = defaults;
   }
-  return values as SettingsValues<T>;
+  return values as MutableSettingsValues<T>;
 }
 
 export {

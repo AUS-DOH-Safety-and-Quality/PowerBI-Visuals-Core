@@ -7,7 +7,7 @@ export type SettingsValidation =
   | { status: 1; messages: string[][]; error: string };
 export type SettingsRows<T> = { values: T[]; validation: SettingsValidation };
 export type SettingsCategory = {
-  objects?: readonly (Readonly<Record<string, Readonly<Record<string, unknown>> | undefined>> | undefined)[];
+  readonly objects?: readonly (Readonly<Record<string, Readonly<Record<string, unknown>> | undefined>> | undefined)[];
 };
 
 function readValue(raw: unknown, defaultValue: SettingValue, type: SettingDefinition["type"]): unknown {
@@ -73,13 +73,13 @@ export default function readSettingsRows<T extends SettingCard>(
   const messages = new Array<string[]>(rawRowIndices.length);
   let anyValid = false;
   let firstMessage: string | undefined;
-  // Rows without their own card objects all read the same way, so reuse the first
+  // Rows without their own card objects all read the same way, so share the first; callers copy before writing
   let defaultRow: { values: CardValues<T>; messages: string[] } | undefined;
   for (let i = 0; i < rawRowIndices.length; i++) {
     const objects = category.objects?.[rawRowIndices[i]]?.[cardName];
     if (objects == null && defaultRow !== undefined) {
-      values[i] = { ...defaultRow.values };
-      messages[i] = defaultRow.messages.slice();
+      values[i] = defaultRow.values;
+      messages[i] = defaultRow.messages;
       anyValid ||= defaultRow.messages.length === 0;
       continue;
     }

@@ -37,9 +37,8 @@ describe("settings row contracts", () => {
       ["-1 is not a valid value for optional. Valid values are numbers from 0 to 10"], []
     ]);
     expect(rows.validation.status).toBe(0);
-    rows.values[0].count = 9;
+    expect(rows.values[2]).not.toBe(rows.values[0]);
     rows.validation.messages[0].push("local");
-    expect(rows.values[2].count).toBe(7);
     expect(rows.validation.messages[2]).toHaveLength(1);
     expect(defaults.count).toBe(2);
     expect(category.objects[4]).toEqual({ example: { count: 7, optional: -1, mode: "second" } });
@@ -158,16 +157,16 @@ it("keeps text blank while resetting erased non-text controls", () => {
   expect(result.validation).toEqual({ status: 0, messages: [[]] });
 });
 
-it("gives rows without card objects independent copies of the shared defaults", () => {
+it("shares one values object and message list between rows without card objects, apart from the defaults", () => {
   const result = readSettingsRows(card, "example", defaults, {
-    objects: [{}, undefined, { other: { count: 1 } }]
-  }, [0, 1, 2, 0]);
-  expect(result.values).toEqual([defaults, defaults, defaults, defaults]);
-  expect(result.validation).toEqual({ status: 0, messages: [[], [], [], []] });
-  result.values[0].count = 9;
-  result.validation.messages[0].push("local");
-  expect(result.values[1].count).toBe(2);
-  expect(result.values[3].count).toBe(2);
-  expect(result.validation.messages[1]).toEqual([]);
-  expect(defaults.count).toBe(2);
+    objects: [{}, undefined, { other: { count: 1 } }, { example: { count: 3 } }]
+  }, [0, 1, 2, 0, 3]);
+  expect(result.values).toEqual([defaults, defaults, defaults, defaults, { ...defaults, count: 3 }]);
+  expect(result.validation).toEqual({ status: 0, messages: [[], [], [], [], []] });
+  for (let i = 1; i < 4; i++) {
+    expect(result.values[i]).toBe(result.values[0]);
+    expect(result.validation.messages[i]).toBe(result.validation.messages[0]);
+  }
+  expect(result.values[4]).not.toBe(result.values[0]);
+  expect(result.values[0]).not.toBe(defaults);
 });

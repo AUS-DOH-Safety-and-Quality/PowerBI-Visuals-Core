@@ -13,6 +13,7 @@ const cards = {
 };
 const defaults = createDefaultValues(cards);
 const settings = { messages: [["bad size"]], messagePositionByRowIndex: new Map([[2, 0]]) };
+const rowSettings = [defaults, defaults, { scatter: { ...defaults.scatter, size: 9 }, labels: defaults.labels }];
 
 function extract(numerators: (number | null)[]) {
   const view = validatedView(buildDataView({
@@ -21,11 +22,11 @@ function extract(numerators: (number | null)[]) {
       { role: "indicator", values: ["X", "X", "X"] }
     ],
     values: [{ role: "numerators", values: numerators }]
-  }, [{}, {}, { scatter: { size: 9 } }]), ["numerators"]);
+  }), ["numerators"]);
   const rows = [0, 1, 2];
   const values = readNumbers(view.values.numerators[0], rows);
   return extractRows(view, rows, {
-    keys: ["A", "B", "C"], validation: validateRows(3, [missingRule(values, quantity.numerator)]), cards, defaults, settings
+    keys: ["A", "B", "C"], validation: validateRows(3, [missingRule(values, quantity.numerator)]), rowSettings, settings
   });
 }
 

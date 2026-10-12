@@ -13,7 +13,7 @@ export type ErrorMessageOptions = {
   readonly show: boolean;
 };
 
-const preambles: Record<ErrorKind, string> = {
+const preambles: Readonly<Record<ErrorKind, string>> = {
   internal: "Internal Error! Please file a bug report with the following text:",
   settings: "Invalid settings provided for all observations! First error:"
 };

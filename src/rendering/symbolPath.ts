@@ -90,7 +90,7 @@ function wyePath(size: number): string {
   ]);
 }
 
-const SYMBOLS: Record<string, (size: number) => string> = {
+const SYMBOLS: Readonly<Record<string, (size: number) => string>> = {
   Circle: circlePath,
   Cross: crossPath,
   Diamond: diamondPath,

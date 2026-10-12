@@ -34,7 +34,7 @@ export function formattingContractsSuite<M extends CanvasModel>(settingsModel: M
   it("resolves the formatting contracts through the installed Core package", () => {
     const defaults = createDefaultValues(settingsModel);
     expect(defaultSettings).toEqual(defaults);
-    const rows = readSettingsRows(settingsModel.canvas, "canvas", defaults.canvas, {
+    const rows = readSettingsRows(settingsModel.canvas, "canvas", defaultSettings.canvas, {
       objects: [{ canvas: { lower_padding: 0, show_errors: false } }]
     }, [0]);
     expect(rows.values[0]).toMatchObject({ lower_padding: 0, show_errors: false });

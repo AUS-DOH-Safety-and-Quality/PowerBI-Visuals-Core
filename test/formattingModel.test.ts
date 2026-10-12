@@ -88,7 +88,7 @@ describe("formatting model", () => {
     const values = createDefaultValues(schema);
     const first = buildFormattingModel(schema, values);
     const second = buildFormattingModel(schema, values);
-    first.cards[0].displayName = "Edited";
+    expect(second.cards[0]).not.toBe(first.cards[0]);
     first.cards[0].groups[0].slices[0].control.properties.value = false;
     first.cards[0].revertToDefaultDescriptors[0].propertyName = "edited";
     expect(second.cards[0].displayName).toBe("Example card");

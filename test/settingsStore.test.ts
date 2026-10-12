@@ -28,8 +28,7 @@ describe("settings store", () => {
     expect(store.validationStatus).toEqual({ status: 0, messages: [] });
     expect(store.group(0)).toEqual({ settings: store.settings[0], derivedSettings: 2 });
     expect(store.getFormattingModel().cards).toHaveLength(2);
-    store.settings[0].example.scale = 5;
-    expect(createStore().settings[0].example.scale).toBe(2);
+    expect(createStore().settings[0].example).not.toBe(store.settings[0].example);
   });
 
   it("reads each group's values and rows, deriving per group", () => {

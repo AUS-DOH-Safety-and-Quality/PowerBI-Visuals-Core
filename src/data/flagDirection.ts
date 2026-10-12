@@ -7,7 +7,7 @@ export type FlagSettings = {
   readonly improvement_direction: ImprovementDirection;
 };
 
-const directionMaps: Record<ImprovementDirection, Record<"lower" | "upper", FlagDirection>> = {
+const directionMaps: Readonly<Record<ImprovementDirection, Readonly<Record<"lower" | "upper", FlagDirection>>>> = {
   increase: { upper: "improvement", lower: "deterioration" },
   decrease: { lower: "improvement", upper: "deterioration" },
   neutral: { lower: "neutral_low", upper: "neutral_high" }

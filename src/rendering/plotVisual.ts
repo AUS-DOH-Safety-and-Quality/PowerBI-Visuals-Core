@@ -77,10 +77,10 @@ export type SvgSelection = Selection<SVGSVGElement, unknown, null, undefined>;
 export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewModel<P, L>, S extends PlotVisualSettings,
                                  L extends LinePoint = LinePoint> implements powerbi.extensibility.IVisual {
   readonly element: HTMLElement;
-  host: IVisualHost;
-  svg: SvgSelection;
-  viewModel: VM;
-  selectionManager: powerbi.extensibility.ISelectionManager;
+  readonly host: IVisualHost;
+  readonly svg: SvgSelection;
+  readonly viewModel: VM;
+  readonly selectionManager: powerbi.extensibility.ISelectionManager;
   private currentPlotProperties: PlotFrame | undefined;
   /** Line names to their `createLineGroup` keys */
   protected abstract readonly lineKeys: Readonly<Record<string, string>>;

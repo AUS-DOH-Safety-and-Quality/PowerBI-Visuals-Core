@@ -1,5 +1,4 @@
 import type powerbi from "powerbi-visuals-api";
-import type { CardValues, SettingCard } from "../settings/definitions";
 import { keptPositions, type InputDataResult, type RowValidation, type ValidRows } from "../data/validateRows";
 import {
   readRowAnnotations, rowWarnings, type RowAnnotations, type RowAnnotationSources, type RowSettingsMessages
@@ -9,12 +8,12 @@ import type { ValidatedDataView } from "./validateDataView";
 /** What every visual's input data carries for a group's kept rows */
 export type InputRows<S, L> = RowAnnotations<S, L> & {
   /** Key and indicator columns, which together identify a row */
-  identityColumns: powerbi.DataViewCategoryColumn[];
-  warningMessage: string;
-  validationStatus: ValidRows;
+  readonly identityColumns: powerbi.DataViewCategoryColumn[];
+  readonly warningMessage: string;
+  readonly validationStatus: ValidRows;
 };
 
-export type RowExtractionOptions<S extends SettingCard, L extends SettingCard> = Pick<RowAnnotationSources<S, L>, "cards" | "defaults"> & {
+export type RowExtractionOptions<S, L> = Pick<RowAnnotationSources<S, L>, "rowSettings"> & {
   readonly keys: readonly (string | undefined)[];
   readonly validation: RowValidation;
   readonly settings: RowSettingsMessages;
@@ -22,23 +21,21 @@ export type RowExtractionOptions<S extends SettingCard, L extends SettingCard> =
 
 export type ExtractedRows<S, L> = Omit<InputRows<S, L>, "warningMessage"> & {
   /** Positions within the group's rows that validation kept */
-  kept: number[];
+  readonly kept: number[];
   /** Why each dropped row went, and which conditional formatting was ignored */
-  warnings: string[];
+  readonly warnings: string[];
 };
 
 /** Rejects the group when no row is valid; otherwise the kept rows' annotations with the warnings for the rest */
-export default function extractRows<S extends SettingCard, L extends SettingCard>(
+export default function extractRows<S, L>(
   view: ValidatedDataView, rows: readonly number[], options: RowExtractionOptions<S, L>
-): InputDataResult<ExtractedRows<CardValues<S>, CardValues<L>>> {
+): InputDataResult<ExtractedRows<S, L>> {
   const validation = options.validation;
   if (validation.status !== 0) {
     return { status: "invalid", error: validation.error };
   }
   const kept = keptPositions(validation.messages);
-  const annotations = readRowAnnotations({
-    categorical: view.categorical, values: view.values, categories: view.category, cards: options.cards, defaults: options.defaults
-  }, rows, kept);
+  const annotations = readRowAnnotations({ categorical: view.categorical, values: view.values, rowSettings: options.rowSettings }, rows, kept);
   return {
     status: "valid",
     data: {

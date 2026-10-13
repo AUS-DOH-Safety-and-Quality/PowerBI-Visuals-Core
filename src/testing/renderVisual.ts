@@ -1,7 +1,7 @@
 import type powerbi from "powerbi-visuals-api";
 import { onTestFinished } from "vitest";
 import { testDom, createVisualHost } from "powerbi-visuals-utils-testutils";
-import type { UpdateOptions } from "../powerbi/updateOptions";
+import { updateType, type UpdateOptions } from "../powerbi/updateOptions";
 
 type IVisualHost = powerbi.extensibility.visual.IVisualHost;
 type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -37,7 +37,7 @@ export default function createRenderer<V extends { update(options: UpdateOptions
       current = nextInputs;
       const dataView = build(nextInputs, next);
       options.prepare?.(dataView);
-      visual.update({ dataViews: [dataView], viewport: { width: 500, height: 500 }, type: 2 });
+      visual.update({ dataViews: [dataView], viewport: { width: 500, height: 500 }, type: updateType.data });
     };
     update(settings);
     return { element, visual, update };

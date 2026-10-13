@@ -17,7 +17,7 @@ const values = createDefaultValues(schema);
 const count: number = values.data.count;
 const limit: number | undefined = values.data.limit;
 const from: "Start" | "End" = values.data.from;
-void [count, limit, from];
+[count, limit, from];
 values.data.count = 2;
 values.data.limit = 3;
 values.data.limit = undefined;
@@ -32,7 +32,7 @@ stored.data.count = 3;
 values.data.count = undefined;
 // @ts-expect-error Optional settings are still named required properties.
 const missing: typeof values.data = { count: 1, from: "Start", enabled: true, text: "" };
-void missing;
+missing;
 // @ts-expect-error Dropdown values retain the declared literal union.
 values.data.from = "Middle";
 // @ts-expect-error The initial selection must belong to the valid values.

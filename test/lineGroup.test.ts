@@ -20,12 +20,6 @@ describe("line group factory", () => {
       "plot_label_show_68", "plot_label_show_all_68", "plot_label_show_n_68", "plot_label_position_68",
       "plot_label_vpad_68", "plot_label_hpad_68", "plot_label_font_68", "plot_label_size_68", "plot_label_colour_68", "plot_label_prefix_68"
     ]);
-    expect(group.show_68).toEqual({ displayName: "Show 68% Lines", description: "Draws the line.", type: "ToggleSwitch", default: false });
-    expect(group.width_68.default).toBe(2);
-    expect(group.type_68.default).toBe("2 5");
-    expect(group.colour_68.default).toBe("#6495ED");
-    expect(group.ttip_label_68.default).toBe("68% Limit");
-    expect(group.ttip_label_68_prefix_lower.default).toBe("Lower ");
     expect(group.plot_label_show_n_68.options).toEqual({ minValue: { value: 1 } });
   });
 

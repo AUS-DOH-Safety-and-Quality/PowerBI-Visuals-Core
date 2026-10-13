@@ -13,14 +13,16 @@ export type ValidatedDataView<R extends string = never> = {
 
 export type DataViewValidation<R extends string> =
   | { readonly status: "valid"; readonly view: ValidatedDataView<R> }
-  | { readonly status: "invalid"; readonly error: string };
+  | { readonly status: "invalid"; readonly error: string }
+  /** No view or no rows, as when every row is filtered out: drawn blank, like the built-in visuals */
+  | { readonly status: "empty"; readonly error: "No data present" };
 
 /** The first problem wins: no view, no key category, no rows, then each missing value role in order */
 export function validateDataView<R extends string>(dataViews: readonly powerbi.DataView[],
                                                    requiredValueRoles: readonly R[]): DataViewValidation<R> {
   const dataView = dataViews[0];
   if (dataView === undefined) {
-    return { status: "invalid", error: "No data present" };
+    return { status: "empty", error: "No data present" };
   }
   const categorical = dataView.categorical;
   const category = categorical?.categories?.[0];
@@ -34,7 +36,7 @@ export function validateDataView<R extends string>(dataViews: readonly powerbi.D
   }
   const rowCount = key[0].values.length;
   if (rowCount === 0) {
-    return { status: "invalid", error: "No data present" };
+    return { status: "empty", error: "No data present" };
   }
   const values = indexColumnsByRole(categorical.values ?? []);
   for (let i = 0; i < requiredValueRoles.length; i++) {

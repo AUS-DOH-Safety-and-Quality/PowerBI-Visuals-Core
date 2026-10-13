@@ -6,8 +6,8 @@ import type { OutlierStatus } from "../data/flagDirection";
  */
 export default function twoInThree(val: readonly number[], ll95: readonly (number | undefined)[], ul95: readonly (number | undefined)[], highlight_series: boolean): OutlierStatus[] {
   const length: number = val.length;
-  let outside95: number[] = new Array<number>(length);
-  let two_in_three_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
+  const outside95: number[] = new Array<number>(length);
+  const two_in_three_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
   for (let i: number = 0; i < length; i++) {
     const lower = ll95[i];
     const upper = ul95[i];

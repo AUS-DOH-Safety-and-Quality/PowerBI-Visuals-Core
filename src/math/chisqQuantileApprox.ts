@@ -41,9 +41,9 @@ export default function chisqQuantileApprox(p: number, nu: number, g: number,
   const C10: number = 13.32;
 
   let ch: number = 0.4;
-  let p2: number = 0;
+  let p2: number;
   let q: number = 0;
-  let t: number = 0;
+  let t: number;
   const a: number = logP(p, !lower_tail, log_p) + g + c * Math.LN2;
 
   while (Math.abs(q - ch) > tol * Math.abs(ch)) {

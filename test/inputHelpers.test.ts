@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveScaling, keptValues, missingRule, quantity, validateRows } from "../src/data/index";
+import { deriveScaling, keptValues } from "../src/data/index";
 import { readNumbers, readSettingsGroups } from "../src/powerbi/index";
 import { defineCard, numberOption } from "../src/settings/index";
 
@@ -24,11 +24,12 @@ describe("derived scaling", () => {
 });
 
 describe("kept rows", () => {
-  it("reads numbers with blanks, keeps the unrejected positions and compacts their values", () => {
-    const numbers = readNumbers({ values: [1, null, 3, undefined, 5] }, [0, 1, 2, 4]);
-    expect(numbers).toEqual([1, undefined, 3, 5]);
-    const validation = validateRows(4, [missingRule(numbers, quantity.numerator)]);
-    expect(validation).toEqual({ status: 0, messages: ["", "Numerator missing", "", ""], kept: [0, 2, 3] });
+  it("reads the selected cells as numbers, with blank cells and empty strings missing", () => {
+    expect(readNumbers({ values: [2.5, null, "0", 4, undefined, ""] }, [0, 1, 2, 4, 5])).toEqual([2.5, undefined, 0, undefined, undefined]);
+  });
+
+  it("compacts the kept positions' values and rejects a kept missing value", () => {
+    const numbers = [1, undefined, 3, 5];
     expect(keptValues(numbers, [0, 2, 3])).toEqual([1, 3, 5]);
     expect(() => keptValues(numbers, [1])).toThrow("missing value");
   });
@@ -36,16 +37,11 @@ describe("kept rows", () => {
 
 describe("settings group rules", () => {
   const schema = { card: defineCard({ displayName: "Card", description: "Card", settingsGroups: {
-    all: { lower: numberOption("Lower", "Lower.", 0), upper: numberOption("Upper", "Upper.", 10) }
+    all: { lower: numberOption("Lower", "Lower.", 0) }
   } }) };
-  const ordered = (values: { card: { lower: number; upper: number } }, group: number) =>
-    values.card.lower < values.card.upper ? undefined : `group ${group} inverted`;
 
-  it("reports the first failing group's rule after any row-level error", () => {
-    const category = { objects: [{ card: { lower: 5 } }, { card: { lower: 20 } }, { card: { upper: 1 } }] };
-    expect(readSettingsGroups(schema, category, [[0], [1], [2]], [ordered]).validation).toMatchObject({ status: 1, error: "group 1 inverted" });
-    expect(readSettingsGroups(schema, category, [[0]], [ordered]).validation.status).toBe(0);
+  it("reports a row-level error ahead of any group rule", () => {
     const invalid = { objects: [{ card: { lower: "x" } }] };
-    expect(readSettingsGroups(schema, invalid, [[0]], [() => "rule"]).validation).toMatchObject({ status: 1, error: expect.stringContaining("lower") });
+    expect(readSettingsGroups(schema, invalid, [[0]], [() => "rule"]).validation).toMatchObject({ status: 1, error: "x is not a valid number for lower" });
   });
 });

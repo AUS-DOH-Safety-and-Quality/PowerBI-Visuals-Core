@@ -10,6 +10,7 @@ export type { FlaggedAesthetics } from "./flagColours";
 export { default as createValueFormatter } from "./valueFormatter";
 export { default as resolvePercentScaling } from "./percentScaling";
 export { default as toCsv } from "./toCsv";
+export type { TableValue } from "./toCsv";
 export type { ValueFormatter } from "./valueFormatter";
 export { default as validateRows } from "./validateRows";
 export type { RowRule, RowValidation, ValidRows, InputDataResult } from "./validateRows";

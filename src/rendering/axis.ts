@@ -93,9 +93,9 @@ export function drawAxisTicks(group: SVGGElement, options: AxisTicksOptions): vo
   domain.setAttribute("class", "domain");
   domain.setAttribute("stroke", "currentColor");
   if (bottom) {
-    domain.setAttribute("d", outer ? `M${range0},${outer}V${offset}H${range1}V${outer}` : `M${range0},${offset}H${range1}`);
+    domain.setAttribute("d", outer !== 0 ? `M${range0},${outer}V${offset}H${range1}V${outer}` : `M${range0},${offset}H${range1}`);
   } else {
-    domain.setAttribute("d", outer ? `M${outer},${range0}H${offset}V${range1}H${outer}` : `M${offset},${range0}V${range1}`);
+    domain.setAttribute("d", outer !== 0 ? `M${outer},${range0}H${offset}V${range1}H${outer}` : `M${offset},${range0}V${range1}`);
   }
   group.appendChild(domain);
   for (let i = 0; i < options.values.length; i++) {

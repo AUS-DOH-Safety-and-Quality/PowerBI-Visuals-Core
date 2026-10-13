@@ -4,7 +4,7 @@ import type SettingsStore from "../powerbi/settingsStore";
 import { readColourPalette, type ColourPalette } from "../powerbi/colourPalette";
 import { validateDataView, type ValidatedDataView } from "../powerbi/validateDataView";
 import groupCategoryRows, { type CategoryGroups } from "../powerbi/groupCategoryRows";
-import type { UpdateOptions } from "../powerbi/updateOptions";
+import { updateType, type UpdateOptions } from "../powerbi/updateOptions";
 import type { FormattingModel } from "../powerbi/buildFormattingModel";
 import { axisRangeError, type AxisBounds } from "./plotFrame";
 import type { ErrorKind } from "./errorMessage";
@@ -50,7 +50,7 @@ export abstract class PlotViewModelBase<T extends Record<string, SettingCard>, D
     this.colourPalette = readColourPalette(host);
     const checkView = validateDataView(options.dataViews, this.valueRoles);
     if (checkView.status !== "valid") {
-      return this.invalidate(checkView.error);
+      return this.invalidate(checkView.error, checkView.status === "empty" ? "empty" : undefined);
     }
     const view = checkView.view;
     this.svgWidth = options.viewport.width;
@@ -60,7 +60,7 @@ export abstract class PlotViewModelBase<T extends Record<string, SettingCard>, D
 
     const groups = groupCategoryRows(view.categories.indicator ?? [], view.rowCount);
     // Data and Style updates both rebuild settings, so theme changes reach the derived values
-    const dataChanged = (options.type & (2 | 16)) !== 0 || this.firstRun;
+    const dataChanged = (options.type & (updateType.data | updateType.style)) !== 0 || this.firstRun;
     if (dataChanged) {
       this.inputSettings.update(view.category, groups.rows);
     }

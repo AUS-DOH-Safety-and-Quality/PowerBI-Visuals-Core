@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { select } from "d3-selection";
 import { initialiseSvg, screenToSvg } from "../src/rendering/index";
 import { svgElement } from "./browserHelpers";
+import { must } from "../src/testing/index";
 
 describe("svg layers", () => {
   it("builds the fixed layer order", () => {
@@ -17,7 +18,7 @@ describe("svg layers", () => {
 
   it("resetting clears every child and the .plot handlers before rebuilding the layers", () => {
     const svg = svgElement();
-    svg.querySelector(".dotsgroup")!.appendChild(svg.ownerDocument.createElementNS("http://www.w3.org/2000/svg", "path"));
+    must(svg.querySelector(".dotsgroup")).appendChild(svg.ownerDocument.createElementNS("http://www.w3.org/2000/svg", "path"));
     const plotClick = vi.fn();
     const otherClick = vi.fn();
     select(svg).on("click.plot", plotClick).on("click.other", otherClick);

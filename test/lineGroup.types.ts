@@ -31,7 +31,7 @@ const lineType: "10 0" | "10 10" | "2 5" = values.type_target;
 const count: number = values.plot_label_show_n_99;
 const prefix: string = values.ttip_label_99_prefix_upper;
 const position: "outside" | "inside" | "above" | "below" | "beside" = values.plot_label_position_target;
-void [shown, lineType, count, prefix, position];
+[shown, lineType, count, prefix, position];
 
 // @ts-expect-error Re-baseline controls exist only when requested.
 values.join_rebaselines_target;

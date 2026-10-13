@@ -30,6 +30,28 @@ describe("alignment with R nmath edge cases", () => {
     expectRel(gammaCDF(0.5, 0.001, 1, false, true), -7.4874547519064638, 1e-14);
   });
 
+  it("matches pgamma, pchisq and dpois away from the edges", () => {
+    // R 4.6.1: pgamma(x, shape, scale = scale, lower.tail, log.p), arguments in the same order
+    expectRel(gammaCDF(2, 2, 1, true, false), 0.59399415029016189, 1e-14);
+    expectRel(gammaCDF(1, 0.5, 1, true, false), 0.84270079294971556, 1e-14);
+    expectRel(gammaCDF(5, 3, 2, true, false), 0.45618688411667041, 1e-14);
+    expectRel(gammaCDF(5, 3, 2, false, false), 0.54381311588332959, 1e-14);
+    expectRel(gammaCDF(5, 3, 2, true, true), -0.78485271983740823, 1e-14);
+    expectRel(gammaCDF(5, 3, 2, false, true), -0.609149628127714, 1e-14);
+    // R 4.6.1: pchisq(x, df, lower.tail)
+    expectRel(chisqCDF(3.841459, 1, true, false), 0.95000000534680429, 1e-14);
+    expectRel(chisqCDF(10, 5, true, false), 0.92476475385348778, 1e-14);
+    expectRel(chisqCDF(10, 5, false, false), 0.075235246146512197, 1e-14);
+    expectRel(chisqCDF(23.20925, 10, false, false), 0.010000003995074247, 1e-14);
+    // R 4.6.1: dpois(x, lambda, log)
+    expectRel(poissonDensity(10, 3, false), 0.0008101511794681432, 1e-14);
+    expectRel(poissonDensity(0, 2.5, false), 0.0820849986238988, 1e-14);
+    expectRel(poissonDensity(1000, 1000, false), 0.012614611348721503, 1e-14);
+    expectRel(poissonDensity(10, 3, true), -7.1182896863944185, 1e-14);
+    expectRel(poissonDensity(1000, 1000, true), -4.3728995060262967, 1e-14);
+    expectRel(poissonDensity(0, 2.5, true), -2.5, 1e-14);
+  });
+
   it("frexp handles the top binade, subnormals and signs", () => {
     const top = frexp(1.5e308);
     expect(top.exponent).toBe(1024);

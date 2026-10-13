@@ -53,8 +53,8 @@ export default function gammaCDFImpl(x: number, alph: number,
       if (log_p) {
         res = log1mExp(Math.log1p(sum) + lf2);
       } else {
-        let f1m1: number = sum;
-        let f2m1: number = Math.expm1(lf2);
+        const f1m1: number = sum;
+        const f2m1: number = Math.expm1(lf2);
         res =  -(f1m1 + f2m1 + f1m1 * f2m1);
       }
     }
@@ -97,7 +97,7 @@ export default function gammaCDFImpl(x: number, alph: number,
         y--;
       }
 
-      if (y != Math.floor(y)) {
+      if (y !== Math.floor(y)) {
         sum += term * gammaContFrac(y, x + 1 - y);
       }
 

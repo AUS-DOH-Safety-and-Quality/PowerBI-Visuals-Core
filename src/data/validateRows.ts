@@ -38,6 +38,6 @@ export default function validateRows(count: number, rules: readonly RowRule[]): 
   if (kept.length > 0) {
     return { status: 0, messages, kept };
   }
-  // A single shared failure names it; mixed failures get the generic error
-  return { status: 1, messages, error: sameRule ? rules[firstRule].all : "No valid data found!" };
+  // A single shared failure names it; mixed failures or no rows get the generic error
+  return { status: 1, messages, error: sameRule && count > 0 ? rules[firstRule].all : "No valid data found!" };
 }

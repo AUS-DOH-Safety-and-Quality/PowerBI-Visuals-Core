@@ -2,7 +2,9 @@
  * Fields holding a comma, quote or line break are quoted, with embedded quotes doubled.
  * Text a spreadsheet would read as a formula is prefixed with ' (OWASP CSV injection).
  */
-function csvField(value: unknown): string {
+export type TableValue = string | number | boolean | null | undefined;
+
+function csvField(value: TableValue): string {
   const raw = String(value ?? "");
   const text = typeof value === "string" && /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
   if (!/[",\r\n]/.test(text)) {
@@ -11,8 +13,11 @@ function csvField(value: unknown): string {
   return `"${text.replace(/"/g, "\"\"")}"`;
 }
 
-/** Header from the first row's keys; missing values are blank */
-export default function toCsv(rows: readonly Readonly<Record<string, unknown>>[]): string {
+/** Header from the first row's keys; missing values are blank; no rows gives an empty string */
+export default function toCsv(rows: readonly Readonly<Record<string, TableValue>>[]): string {
+  if (rows.length === 0) {
+    return "";
+  }
   const columns = Object.keys(rows[0]);
   const lines = new Array<string>(rows.length + 1);
   const header = new Array<string>(columns.length);

@@ -34,15 +34,11 @@ export default function poissonCDFAsymp(x: number, lambda: number,
   let res1_ig: number;
   let res2_term: number;
   let res2_ig: number;
-  let dfm: number;
-  let pt_: number;
   let s2pt: number;
-  let f: number;
-  let np: number;
   let i: number;
 
-  dfm = lambda - x;
-  pt_ = -log1pmx(dfm / x);
+  const dfm: number = lambda - x;
+  const pt_: number = -log1pmx(dfm / x);
 
   // Signed root deviance; approximately standard normal
   s2pt = Math.sqrt(2 * x * pt_);
@@ -72,8 +68,8 @@ export default function poissonCDFAsymp(x: number, lambda: number,
     elfb = -elfb;
   }
 
-  f = res12 / elfb;
-  np = normalCDF(s2pt, 0, 1, !lower_tail, log_p);
+  const f: number = res12 / elfb;
+  const np: number = normalCDF(s2pt, 0, 1, !lower_tail, log_p);
 
   if (log_p) {
     // Inlined R dpnorm: phi(s2pt) / Phi(s2pt), with a series for large s2pt where exp(np) underflows
@@ -87,7 +83,7 @@ export default function poissonCDFAsymp(x: number, lambda: number,
     if (s2pt > 10 && !i_tail) {
       let term: number = 1 / s2pt;
       let sum: number = term;
-      let x2: number = s2pt * s2pt;
+      const x2: number = s2pt * s2pt;
       let i: number = 1;
 
       while (Math.abs(term) > Number.EPSILON * sum) {
@@ -98,7 +94,7 @@ export default function poissonCDFAsymp(x: number, lambda: number,
 
       n_d_over_p = 1 / sum;
     } else {
-      let d: number = normalDensity(s2pt, 0, 1, false);
+      const d: number = normalDensity(s2pt, 0, 1, false);
       n_d_over_p =  d / Math.exp(np);
     }
 

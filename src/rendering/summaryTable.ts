@@ -245,6 +245,7 @@ export function drawSummaryTable<R extends TableRow>(div: TableSelection, option
 }
 
 /** Fades the rows by their opacities unless selected or host-highlighted */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- R lets callers pass opacities for their own row type
 export function highlightTable<R extends TableRow>(div: TableSelection, state: SelectionHighlightState,
                                                    opacities: (row: R) => HighlightOpacities): void {
   div.selectAll(".table-body").selectChildren<HTMLTableRowElement, R>().style("opacity", d =>

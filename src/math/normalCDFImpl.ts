@@ -3,7 +3,7 @@ import ldexp from "./ldexp";
 
 /** Standard normal CDF (Cody 1993, ACM TOMS 715); adapted from R's pnorm_both. */
 export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boolean): number {
-  let i_tail: number = lower_tail ? 0 : 1;
+  const i_tail: number = lower_tail ? 0 : 1;
 
   const a: readonly number[] = [
     2.2352520354606839287,
@@ -61,21 +61,17 @@ export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boo
   let xnum: number;
   let temp: number;
   let del: number;
-  let eps: number;
   let xsq: number;
-  let y: number;
   let i: number;
-  let lower: boolean;
-  let upper: boolean;
 
-  eps =Number.EPSILON * 0.5;
+  const eps: number = Number.EPSILON * 0.5;
 
-  lower = i_tail != 1;
-  upper = i_tail != 0;
+  const lower: boolean = i_tail !== 1;
+  const upper: boolean = i_tail !== 0;
   let cum: number = 0;
   let ccum: number = 0;
 
-  y = Math.abs(x);
+  const y: number = Math.abs(x);
 
   if (y <= 0.67448975) {
     if (y > eps) {

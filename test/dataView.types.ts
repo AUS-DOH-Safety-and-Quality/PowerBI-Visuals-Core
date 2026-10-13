@@ -14,5 +14,5 @@ if (result.status === "valid") {
   const denominators: powerbi.DataViewValueColumn[] = result.view.values.denominators;
   // @ts-expect-error Optional category roles may be absent.
   const indicator: powerbi.DataViewCategoryColumn[] = result.view.categories.indicator;
-  void [numerators, key, denominators, indicator];
+  [numerators, key, denominators, indicator];
 }

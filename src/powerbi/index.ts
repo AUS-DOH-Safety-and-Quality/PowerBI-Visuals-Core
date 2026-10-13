@@ -11,6 +11,7 @@ export type { CategoryGroups } from "./groupCategoryRows";
 export { indexColumnsByRole, formatPrimitiveValue, readNumbers } from "./columns";
 export type { RoleColumns, PrimitiveValue } from "./columns";
 export type { UpdateOptions } from "./updateOptions";
+export { updateType, combineUpdateTypes } from "./updateOptions";
 export { selectedKeys, identitySelected, selectionState, rowIdentity } from "./selection";
 export { readColourPalette } from "./colourPalette";
 export { validateDataView } from "./validateDataView";

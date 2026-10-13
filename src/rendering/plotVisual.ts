@@ -2,6 +2,7 @@ import type powerbi from "powerbi-visuals-api";
 import { select, type BaseType, type Selection } from "d3-selection";
 import { lineOpacity, lineStyle, type LineSettingValues } from "../settings/lineSettings";
 import type { ValueFormatter } from "../data/valueFormatter";
+import type { TableValue } from "../data/toCsv";
 import bindContextMenu from "./contextMenu";
 import type { ColourPalette } from "../powerbi/colourPalette";
 import type { FormattingModel } from "../powerbi/buildFormattingModel";
@@ -35,7 +36,7 @@ export type PlotVisualSettings = PlotSettings & PlotFrameSettings & {
 };
 
 /** A plot point's table row is what the download exports */
-export type PlotVisualPoint = PlotPoint & HighlightPoint & { readonly table_row: Readonly<Record<string, unknown>> };
+export type PlotVisualPoint = PlotPoint & HighlightPoint & { readonly table_row: Readonly<Record<string, TableValue>> };
 
 /** What the visual shell reads from its view model */
 export type PlotViewModel<P extends PlotVisualPoint, L extends LinePoint = LinePoint> = {
@@ -164,8 +165,13 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       if (!status.status) {
         this.currentPlotProperties = undefined;
         this.resizeCanvas(options.viewport.width, options.viewport.height);
-        this.drawErrors(options, status.error, status.type, this.settings.canvas.show_errors);
-        this.host.eventService.renderingFailed(options);
+        const empty = status.type === "empty";
+        this.drawErrors(options, status.error, status.type, this.settings.canvas.show_errors && !empty);
+        if (empty) {
+          this.host.eventService.renderingFinished(options);
+        } else {
+          this.host.eventService.renderingFailed(options);
+        }
         return;
       }
       if (status.warning) {
@@ -252,7 +258,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
     });
   }
 
-  /** Context menu for the datum under the pointer; grouped rows supply their first identity, the background an empty one */
+  /** Context menu for the datum under the pointer; grouped rows supply their first identity, anything without one an empty one */
   addContextMenu(root: GlobalEventHandlers | null, enabled = this.plotProperties.displayPlot): void {
     if (root === null) {
       return;
@@ -260,13 +266,15 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
     bindContextMenu(root, {
       enabled,
       identity: target => {
-        const datum = select(target as BaseType).datum() as ContextMenuDatum | undefined;
-        if (datum === undefined) {
+        const datum = select(target as BaseType).datum() as Partial<ContextMenuDatum> | undefined;
+        if (datum?.identity === undefined) {
           return {} as ISelectionId;
         }
         return Array.isArray(datum.identity) ? datum.identity[0] : datum.identity;
       },
-      show: (identity, position) => this.selectionManager.showContextMenu(identity, position)
+      show: (identity, position) => {
+        void this.selectionManager.showContextMenu(identity, position);
+      }
     });
   }
 
@@ -289,6 +297,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
 
   getFormattingModel(): powerbi.visuals.FormattingModel {
     // API 5.1 omits the visual's unset numeric values and legacy option shapes.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- tsc rejects the uncast model
     return this.viewModel.getFormattingModel() as powerbi.visuals.FormattingModel;
   }
 }

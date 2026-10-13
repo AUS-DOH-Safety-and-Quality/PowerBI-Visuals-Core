@@ -7,6 +7,10 @@ describe("csv export", () => {
       .toBe("date,value,target\nA,1.5,\nB,2,3");
   });
 
+  it("writes nothing for no rows", () => {
+    expect(toCsv([])).toBe("");
+  });
+
   it("quotes fields holding commas, quotes or line breaks and doubles embedded quotes", () => {
     expect(toCsv([{ "a,b": 'x"y', note: "line\nbreak", plain: 1 }]))
       .toBe('"a,b",note,plain\n"x""y","line\nbreak",1');

@@ -14,8 +14,6 @@ function polyEval(x: number, q: number, num_coeffs: readonly number[], den_coeff
 
 /** Normal quantile (Wichura 1988, AS 241); adapted from R's qnorm. */
 export default function normalQuantile(p: number, mu: number, sigma: number, lower_tail: boolean, log_p: boolean) {
-  let p_: number;
-  let q: number;
   let r: number;
   let val: number;
 
@@ -23,32 +21,32 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
     if (p > 0) {
       return Number.NaN;  // log(p) > 0 means p > 1
     }
-    if (p == 0) {
+    if (p === 0) {
       return lower_tail ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;  // p = 1
     }
-    if (p == Number.NEGATIVE_INFINITY) {
+    if (p === Number.NEGATIVE_INFINITY) {
       return lower_tail ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;  // p = 0
     }
   } else {
     if (p < 0 || p > 1) {
       return Number.NaN;
     }
-    if (p == 0) {
+    if (p === 0) {
       return lower_tail ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
     }
-    if (p == 1) {
+    if (p === 1) {
       return lower_tail ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
     }
   }
 
-  if (sigma == 0) {
+  if (sigma === 0) {
     return mu;
   }
 
   // Lower-tail probability on the natural scale
-  p_ = log_p ? (lower_tail ? Math.exp(p) : - Math.expm1(p))
-              : (lower_tail ? p : (0.5 - p + 0.5));
-  q = p_ - 0.5;
+  const p_: number = log_p ? (lower_tail ? Math.exp(p) : - Math.expm1(p))
+                            : (lower_tail ? p : (0.5 - p + 0.5));
+  const q: number = p_ - 0.5;
 
   const coeffs_a: readonly number[] = [
     2509.0809287301226727,

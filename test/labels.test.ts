@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { drawValueLabels, drawPlotValueLabels, labelGeometry, type PlotFrame } from "../src/rendering/index";
 import type { ValueLabelOptions } from "../src/rendering/drawValueLabels";
 import { svgElement, frame, host, points, context, client, settings, pluck, type TestPoint } from "./browserHelpers";
+import { must } from "../src/testing/index";
 
 const line = { colour: "#123456", width: 2, type: "2 5" };
 
@@ -28,12 +29,12 @@ describe("value labels", () => {
     drawValueLabels(svg, labelOptions(plotPoints, f));
     const groups = svg.querySelectorAll<SVGGElement>(".text-labels > .text-group-inner");
     expect(groups).toHaveLength(1);
-    const text = groups[0].querySelector("text")!;
-    const connector = groups[0].querySelector("line")!;
-    const marker = groups[0].querySelector("path")!;
+    const text = must(groups[0].querySelector("text"));
+    const connector = must(groups[0].querySelector("line"));
+    const marker = must(groups[0].querySelector("path"));
     const pointX = f.xScale(0);
     const pointY = f.yScale(10);
-    const geometry = labelGeometry(plotPoints[0].label, pointX, pointY, 400, 10)!;
+    const geometry = labelGeometry(plotPoints[0].label, pointX, pointY, 400, 10);
     expect(text.textContent).toBe("first");
     expect(Number(text.getAttribute("x"))).toBeCloseTo(geometry.x, 6);
     expect(Number(text.getAttribute("y"))).toBeCloseTo(geometry.y, 6);
@@ -71,7 +72,7 @@ describe("value labels", () => {
       const plotPoints = points(visualHost, [50], ["drag me"]);
       const f = frame();
       drawValueLabels(svg, labelOptions(plotPoints, f, { interactive: true }));
-      const group = svg.querySelector<SVGGElement>(".text-group-inner")!;
+      const group = must(svg.querySelector<SVGGElement>(".text-group-inner"));
       expect(group.style.touchAction).toBe("none");
       const pointX = f.xScale(0);
       const pointY = f.yScale(50);
@@ -80,7 +81,7 @@ describe("value labels", () => {
       group.dispatchEvent(new PointerEvent("pointermove", { pointerId: 1, ...client(svg, pointX + 30, pointY) }));
       expect(plotPoints[0].label.angle).toBeCloseTo(0, 6);
       expect(plotPoints[0].label.distance).toBeCloseTo(30, 6);
-      expect(Number(group.querySelector("text")!.getAttribute("x"))).toBeCloseTo(pointX + 30, 6);
+      expect(Number(must(group.querySelector("text")).getAttribute("x"))).toBeCloseTo(pointX + 30, 6);
       group.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1 }));
       group.dispatchEvent(new PointerEvent("pointermove", { pointerId: 1, ...client(svg, pointX + 90, pointY) }));
       expect(plotPoints[0].label.distance).toBeCloseTo(30, 6);
@@ -99,7 +100,7 @@ describe("value labels", () => {
     const groups = svg.querySelectorAll<SVGGElement>(".text-group-inner");
     expect(groups).toHaveLength(2);
     expect(groups[0].style.touchAction).toBe("");
-    expect(groups[0].querySelector("line")!.style.strokeWidth).toBe(String(settings.labels.label_line_width));
+    expect(must(groups[0].querySelector("line")).style.strokeWidth).toBe(String(settings.labels.label_line_width));
   });
 
   it("labels only the points drawn inside the axis limits", () => {

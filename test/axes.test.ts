@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { drawAxis, drawPlotAxes, measureAxisEdge, type PlotFrame } from "../src/rendering/index";
 import type { AxisDrawOptions } from "../src/rendering/drawAxis";
-import { svgElement, frame, settings, host, points, context } from "./browserHelpers";
+import { svgElement, frame, settings, host, points, context, pluck } from "./browserHelpers";
+import { must } from "../src/testing/index";
+
+// d3-array 3.2.4: ticks(0, 3, 10)
+const fractionalTicks = ["0", "0.2", "0.4", "0.6", "0.8", "1", "1.2", "1.4", "1.6", "1.8", "2", "2.2", "2.4", "2.6", "2.8", "3"];
+
+function tickLabels(svg: SVGSVGElement, axis: "x" | "y"): (string | null)[] {
+  return pluck(svg.querySelectorAll(`.${axis}axisgroup .tick text`), "textContent");
+}
 
 function axisOptions(plotFrame: PlotFrame, overrides: Partial<AxisDrawOptions> = {}): AxisDrawOptions {
   return {
@@ -11,6 +19,7 @@ function axisOptions(plotFrame: PlotFrame, overrides: Partial<AxisDrawOptions> =
     tickFormat: undefined,
     labelSize: 10,
     measure: false,
+    integer: false,
     ...overrides
   };
 }
@@ -19,22 +28,22 @@ describe("axis drawing", () => {
   it("draws ticks on the padded edge with the settings colours", () => {
     const svg = svgElement();
     drawAxis(svg, axisOptions(frame()));
-    const group = svg.querySelector<SVGGElement>(".xaxisgroup")!;
+    const group = must(svg.querySelector<SVGGElement>(".xaxisgroup"));
     expect(group.getAttribute("transform")).toBe("translate(0, 390)");
     expect(group.getAttribute("color")).toBe("#000000");
     const ticks = group.querySelectorAll(".tick");
     expect(ticks).toHaveLength(11);
-    expect(ticks[0].querySelector("text")!.textContent).toBe("0");
-    expect(ticks[10].querySelector("text")!.textContent).toBe("10");
-    expect(ticks[0].querySelector("text")!.style.fontSize).toBe("10px");
-    expect(ticks[0].querySelector("line")!.style.stroke).toBe("currentcolor");
+    expect(must(ticks[0].querySelector("text")).textContent).toBe("0");
+    expect(must(ticks[10].querySelector("text")).textContent).toBe("10");
+    expect(must(ticks[0].querySelector("text")).style.fontSize).toBe("10px");
+    expect(must(ticks[0].querySelector("line")).style.stroke).toBe("currentcolor");
     expect(svg.querySelectorAll(".xgridline")).toHaveLength(0);
   });
 
   it("draws the y axis on the left padding edge with formatted ticks", () => {
     const svg = svgElement();
     drawAxis(svg, axisOptions(frame(), { axis: "y", tickFormat: value => `${value}%` }));
-    const group = svg.querySelector<SVGGElement>(".yaxisgroup")!;
+    const group = must(svg.querySelector<SVGGElement>(".yaxisgroup"));
     expect(group.getAttribute("transform")).toBe("translate(10, 0)");
     const labels = group.querySelectorAll(".tick text");
     expect(labels[0].textContent).toBe("0%");
@@ -55,7 +64,7 @@ describe("axis drawing", () => {
       }
     } });
     drawAxis(svg, axisOptions(titled));
-    const label = svg.querySelector<SVGTextElement>(".xaxislabel")!;
+    const label = must(svg.querySelector<SVGTextElement>(".xaxislabel"));
     expect(label.textContent).toBe("Date");
     expect(label.style.textAnchor).toBe("end");
     expect(label.getAttribute("x")).toBe("490");
@@ -73,11 +82,11 @@ describe("axis drawing", () => {
   it("measures a drawn axis to place the title between it and the canvas edge", () => {
     const svg = svgElement();
     drawAxis(svg, axisOptions(frame(), { measure: true }));
-    const group = svg.querySelector<SVGGElement>(".xaxisgroup")!;
+    const group = must(svg.querySelector<SVGGElement>(".xaxisgroup"));
     // Tick labels hang below the axis line at 390, so the measured edge lies beneath it
     const edge = measureAxisEdge(svg, group, "bottom");
     expect(edge).toBeGreaterThan(390);
-    expect(Number(svg.querySelector(".xaxislabel")!.getAttribute("y"))).toBeCloseTo(400 - (400 - edge) / 2, 6);
+    expect(Number(must(svg.querySelector(".xaxislabel")).getAttribute("y"))).toBeCloseTo(400 - (400 - edge) / 2, 6);
   });
 
   it("draws no ticks when the axis has none", () => {
@@ -109,8 +118,17 @@ describe("axis drawing", () => {
     expect(svg.querySelectorAll(".xgridline")).toHaveLength(0);
     drawAxis(svg, axisOptions(gridded));
     expect(svg.querySelectorAll(".xaxisgroup")).toHaveLength(1);
-    expect(svg.querySelector(".xaxisgroup")!.nextElementSibling!.classList.contains("xaxislabel")).toBe(true);
-    expect(svg.querySelector(".linesgroup")!.previousElementSibling).not.toBeNull();
+    expect(must(must(svg.querySelector(".xaxisgroup")).nextElementSibling).classList.contains("xaxislabel")).toBe(true);
+    expect(must(svg.querySelector(".linesgroup")).previousElementSibling).not.toBeNull();
+  });
+
+  it("keeps only whole-number ticks on an integer axis", () => {
+    const svg = svgElement();
+    const small = frame({ x: { lower: 0, upper: 3 } });
+    drawAxis(svg, axisOptions(small));
+    expect(tickLabels(svg, "x")).toEqual(fractionalTicks);
+    drawAxis(svg, axisOptions(small, { integer: true }));
+    expect(tickLabels(svg, "x")).toEqual(["0", "1", "2", "3"]);
   });
 });
 
@@ -122,8 +140,21 @@ describe("plot axes from a context", () => {
       settings: { ...settings, y_axis: { ...settings.y_axis, ylimit_show: false } }
     });
     drawPlotAxes(svg, ctx, { x: value => `d${value}`, y: undefined });
-    expect(svg.querySelector(".xaxisgroup .tick text")!.textContent).toBe("d0");
+    expect(must(svg.querySelector(".xaxisgroup .tick text")).textContent).toBe("d0");
     expect(svg.querySelector(".yaxisgroup")).toBeNull();
-    expect(svg.querySelector(".xaxislabel")!.getAttribute("y")).toBe("395");
+    expect(must(svg.querySelector(".xaxislabel")).getAttribute("y")).toBe("395");
+  });
+
+  it("keeps whole-number y ticks and gridlines for integer y formats, leaving the x axis fractional", () => {
+    const svg = svgElement();
+    const visualHost = host();
+    const gridded = { ...settings, y_axis: { ...settings.y_axis, ylimit_grid_show: true } };
+    const ctx = context(visualHost, points(visualHost, [1, 2]), {
+      frame: frame({ x: { lower: 0, upper: 3 }, y: { lower: 0, upper: 3 }, settings: gridded })
+    });
+    drawPlotAxes(svg, ctx, { x: undefined, y: undefined, yInteger: true });
+    expect(tickLabels(svg, "y")).toEqual(["0", "1", "2", "3"]);
+    expect(svg.querySelectorAll(".ygridline")).toHaveLength(4);
+    expect(tickLabels(svg, "x")).toEqual(fractionalTicks);
   });
 });

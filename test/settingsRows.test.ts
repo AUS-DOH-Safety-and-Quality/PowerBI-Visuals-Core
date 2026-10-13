@@ -77,20 +77,34 @@ describe("settings row contracts", () => {
     expect(result.values[1].mode).toBe("first");
   });
 
-  it("uses named defaults for missing row objects and normalizes null/eraser values", () => {
+  it("uses defaults for missing row objects and null, undefined or erased values, keeping explicit blank text", () => {
     const result = readSettingsRows(card, "example", defaults, { objects: [
       { example: {
-        count: null,
+        count: "",
         optional: "",
-        enabled: undefined,
+        enabled: "",
         mode: "",
-        colour: { solid: { color: "#123456" } }
-      } }
-    ] }, [0, 1]);
-    expect(result.values[0]).toEqual({ ...defaults, colour: "#123456" });
-    expect(result.values[1]).toEqual(defaults);
-    expect(Object.prototype.hasOwnProperty.call(result.values[1], "optional")).toBe(true);
-    expect(result.validation).toEqual({ status: 0, messages: [[], []] });
+        colour: "",
+        title: "",
+        font: "",
+        alignment: ""
+      } },
+      { example: { count: null, enabled: undefined, colour: { solid: { color: "#123456" } }, title: null } },
+      { example: { title: undefined } },
+      { example: { title: "  " } },
+      {}
+    ] }, [0, 1, 2, 3, 4, 5]);
+    expect(result.values).toEqual([
+      { ...defaults, title: "" },
+      { ...defaults, colour: "#123456" },
+      defaults,
+      { ...defaults, title: "  " },
+      defaults,
+      defaults
+    ]);
+    expect(Object.prototype.hasOwnProperty.call(result.values[5], "optional")).toBe(true);
+    expect(result.validation).toEqual({ status: 0, messages: [[], [], [], [], [], []] });
+    expect(defaults.title).toBe("Heading");
   });
 
   it.each([-1, 11, NaN, Infinity, -Infinity, "4", true])("rejects supplied invalid numeric controls: %s", value => {
@@ -126,35 +140,6 @@ describe("settings row contracts", () => {
     expect(result.validation.messages[0]).toHaveLength(4);
     expect(result.validation.status).toBe(1);
   });
-});
-
-it("keeps explicit blank text while missing and null text use the non-blank default", () => {
-  const result = readSettingsRows(card, "example", defaults, { objects: [
-    { example: { title: "" } }, { example: { title: undefined } },
-    { example: { title: null } }, {}, { example: { title: "  " } }
-  ] }, [0, 1, 2, 3, 4]);
-  expect(result.values[0].title).toBe("");
-  expect(result.values[1].title).toBe("Heading");
-  expect(result.values[2].title).toBe("Heading");
-  expect(result.values[3].title).toBe("Heading");
-  expect(result.values[4].title).toBe("  ");
-  expect(result.validation).toEqual({ status: 0, messages: [[], [], [], [], []] });
-  expect(defaults.title).toBe("Heading");
-});
-
-it("keeps text blank while resetting erased non-text controls", () => {
-  const result = readSettingsRows(card, "example", defaults, { objects: [{ example: {
-    count: "",
-    optional: "",
-    enabled: "",
-    mode: "",
-    colour: "",
-    title: "",
-    font: "",
-    alignment: ""
-  } }] }, [0]);
-  expect(result.values[0]).toEqual({ ...defaults, title: "" });
-  expect(result.validation).toEqual({ status: 0, messages: [[]] });
 });
 
 it("shares one values object and message list between rows without card objects, apart from the defaults", () => {

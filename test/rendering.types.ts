@@ -154,7 +154,7 @@ import type { AxisLabelAlign } from "../src/rendering/axis";
 
 declare const align: AxisLabelAlign;
 const anchor: "start" | "middle" | "end" = axisLabelPlacement(align, 0, 100).anchor;
-void anchor;
+anchor;
 drawGridlines({
   container: group,
   className: "xgridline",

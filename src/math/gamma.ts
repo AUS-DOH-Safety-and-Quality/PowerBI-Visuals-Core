@@ -54,7 +54,7 @@ export default function gamma(x: number): number {
   if (Number.isNaN(x)) {
     return Number.NaN;
   }
-  if (x == 0 || (x < 0 && x === Math.trunc(x))) {
+  if (x === 0 || (x < 0 && x === Math.trunc(x))) {
     return Number.NaN;
   }
 
@@ -69,7 +69,7 @@ export default function gamma(x: number): number {
     y = x - n;
     n--;
     value = chebyshevPolynomial(y * 2 - 1, gamcs, 22) + .9375;
-    if (n == 0) {
+    if (n === 0) {
       return value;
     }
 
@@ -97,7 +97,7 @@ export default function gamma(x: number): number {
     return 0;
   }
 
-  if (y <= 50 && y == Math.trunc(y)) {
+  if (y <= 50 && y === Math.trunc(y)) {
     value = 1;
     for (let i = 2; i < y; i++) {
       value *= i;
@@ -105,7 +105,7 @@ export default function gamma(x: number): number {
   } else {
     const two_y = 2 * y;
     value = Math.exp((y - 0.5) * Math.log(y) - y + LOG_SQRT_TWO_PI
-            + ((two_y == Math.trunc(two_y)) ? stirlingError(y) : lgammaCorrection(y)));
+            + ((two_y === Math.trunc(two_y)) ? stirlingError(y) : lgammaCorrection(y)));
   }
 
   if (x > 0) {

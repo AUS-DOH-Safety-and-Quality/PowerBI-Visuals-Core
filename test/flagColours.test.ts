@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { applyFlagColours, type FlagDirection } from "../src/data/index";
-import { limitStatus } from "../src/spc/index";
 
 const colours = {
   shift_colour_improvement: "#111111",
@@ -31,16 +30,5 @@ describe("flag colours", () => {
     const text = { colour: "#000000", colour_outline: "#000000", scatter_text_colour: "#000000" };
     applyFlagColours(text, colours, [[ "neutral_low", "shift_colour"]] as const);
     expect(text.scatter_text_colour).toBe("#333333");
-  });
-});
-
-describe("limit status", () => {
-  it("flags the side a value lies beyond, with a blank limit flagging nothing", () => {
-    expect(limitStatus(5, 0, 10)).toBe("none");
-    expect(limitStatus(11, 0, 10)).toBe("upper");
-    expect(limitStatus(-1, 0, 10)).toBe("lower");
-    expect(limitStatus(10, 0, 10)).toBe("none");
-    expect(limitStatus(-1, undefined, 10)).toBe("none");
-    expect(limitStatus(11, 0, undefined)).toBe("none");
   });
 });

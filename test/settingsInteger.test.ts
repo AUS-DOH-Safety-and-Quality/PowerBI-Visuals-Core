@@ -16,20 +16,13 @@ const defaults = createDefaultValues(schema).subset;
 
 // An integer descriptor rejects fractional values with a message and resets to the default.
 describe("integer settings", () => {
-  it("accepts whole numbers and unset optional values", () => {
-    const rows = readSettingsRows(card, "subset", defaults, { objects: [{ subset: { count: 3, bounded: 0 } }, {}] }, [0, 1]);
-    expect(rows.values).toEqual([{ count: 3, bounded: 0 }, { count: undefined, bounded: 1 }]);
-    expect(rows.validation).toEqual({ status: 0, messages: [[], []] });
-  });
-
-  it("rejects fractional values with a whole-number message and resets them", () => {
-    const rows = readSettingsRows(card, "subset", defaults, { objects: [{ subset: { count: 2.5, bounded: 9.5 } }] }, [0]);
-    expect(rows.values).toEqual([{ count: undefined, bounded: 1 }]);
-    expect(rows.validation.messages[0]).toEqual([
+  it("accepts whole numbers and rejects fractional values with a whole-number message, resetting them", () => {
+    const rows = readSettingsRows(card, "subset", defaults, { objects: [{ subset: { count: 2.5, bounded: 9.5 } }, { subset: { count: 3, bounded: 0 } }] }, [0, 1]);
+    expect(rows.values).toEqual([{ count: undefined, bounded: 1 }, { count: 3, bounded: 0 }]);
+    expect(rows.validation.messages).toEqual([[
       "2.5 is not a valid value for count. Valid values are whole numbers",
       "9.5 is not a valid value for bounded. Valid values are whole numbers from 0 to 10"
-    ]);
-    expect(rows.validation.status).toBe(1);
+    ], []]);
   });
 
   it("treats Core's counts and decimal places as whole numbers", () => {

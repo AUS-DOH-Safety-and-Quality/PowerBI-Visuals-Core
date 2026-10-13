@@ -26,7 +26,7 @@ export default function calculateTrendLine(values: readonly number[]): number[] 
 
   const intercept: number = (sumY - slope * sumX) / n;
 
-  const trendLine: Array<number> = new Array(n);
+  const trendLine: Array<number> = new Array<number>(n);
   for (let i = 0; i < n; i++) {
     trendLine[i] = slope * (i + 1) + intercept;
   }

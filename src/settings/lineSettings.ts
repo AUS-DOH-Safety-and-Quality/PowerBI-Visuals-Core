@@ -68,6 +68,7 @@ export type StandardLineValues<T> = { [K in StandardLineName]: T };
 export type LineSettingValues = Readonly<Record<string, unknown>>;
 
 /** The `<setting>_<key>` value of one line */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- the key is built at runtime, so callers name its type
 export function lineSetting<T>(lines: LineSettingValues, setting: string, key: string): T {
   return lines[`${setting}_${key}`] as T;
 }

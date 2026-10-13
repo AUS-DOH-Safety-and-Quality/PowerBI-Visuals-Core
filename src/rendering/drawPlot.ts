@@ -1,5 +1,5 @@
 import { select } from "d3-selection";
-import toCsv from "../data/toCsv";
+import toCsv, { type TableValue } from "../data/toCsv";
 import { drawAxis } from "./drawAxis";
 import { drawCrosshairs } from "./crosshairs";
 import { nearestPoint } from "./nearestPoint";
@@ -33,6 +33,8 @@ export type TickFormat = (value: number) => string;
 export type TickFormats = {
   readonly x: TickFormat | undefined;
   readonly y: TickFormat | undefined;
+  /** Only whole-number y ticks, for charts of counts */
+  readonly yInteger?: boolean;
 };
 
 export type PlotDotsOptions<P extends PlotPoint> = {
@@ -69,7 +71,8 @@ export function drawPlotAxes(svg: SVGSVGElement, context: PlotContext, formats: 
     show: settings.x_axis.xlimit_show,
     labelSize: settings.x_axis.xlimit_label_size,
     measure,
-    tickFormat: formats.x
+    tickFormat: formats.x,
+    integer: false
   });
   drawAxis(svg, {
     axis: "y",
@@ -77,7 +80,8 @@ export function drawPlotAxes(svg: SVGSVGElement, context: PlotContext, formats: 
     show: settings.y_axis.ylimit_show,
     labelSize: settings.y_axis.ylimit_label_size,
     measure,
-    tickFormat: formats.y
+    tickFormat: formats.y,
+    integer: formats.yInteger ?? false
   });
 }
 
@@ -226,11 +230,13 @@ export function drawPlotDots<P extends PlotPoint>(svg: SVGSVGElement, context: P
 }
 
 /** Exports the rows as chartdata.csv through the host's download service */
-export function drawPlotDownload(svg: SVGSVGElement, context: PlotContext, rows: () => readonly Readonly<Record<string, unknown>>[]): void {
+export function drawPlotDownload(svg: SVGSVGElement, context: PlotContext, rows: () => readonly Readonly<Record<string, TableValue>>[]): void {
   drawDownloadButton(svg, {
     visible: context.settings.download_options.show_button,
     x: context.frame.width - 50,
     y: context.frame.height - 5,
-    onClick: () => context.host.downloadService.exportVisualsContent(toCsv(rows()), "chartdata.csv", "csv", "csv file")
+    onClick: () => {
+      void context.host.downloadService.exportVisualsContent(toCsv(rows()), "chartdata.csv", "csv", "csv file");
+    }
   });
 }

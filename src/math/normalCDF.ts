@@ -5,7 +5,7 @@ export default function normalCDF(x: number, mu: number, sigma: number,
                                   lower_tail: boolean = true,
                                   log_p: boolean = false): number {
   // x - mu would be Inf - Inf
-  if (!Number.isFinite(x) && mu == x) {
+  if (!Number.isFinite(x) && mu === x) {
     return Number.NaN;
   }
 
@@ -16,7 +16,7 @@ export default function normalCDF(x: number, mu: number, sigma: number,
     return (x < mu) ? zeroBoundLower : zeroBoundUpper;
   }
 
-  let p: number = (x - mu) / sigma;
+  const p: number = (x - mu) / sigma;
 
   if (!Number.isFinite(p)) {
     return (x < mu) ? zeroBoundLower : zeroBoundUpper;

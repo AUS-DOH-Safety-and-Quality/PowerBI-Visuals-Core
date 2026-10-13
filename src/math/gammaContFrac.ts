@@ -3,7 +3,7 @@
  * adapted from R's pd_lower_cf.
  */
 export default function gammaContFrac(y: number, d: number): number {
-  if (y == 0) {
+  if (y === 0) {
     return 0;
   }
 

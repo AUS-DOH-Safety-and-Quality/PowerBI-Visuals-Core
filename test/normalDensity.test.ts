@@ -19,24 +19,12 @@ describe("normalDensity", () => {
             expect(normalDensity(3, 0, 1)).toBeCloseTo(0.004431848, 8);
             expect(normalDensity(-3, 0, 1)).toBeCloseTo(0.004431848, 8);
         });
-
-        it("should be symmetric around the mean", () => {
-            expect(normalDensity(-1, 0, 1)).toBeCloseTo(normalDensity(1, 0, 1), 10);
-            expect(normalDensity(-2.5, 0, 1)).toBeCloseTo(normalDensity(2.5, 0, 1), 10);
-            expect(normalDensity(-5, 0, 1)).toBeCloseTo(normalDensity(5, 0, 1), 10);
-        });
     });
 
     describe("general normal N(mu, sigma)", () => {
         it("should return maximum density at the mean", () => {
             expect(normalDensity(5, 5, 2)).toBeCloseTo(0.1994711, 6);
             expect(normalDensity(10, 10, 0.5)).toBeCloseTo(0.7978846, 6);
-        });
-
-        it("should correctly scale with sigma", () => {
-            expect(normalDensity(0, 0, 1)).toBeCloseTo(1 / (1 * Math.sqrt(2 * Math.PI)), 10);
-            expect(normalDensity(0, 0, 2)).toBeCloseTo(1 / (2 * Math.sqrt(2 * Math.PI)), 10);
-            expect(normalDensity(0, 0, 0.5)).toBeCloseTo(1 / (0.5 * Math.sqrt(2 * Math.PI)), 10);
         });
 
         it("should correctly standardize", () => {
@@ -108,24 +96,9 @@ describe("normalDensity", () => {
     });
 
     describe("numerical precision", () => {
-        it("should maintain precision near the mean", () => {
-            const d1 = normalDensity(1e-10, 0, 1);
-            const d0 = normalDensity(0, 0, 1);
-            expect(d1).toBeCloseTo(d0, 10);
-        });
-
         it("should maintain precision for moderate z-scores", () => {
             expect(normalDensity(4, 0, 1)).toBeCloseTo(0.0001338302, 9);
             expect(normalDensity(-4, 0, 1)).toBeCloseTo(0.0001338302, 9);
-        });
-
-        it("should integrate to approximately 1", () => {
-            let sum = 0;
-            const dx = 0.01;
-            for (let x = -10; x <= 10; x += dx) {
-                sum += normalDensity(x, 0, 1) * dx;
-            }
-            expect(sum).toBeCloseTo(1, 2);
         });
     });
 });

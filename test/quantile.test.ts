@@ -11,9 +11,16 @@ describe("quantile", () => {
     expect(quantile([1, 1, 2, 3, 4, 5, 6, 9], 0.9)).toBeCloseTo(6.9, 12);
   });
 
-  it("returns the end points at q = 0 and q = 1, a lone value for any q, and nothing for no values", () => {
+  it("returns the end points at q = 0 and q = 1 and a lone value for any q", () => {
     expect(quantile([3, 8, 9], 0)).toBe(3);
     expect(quantile([3, 8, 9], 1)).toBe(9);
     expect(quantile([5], 0.3)).toBe(5);
+  });
+
+  it("returns NaN without values or for q outside [0, 1]", () => {
+    expect(quantile([], 0.5)).toBeNaN();
+    expect(quantile([1, 2, 3], -0.1)).toBeNaN();
+    expect(quantile([1, 2, 3], 1.5)).toBeNaN();
+    expect(quantile([1, 2, 3], NaN)).toBeNaN();
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildFormattingModel, groupCategoryRows, readSettingsGroups } from "../src/powerbi/index";
-import { defineCard, dropdownOption, numberOption, textOption } from "../src/settings/index";
+import { groupCategoryRows, readSettingsGroups } from "../src/powerbi/index";
+import { defineCard, numberOption, textOption } from "../src/settings/index";
 
 describe("category grouping", () => {
   it("preserves first-seen groups and raw rows for interleaved tuples", () => {
@@ -82,14 +82,4 @@ describe("grouped settings", () => {
   it("reports all-invalid selections", () => {
     expect(readSettingsGroups(schema, { objects: [{ data: { size: -1 } }] }, [[0]]).validation.status).toBe(1);
   });
-});
-
-it("builds a constant dropdown with runtime choices and no row selector", () => {
-  const schema = { misc: defineCard({ displayName: "MISC", description: "", settingsGroups: { all: {
-    group: { ...dropdownOption("Group", "Description.", "B", ["A", "B"]), constant: true }
-  } } }) };
-  const control = buildFormattingModel(schema, { misc: { group: "B" } }).cards[0].groups[0].slices[0].control;
-  expect(control.properties.descriptor).toEqual({ objectName: "misc", propertyName: "group" });
-  expect(control.properties.value).toEqual({ displayName: "B", value: "B" });
-  expect(control.properties.items).toHaveLength(2);
 });

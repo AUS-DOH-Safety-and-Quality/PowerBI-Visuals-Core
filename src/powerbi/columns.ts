@@ -2,7 +2,7 @@ export type RoleColumn = { source: { roles?: Readonly<Record<string, boolean>> }
 export type RoleColumns<T extends RoleColumn> = Record<string, T[] | undefined>;
 
 export function indexColumnsByRole<T extends RoleColumn>(columns: readonly T[]): RoleColumns<T> {
-  const result: RoleColumns<T> = Object.create(null);
+  const result = Object.create(null) as RoleColumns<T>;
   for (let i = 0; i < columns.length; i++) {
     const column = columns[i];
     const roles = column.source.roles;
@@ -27,12 +27,12 @@ export function formatPrimitiveValue(value: PrimitiveValue): string | undefined 
   return value == null ? undefined : String(value);
 }
 
-/** The column's cells at the rows as numbers; blank cells read as undefined */
+/** The column's cells at the rows as numbers; blank cells and empty strings read as undefined */
 export function readNumbers(column: { readonly values: readonly PrimitiveValue[] }, rows: readonly number[]): (number | undefined)[] {
   const numbers = new Array<number | undefined>(rows.length);
   for (let i = 0; i < rows.length; i++) {
     const value = column.values[rows[i]];
-    numbers[i] = value == null ? undefined : Number(value);
+    numbers[i] = value == null || value === "" ? undefined : Number(value);
   }
   return numbers;
 }

@@ -97,4 +97,14 @@ describe("formatting model", () => {
     expect(values.example.enabled).toBe(true);
     expect(schema.example.enabled.default).toBe(true);
   });
+
+  it("builds a constant dropdown with runtime choices and no row selector", () => {
+    const constant = { misc: defineCard({ displayName: "MISC", description: "", settingsGroups: { all: {
+      group: { ...dropdownOption("Group", "Description.", "B", ["A", "B"]), constant: true }
+    } } }) };
+    const control = buildFormattingModel(constant, { misc: { group: "B" } }).cards[0].groups[0].slices[0].control;
+    expect(control.properties.descriptor).toEqual({ objectName: "misc", propertyName: "group" });
+    expect(control.properties.value).toEqual({ displayName: "B", value: "B" });
+    expect(control.properties.items).toHaveLength(2);
+  });
 });

@@ -11,4 +11,4 @@ const size: number | undefined = result.values[0].data.size;
 const required: number = result.values[0].data.size;
 // @ts-expect-error Dropdown unions remain narrow across groups.
 result.values[0].data.mode = "invalid";
-void [mode, size, required];
+[mode, size, required];

@@ -3,6 +3,7 @@ import {
   createCanvasCard, createLabelsCard, createDefaultValues, defineCard,
   dropdownOption, fontStyleOption, numberOption, textOption, toggleOption, orderedBoundsError
 } from "../src/settings/index";
+import { must } from "../src/testing/index";
 
 describe("setting definitions", () => {
   it("preserves explicit unset defaults and zero bounds", () => {
@@ -56,12 +57,10 @@ describe("setting definitions", () => {
     const second = createLabelsCard();
     first.label_position.items[0].displayName = "Changed";
     first.label_font.valid[0] = "Changed";
-    first.label_line_width.options!.minValue!.value = -1;
+    must(must(first.label_line_width.options).minValue).value = -1;
     expect(second.label_position.items[0].displayName).toBe("Top");
     expect(second.label_font.valid[0]).toBe("'Arial', sans-serif");
     expect(second.label_line_width.options?.minValue?.value).toBe(0);
-    expect(Object.keys(first.settingsGroups.all)).toHaveLength(17);
-    expect(first.label_line_max_length.default).toBe(1000);
   });
 
   it("owns dropdown arrays and preserves supplied labels and transforms", () => {

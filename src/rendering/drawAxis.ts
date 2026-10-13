@@ -7,6 +7,8 @@ export type AxisDrawOptions = {
   readonly frame: PlotFrame;
   readonly show: boolean;
   readonly tickFormat: ((value: number) => string) | undefined;
+  /** Drops fractional ticks */
+  readonly integer: boolean;
   /** Unscaled title size; places the title when the axis cannot be measured */
   readonly labelSize: number;
   readonly measure: boolean;
@@ -37,7 +39,16 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   const scale = isX ? frame.xScale : frame.yScale;
   let values: number[] = [];
   if (properties.ticks) {
-    values = properties.tick_count ? scale.ticks(properties.tick_count) : scale.ticks();
+    values = properties.tick_count !== 0 ? scale.ticks(properties.tick_count) : scale.ticks();
+    if (options.integer) {
+      const integers: number[] = [];
+      for (let i = 0; i < values.length; i++) {
+        if (Number.isInteger(values[i])) {
+          integers.push(values[i]);
+        }
+      }
+      values = integers;
+    }
   }
   const groupNode = group.node();
   if (groupNode !== null) {

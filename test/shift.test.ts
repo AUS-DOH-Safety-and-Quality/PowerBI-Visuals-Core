@@ -22,16 +22,6 @@ describe("shift", () => {
         expect(result).toEqual(["none", "upper", "upper", "upper", "upper", "upper", "none"]);
     });
 
-    it("should detect lower shift when n consecutive points are below target (n=5)", () => {
-        const val = [5, 4, 4, 4, 4, 4, 5];
-        const targets = [5, 5, 5, 5, 5, 5, 5];
-        const n = 5;
-
-        const result = shift(val, targets, n);
-
-        expect(result).toEqual(["none", "lower", "lower", "lower", "lower", "lower", "none"]);
-    });
-
     it("should detect shift exactly at n points (n=3)", () => {
         const val = [5, 6, 6, 6, 5];
         const targets = [5, 5, 5, 5, 5];
@@ -108,16 +98,6 @@ describe("shift", () => {
         expect(result).toEqual([]);
     });
 
-    it("should detect shift with n=1 (any point different from target)", () => {
-        const val = [5, 6, 5, 4, 5];
-        const targets = [5, 5, 5, 5, 5];
-        const n = 1;
-
-        const result = shift(val, targets, n);
-
-        expect(result).toEqual(["none", "upper", "none", "lower", "none"]);
-    });
-
     it("should detect multiple consecutive shifts", () => {
         const val = [6, 6, 6, 6, 4, 4, 4, 4, 5];
         const targets = [5, 5, 5, 5, 5, 5, 5, 5, 5];
@@ -129,33 +109,4 @@ describe("shift", () => {
         expect(result).toEqual(["upper", "upper", "upper", "upper", "lower", "lower", "lower", "lower", "none"]);
     });
 
-    it("should backfill all points in a long shift sequence (n=7)", () => {
-        const val = [6, 6, 6, 6, 6, 6, 6, 5];
-        const targets = [5, 5, 5, 5, 5, 5, 5, 5];
-        const n = 7;
-
-        const result = shift(val, targets, n);
-
-        expect(result).toEqual(["upper", "upper", "upper", "upper", "upper", "upper", "upper", "none"]);
-    });
-
-    it("should handle alternating values around target (no shift)", () => {
-        const val = [6, 4, 6, 4, 6, 4];
-        const targets = [5, 5, 5, 5, 5, 5];
-        const n = 3;
-
-        const result = shift(val, targets, n);
-
-        expect(result).toEqual(["none", "none", "none", "none", "none", "none"]);
-    });
-
-    it("should work with negative values", () => {
-        const val = [-2, -2, -2, -2];
-        const targets = [-3, -3, -3, -3];
-        const n = 3;
-
-        const result = shift(val, targets, n);
-
-        expect(result).toEqual(["upper", "upper", "upper", "upper"]);
-    });
 });

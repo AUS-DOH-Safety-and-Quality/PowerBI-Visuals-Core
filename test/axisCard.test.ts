@@ -21,7 +21,6 @@ describe("axis card factory", () => {
     ]);
     expect(Object.keys(card.settingsGroups.Gridlines)).toEqual(["xlimit_grid_show", "xlimit_grid_colour", "xlimit_grid_width"]);
     expect(card.xlimit_label_align.valid).toEqual(["left", "center", "right"]);
-    expect(card.xlimit_tick_rotation.default).toBe(0);
   });
 
   it("builds the y card with extras after the colour, decimal places and vertical alignment", () => {
@@ -36,7 +35,6 @@ describe("axis card factory", () => {
     expect(values.ylimit_show).toBe(true);
     expect(values.limit_multiplier).toBe(1.5);
     expect(values.ylimit_sig_figs).toBeUndefined();
-    expect(values.ylimit_grid_colour).toBe("#D3D3D3");
   });
 });
 

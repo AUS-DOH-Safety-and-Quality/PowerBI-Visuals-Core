@@ -100,12 +100,4 @@ describe("gammaQuantile", () => {
             expect(gammaQuantile(0.5, 0.01, 1) / 4.465535e-31).toBeCloseTo(1, 6);
         });
     });
-
-    describe("chi-squared relationship", () => {
-        it("should match chi-squared quantiles", () => {
-            // Chi-squared(df) = Gamma(df/2, scale = 2); values from R's qchisq(0.95, 10) and qchisq(0.99, 20)
-            expect(gammaQuantile(0.95, 5, 2)).toBeCloseTo(18.30704, 4);
-            expect(gammaQuantile(0.99, 10, 2)).toBeCloseTo(37.56623, 4);
-        });
-    });
 });

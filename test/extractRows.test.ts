@@ -41,7 +41,7 @@ describe("row extraction", () => {
       "Category B removed due to: Numerator missing.",
       "Conditional formatting for Category C ignored due to: bad size."
     ]);
-    expect(result.data.identityColumns.map(column => column.source.displayName)).toEqual(["Category", "indicator"]);
+    expect(result.data.identityColumns).toMatchObject([{ source: { displayName: "Category" } }, { source: { displayName: "indicator" } }]);
     expect(result.data.validationStatus).toEqual({ status: 0, messages: ["", "Numerator missing", ""], kept: [0, 2] });
     expect(result.data.scatter_formatting).toHaveLength(2);
     expect(result.data.scatter_formatting[1].size).toBe(9);

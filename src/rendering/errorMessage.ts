@@ -1,6 +1,7 @@
 import { initialiseSvg } from "./initialiseSvg";
 
-export type ErrorKind = "internal" | "settings";
+/** An empty view leaves a blank canvas rather than a message */
+export type ErrorKind = "internal" | "settings" | "empty";
 
 export type ErrorMessageOptions = {
   readonly width: number;
@@ -13,7 +14,7 @@ export type ErrorMessageOptions = {
   readonly show: boolean;
 };
 
-const preambles: Readonly<Record<ErrorKind, string>> = {
+const preambles: Readonly<Partial<Record<ErrorKind, string>>> = {
   internal: "Internal Error! Please file a bug report with the following text:",
   settings: "Invalid settings provided for all observations! First error:"
 };
@@ -41,8 +42,9 @@ export function drawErrorMessage(svg: SVGSVGElement, options: ErrorMessageOption
   svg.appendChild(group);
   group.classList.add("errormessage");
   const x = options.width / 2;
-  if (options.kind !== undefined) {
-    addText(group, x, options.height / 3, preambles[options.kind], options.colour);
+  const preamble = options.kind === undefined ? undefined : preambles[options.kind];
+  if (preamble !== undefined) {
+    addText(group, x, options.height / 3, preamble, options.colour);
   }
   addText(group, x, options.height / 2, options.message, options.colour);
 }

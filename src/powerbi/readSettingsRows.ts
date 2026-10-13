@@ -28,7 +28,7 @@ function validationMessage(value: unknown, definition: SettingDefinition, name: 
   const expected = definition.type === FormattingComponent.NumUpDown ? "number"
     : definition.type === FormattingComponent.ToggleSwitch ? "boolean" : "string";
   if (typeof value !== expected) {
-    return `${value} is not a valid ${expected} for ${name}`;
+    return `${String(value)} is not a valid ${expected} for ${name}`;
   }
   if (definition.valid !== undefined) {
     let valid = false;
@@ -39,7 +39,7 @@ function validationMessage(value: unknown, definition: SettingDefinition, name: 
       }
     }
     if (!valid) {
-      return `${value} is not a valid value for ${name}. Valid values are: ${definition.valid.join(", ")}`;
+      return `${String(value)} is not a valid value for ${name}. Valid values are: ${definition.valid.join(", ")}`;
     }
   }
   if (typeof value === "number") {

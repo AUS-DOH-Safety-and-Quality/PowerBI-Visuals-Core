@@ -5,6 +5,7 @@ import {
 import type { ErrorMessageOptions } from "../src/rendering/errorMessage";
 import { toCsv } from "../src/data/index";
 import { svgElement, frame, host, points, context, client, settings } from "./browserHelpers";
+import { must } from "../src/testing/index";
 
 function errorOptions(message: string, overrides: Partial<ErrorMessageOptions> = {}): ErrorMessageOptions {
   return {
@@ -21,7 +22,7 @@ function errorOptions(message: string, overrides: Partial<ErrorMessageOptions> =
 describe("error message", () => {
   it("replaces the plot with the preamble and message, and clears it again", () => {
     const svg = svgElement();
-    svg.querySelector(".dotsgroup")!.appendChild(svg.ownerDocument.createElementNS("http://www.w3.org/2000/svg", "path"));
+    must(svg.querySelector(".dotsgroup")).appendChild(svg.ownerDocument.createElementNS("http://www.w3.org/2000/svg", "path"));
     drawErrorMessage(svg, errorOptions("Bad input", { kind: "settings", colour: "#ff0000" }));
     const texts = svg.querySelectorAll<SVGTextElement>(".errormessage text");
     expect(texts).toHaveLength(2);
@@ -46,8 +47,8 @@ describe("error message", () => {
 describe("crosshairs", () => {
   it("sizes both lines across the plot and toggles their opacity at a point", () => {
     const svg = svgElement();
-    const vertical = svg.querySelector<SVGLineElement>(".ttip-line-x")!;
-    const horizontal = svg.querySelector<SVGLineElement>(".ttip-line-y")!;
+    const vertical = must(svg.querySelector<SVGLineElement>(".ttip-line-x"));
+    const horizontal = must(svg.querySelector<SVGLineElement>(".ttip-line-y"));
     const crosshairs = drawCrosshairs({
       vertical,
       horizontal,
@@ -97,7 +98,7 @@ describe("download button", () => {
       settings: { ...settings, download_options: { show_button: true } }
     });
     drawPlotDownload(svg, shown, () => rows);
-    const button = svg.querySelector<SVGTextElement>(".download-btn-group")!;
+    const button = must(svg.querySelector<SVGTextElement>(".download-btn-group"));
     expect(button.getAttribute("x")).toBe("450");
     expect(button.getAttribute("y")).toBe("395");
     button.dispatchEvent(new MouseEvent("click"));
@@ -108,7 +109,7 @@ describe("download button", () => {
 describe("context menu", () => {
   it("shows the identity under the pointer, prevents the native menu, rebinds without stacking and unbinds when disabled", () => {
     const svg = svgElement();
-    const child = svg.querySelector(".dotsgroup")!;
+    const child = must(svg.querySelector(".dotsgroup"));
     const show = vi.fn();
     const options = {
       enabled: true,
@@ -140,7 +141,7 @@ describe("plot tooltips", () => {
     const ctx = context(visualHost, plotPoints);
     drawPlotTooltips(svg, ctx, false);
     const f = ctx.frame;
-    const vertical = svg.querySelector<SVGLineElement>(".ttip-line-x")!;
+    const vertical = must(svg.querySelector<SVGLineElement>(".ttip-line-x"));
     // Horizontally nearest point 1 even though point 2 is vertically closer
     svg.dispatchEvent(new MouseEvent("mousemove", { ...client(svg, f.xScale(1) + 5, f.yScale(50)) }));
     expect(visualHost.tooltipService.show).toHaveBeenCalledWith({
@@ -206,8 +207,8 @@ describe("overflow fitting", () => {
     rect.setAttribute("y", "395");
     rect.setAttribute("width", "10");
     rect.setAttribute("height", "10");
-    svg.querySelector(".dotsgroup")!.appendChild(rect);
-    const fitted = fitPlotToOverflow(svg, frame())!;
+    must(svg.querySelector(".dotsgroup")).appendChild(rect);
+    const fitted = must(fitPlotToOverflow(svg, frame()));
     expect(fitted.xAxis.start_padding).toBe(30);
     expect(fitted.yAxis.start_padding).toBe(15);
     expect(fitted.xAxis.end_padding).toBe(10);

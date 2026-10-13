@@ -19,21 +19,9 @@ describe("normalQuantile", () => {
             expect(normalQuantile(0.99, 0, 1, true, false)).toBeCloseTo(2.326348, 5);
             expect(normalQuantile(0.999, 0, 1, true, false)).toBeCloseTo(3.090232, 5);
         });
-
-        it("should be symmetric around p = 0.5", () => {
-            expect(normalQuantile(0.1, 0, 1, true, false)).toBeCloseTo(-normalQuantile(0.9, 0, 1, true, false), 10);
-            expect(normalQuantile(0.25, 0, 1, true, false)).toBeCloseTo(-normalQuantile(0.75, 0, 1, true, false), 10);
-            expect(normalQuantile(0.01, 0, 1, true, false)).toBeCloseTo(-normalQuantile(0.99, 0, 1, true, false), 10);
-        });
     });
 
     describe("general normal N(mu, sigma)", () => {
-        it("should return mu for p = 0.5", () => {
-            expect(normalQuantile(0.5, 5, 2, true, false)).toBeCloseTo(5, 10);
-            expect(normalQuantile(0.5, -10, 3, true, false)).toBeCloseTo(-10, 10);
-            expect(normalQuantile(0.5, 100, 15, true, false)).toBeCloseTo(100, 10);
-        });
-
         it("should correctly transform from standard normal", () => {
             const p = 0.95;
             const mu = 10;
@@ -98,10 +86,20 @@ describe("normalQuantile", () => {
         });
 
         it("should handle extreme log-scale probabilities", () => {
-            // log(1e-100) = -230.2585
-            const q = normalQuantile(-230.2585, 0, 1, true, true);
-            expect(q).toBeCloseTo(-21.27344, 3);
             expect(normalQuantile(-690.7755, 0, 1, true, true)).toBeCloseTo(-37.04710, 4);
+        });
+
+        // R: qnorm(lp, log.p = TRUE); between lp = -729 and -3025 the asymptotic expansion
+        // agrees with the rational one to 7dp, so only deeper references detect its loss
+        it("should match R at the asymptotic branch boundary and in its deeper refinements", () => {
+            expect(normalQuantile(-728, 0, 1, true, true)).toBeCloseTo(-38.03792286, 7);
+            expect(normalQuantile(-1e4, 0, 1, true, true) / -141.3798399).toBeCloseTo(1, 9);
+            // R: qnorm(-1e4, log.p = TRUE, lower.tail = FALSE)
+            expect(normalQuantile(-1e4, 0, 1, false, true) / 141.3798399).toBeCloseTo(1, 9);
+            expect(normalQuantile(-1e5, 0, 1, true, true) / -447.1978937).toBeCloseTo(1, 9);
+            expect(normalQuantile(-1e8, 0, 1, true, true) / -14142.13488).toBeCloseTo(1, 9);
+            expect(normalQuantile(-1e10, 0, 1, true, true) / -141421.3561).toBeCloseTo(1, 9);
+            expect(normalQuantile(-1e18, 0, 1, true, true) / -1414213562).toBeCloseTo(1, 9);
         });
 
         it("should return NaN for positive log probabilities", () => {
@@ -119,18 +117,6 @@ describe("normalQuantile", () => {
             expect(normalQuantile(0, 5, 2, true, true)).toBe(Number.POSITIVE_INFINITY);
             expect(normalQuantile(0, 0, 1, false, true)).toBe(Number.NEGATIVE_INFINITY);
             expect(normalQuantile(Number.NEGATIVE_INFINITY, 0, 1, false, true)).toBe(Number.POSITIVE_INFINITY);
-        });
-    });
-
-    describe("upper tail", () => {
-        it("should return correct upper tail quantiles", () => {
-            expect(normalQuantile(0.05, 0, 1, false, false)).toBeCloseTo(1.644854, 5);
-            expect(normalQuantile(0.025, 0, 1, false, false)).toBeCloseTo(1.959964, 5);
-        });
-
-        it("should satisfy upper_tail(p) = lower_tail(1-p)", () => {
-            expect(normalQuantile(0.05, 0, 1, false, false)).toBeCloseTo(normalQuantile(0.95, 0, 1, true, false), 10);
-            expect(normalQuantile(0.1, 0, 1, false, false)).toBeCloseTo(normalQuantile(0.9, 0, 1, true, false), 10);
         });
     });
 

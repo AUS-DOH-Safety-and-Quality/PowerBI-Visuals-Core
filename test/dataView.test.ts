@@ -13,11 +13,11 @@ function view(categories: powerbi.DataViewCategoryColumn[] | undefined, columns:
 
 describe("data view validation", () => {
   it("reports missing views, keys, rows and required value roles in that order", () => {
-    expect(validateDataView([], ["numerators"])).toEqual({ status: "invalid", error: "No data present" });
+    expect(validateDataView([], ["numerators"])).toEqual({ status: "empty", error: "No data present" });
     expect(validateDataView([view(undefined)], ["numerators"])).toEqual({ status: "invalid", error: "No grouping/ID variable passed!" });
     expect(validateDataView([view([{ source: { displayName: "Other", roles: {} }, values: ["A"] }])], []))
       .toEqual({ status: "invalid", error: "No grouping/ID variable passed!" });
-    expect(validateDataView([view([{ ...key, values: [] }])], [])).toEqual({ status: "invalid", error: "No data present" });
+    expect(validateDataView([view([{ ...key, values: [] }])], [])).toEqual({ status: "empty", error: "No data present" });
     expect(validateDataView([view([key])], ["numerators", "denominators"])).toEqual({ status: "invalid", error: "No numerators passed!" });
     expect(validateDataView([view([key], [value("numerators")])], ["numerators", "denominators"]))
       .toEqual({ status: "invalid", error: "No denominators passed!" });

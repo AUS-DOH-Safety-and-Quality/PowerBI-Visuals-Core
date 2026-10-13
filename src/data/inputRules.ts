@@ -16,7 +16,7 @@ export function valueAt(values: NumberSeries, index: number): number {
   return values?.[index] ?? NaN;
 }
 
-export function missingRule<T>(values: readonly (T | undefined)[] | undefined, named: Quantity): RowRule {
+export function missingRule(values: readonly unknown[] | undefined, named: Quantity): RowRule {
   return {
     fails: i => isNullOrUndefined(values?.[i]),
     message: `${named.name} missing`,

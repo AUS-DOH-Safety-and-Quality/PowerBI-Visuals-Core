@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createVisualHost } from "powerbi-visuals-utils-testutils";
 import { PlotViewModelBase, type GroupResults } from "../src/rendering/plotViewModel";
 import SettingsStore from "../src/powerbi/settingsStore";
-import type { ValidatedDataView, CategoryGroups } from "../src/powerbi/index";
+import { updateType, type ValidatedDataView, type CategoryGroups } from "../src/powerbi/index";
 import { createAxisCard, defineCard, numberOption, toggleOption } from "../src/settings/index";
 import buildDataView from "../src/testing/buildDataView";
 
@@ -64,7 +64,7 @@ function view(numerators: (number | null)[], objects?: Record<string, Record<str
   return buildDataView({ categories, values: [{ role: "numerators", values: numerators }] }, objects);
 }
 
-function options(dataView: powerbi.DataView, type = 2) {
+function options(dataView: powerbi.DataView, type: powerbi.VisualUpdateType = updateType.data) {
   return { dataViews: [dataView], viewport: { width: 300, height: 200 }, type, headless: true };
 }
 
@@ -87,9 +87,9 @@ describe("plot view model base", () => {
     model.results = { errors: [], warnings: ["one", "two"] };
     expect(model.update(options(view([1])), host)).toEqual({ status: true, warning: "one\ntwo" });
     model.results = { errors: [], warnings: [] };
-    expect(model.update(options(view([5]), 4), host)).toEqual({ status: true, warning: "one\ntwo" });
+    expect(model.update(options(view([5]), updateType.resize), host)).toEqual({ status: true, warning: "one\ntwo" });
     expect(model.groupTotals).toEqual([2]);
-    expect(model.update(options(view([5]), 16), host)).toEqual({ status: true, warning: undefined });
+    expect(model.update(options(view([5]), updateType.style), host)).toEqual({ status: true, warning: undefined });
     expect(model.groupTotals).toEqual([10]);
     expect(model.updateData).toHaveBeenCalledTimes(2);
   });
@@ -97,10 +97,10 @@ describe("plot view model base", () => {
   it("rejects the update and clears its data on data view, settings, group and axis errors", () => {
     const model = new TestModel(host);
     expect(model.update(options(view([1])), host).status).toBe(true);
-    expect(model.update({ ...options(view([1])), dataViews: [] }, host)).toEqual({ status: false, error: "No data present" });
+    expect(model.update({ ...options(view([1])), dataViews: [] }, host)).toEqual({ status: false, error: "No data present", type: "empty" });
     expect([model.groupTotals, model.firstRun]).toEqual([[], true]);
     expect(model.update(options(view([1], { example: { scale: 0 } })), host))
-      .toMatchObject({ status: false, type: "settings", error: expect.stringContaining("not a valid value for scale") });
+      .toMatchObject({ status: false, type: "settings", error: "0 is not a valid value for scale. Valid values are numbers, above 0" });
     model.results = { errors: ["bad a", "bad b"], warnings: ["ignored"] };
     expect(model.update(options(view([1])), host)).toEqual({ status: false, error: "bad a\nbad b" });
     model.results = { errors: [], warnings: [] };
@@ -108,7 +108,7 @@ describe("plot view model base", () => {
       .toEqual({ status: false, error: "The x-axis lower limit (2) is above the upper limit (1)", type: "settings" });
     expect(model.groupTotals).toEqual([]);
     expect(model.update(options(view([1], { x_axis: { xlimit_l: 2 }, example: { table: true } })), host)).toEqual({ status: true, warning: undefined });
-    expect(model.update(options(view([3]), 4), host)).toEqual({ status: true, warning: undefined });
+    expect(model.update(options(view([3]), updateType.resize), host)).toEqual({ status: true, warning: undefined });
     expect(model.groupTotals).toEqual([2]);
   });
 });

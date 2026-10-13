@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { drawLines, drawLineLabels, type LineLabel, type PlotLine } from "../src/rendering/index";
 import { svgElement, frame, palette } from "./browserHelpers";
+import { must } from "../src/testing/index";
 
 const style = { colour: "#112233", width: 2, type: "2 5" };
 const points = [{ x: 0, line_value: 10 }, { x: 2, line_value: 30 }, { x: 4, line_value: 20 }];
 
 function group(svg: SVGSVGElement): SVGGElement {
-  return svg.querySelector<SVGGElement>(".linesgroup")!;
+  return must(svg.querySelector<SVGGElement>(".linesgroup"));
 }
 
 function draw(svg: SVGSVGElement, lines: readonly PlotLine[], linePalette = palette): void {
@@ -39,8 +40,8 @@ describe("line drawing", () => {
     const svg = svgElement();
     const line: PlotLine = { name: "target", points, style: () => style };
     draw(svg, [line]);
-    const lineGroup = svg.querySelector<SVGGElement>(".linesgroup > g.target-linegroup")!;
-    const path = lineGroup.querySelector("path")!;
+    const lineGroup = must(svg.querySelector<SVGGElement>(".linesgroup > g.target-linegroup"));
+    const path = must(lineGroup.querySelector("path"));
     expect(lineGroup.querySelectorAll("line")).toHaveLength(0);
     expect(path.getAttribute("stroke")).toBe("#112233");
     expect(path.getAttribute("stroke-width")).toBe("2");
@@ -59,7 +60,7 @@ describe("line drawing", () => {
       { x: 4, line_value: 20 }
     ];
     draw(svg, [{ name: "a", points: gapped, style: () => style }]);
-    const d = svg.querySelector(".a-linegroup path")!.getAttribute("d")!;
+    const d = must(must(svg.querySelector(".a-linegroup path")).getAttribute("d"));
     expect(d.split("M")).toHaveLength(4);
   });
 
@@ -68,7 +69,7 @@ describe("line drawing", () => {
     // A segment takes the style of the point it starts at
     const styles = [style, { ...style, colour: "#ff0000" }, { ...style, colour: "#ff0000" }];
     draw(svg, [{ name: "a", points, style: index => styles[index] }]);
-    const lineGroup = svg.querySelector<SVGGElement>(".a-linegroup")!;
+    const lineGroup = must(svg.querySelector<SVGGElement>(".a-linegroup"));
     expect(lineGroup.querySelectorAll("path")).toHaveLength(0);
     const segments = lineGroup.querySelectorAll("line");
     expect(segments).toHaveLength(2);
@@ -111,7 +112,7 @@ describe("line drawing", () => {
   it("uses the host foreground colour in high contrast", () => {
     const svg = svgElement();
     draw(svg, [{ name: "a", points, style: () => style }], { isHighContrast: true, foregroundColour: "#00ff00" });
-    expect(svg.querySelector(".a-linegroup path")!.getAttribute("stroke")).toBe("#00ff00");
+    expect(must(svg.querySelector(".a-linegroup path")).getAttribute("stroke")).toBe("#00ff00");
   });
 });
 
@@ -142,9 +143,9 @@ describe("line labels", () => {
     const target = group(svg);
     const label = lineLabel("Target", 300, 40, { position: "beside", size: 20, vpad: 0 });
     drawLineLabels(target, [label], true);
-    expect(target.querySelector("text")!.getAttribute("dy")).toBe("5px");
+    expect(must(target.querySelector("text")).getAttribute("dy")).toBe("5px");
     drawLineLabels(target, [label], false);
-    const text = target.querySelector("text")!;
+    const text = must(target.querySelector("text"));
     expect(text.getBoundingClientRect().height).toBeGreaterThan(0);
     expect(text.getAttribute("dy")).toBe(`${text.getBoundingClientRect().height / 4}px`);
   });

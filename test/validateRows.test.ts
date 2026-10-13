@@ -24,4 +24,8 @@ describe("row validation", () => {
       status: 1, messages: ["First", "Later", "Later"], error: "No valid data found!"
     });
   });
+
+  it("rejects no rows with the generic error", () => {
+    expect(validateRows(0, rules)).toEqual({ status: 1, messages: [], error: "No valid data found!" });
+  });
 });

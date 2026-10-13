@@ -11,12 +11,12 @@ export default function normalDensity(x: number, mu: number, sigma: number,
   }
 
   // x - mu would be Inf - Inf
-  if (!Number.isFinite(x) && mu == x) {
+  if (!Number.isFinite(x) && mu === x) {
     return Number.NaN;
   }
 
-  if (sigma == 0) {
-    return (x == mu) ? Number.POSITIVE_INFINITY : zeroBound;
+  if (sigma === 0) {
+    return (x === mu) ? Number.POSITIVE_INFINITY : zeroBound;
   }
 
   const z: number = (x - mu) / sigma;
@@ -46,8 +46,8 @@ export default function normalDensity(x: number, mu: number, sigma: number,
 
   // |z| = x1 + x2 with x1 truncated to 16 fractional bits avoids precision loss in z²:
   // exp(-z²/2) = exp(-x1²/2) * exp((-x2/2 - x1) * x2)
-  let x1: number = ldexp(Math.trunc(ldexp(absZ, 16)), -16);
-  let x2: number = absZ - x1;
+  const x1: number = ldexp(Math.trunc(ldexp(absZ, 16)), -16);
+  const x2: number = absZ - x1;
   return ONE_DIV_SQRT_TWO_PI / sigma
           * (Math.exp(-0.5 * x1 * x1) * Math.exp((-0.5 * x2 - x1) * x2));
 }

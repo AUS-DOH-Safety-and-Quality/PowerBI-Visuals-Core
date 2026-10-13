@@ -17,12 +17,12 @@ clamp([1, 2], 0, 1);
 const repeated: string[] = rep("none", 3);
 repeated.length;
 
-const maybe: number | undefined = Math.random() > 0.5 ? 1 : undefined;
+declare const maybe: number | undefined;
 if (isValidNumber(maybe)) {
   const narrowed: number = maybe;
   narrowed.toFixed(1);
 }
-const mixed: string | number | null = Math.random() > 0.5 ? "1" : null;
+declare const mixed: string | number | null;
 if (!isNullOrUndefined(mixed)) {
   const present: string | number = mixed;
   String(present);

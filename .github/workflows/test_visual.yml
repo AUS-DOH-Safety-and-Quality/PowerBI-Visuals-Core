@@ -22,7 +22,7 @@ jobs:
 
     - name: Install PBI visual Tools
       run: |
-        npm install -g powerbi-visuals-tools@6.2.0
+        npm install -g powerbi-visuals-tools
 
     - name: Install Package Dependencies
       run: |
@@ -30,7 +30,7 @@ jobs:
 
     - name: Run linter
       run: |
-        pbiviz lint
+        npm run eslint
 
     - name: Test if package can be built
       run: |

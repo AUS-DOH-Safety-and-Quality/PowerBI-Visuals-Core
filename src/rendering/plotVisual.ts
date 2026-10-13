@@ -155,7 +155,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
     drawPlotValueLabels(svg, context, viewModel.anyLabels);
   }
 
-  update(options: UpdateOptions): void {
+  update(options: UpdateOptions): ViewModelValidation {
     try {
       this.host.eventService.renderingStarted(options);
       // Remove printed error if refreshing after a previous error run
@@ -172,7 +172,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
         } else {
           this.host.eventService.renderingFailed(options);
         }
-        return;
+        return status;
       }
       if (status.warning) {
         this.host.displayWarningIcon("Invalid inputs or settings ignored.\n", status.warning);
@@ -183,7 +183,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
         this.currentPlotProperties = undefined;
         this.updateHighlighting();
         this.host.eventService.renderingFinished(options);
-        return;
+        return status;
       }
       const viewModel = this.viewModel;
       this.currentPlotProperties = createPlotFrame({
@@ -199,12 +199,14 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
 
       this.updateHighlighting();
       this.host.eventService.renderingFinished(options);
+      return status;
     } catch (caught_error) {
       this.currentPlotProperties = undefined;
       this.resizeCanvas(options.viewport.width, options.viewport.height);
       this.drawErrors(options, caught_error instanceof Error ? caught_error.message : String(caught_error), "internal", true);
       console.error(caught_error);
       this.host.eventService.renderingFailed(options);
+      return { status: false, error: String(caught_error), type: "internal" };
     }
   }
 

@@ -28,6 +28,10 @@ jobs:
 
     - name: Typecheck
       run: |
+        npm run eslint
+
+    - name: Typecheck
+      run: |
         npm run typecheck
 
     - name: Run unit tests

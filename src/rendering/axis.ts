@@ -1,3 +1,5 @@
+import { SVG_NS } from "./svgNamespace";
+
 export type AxisLabelAlign = "left" | "center" | "right" | "bottom" | "top";
 export type AxisLabelPlacement = {
   readonly position: number;
@@ -18,8 +20,6 @@ export type GridlineOptions = {
   readonly colour: string;
   readonly width: number;
 };
-
-const SVG_NS = "http://www.w3.org/2000/svg";
 
 /** Bottom/top mirror left/right for the rotated y-axis label; centre is the plot midpoint */
 export function axisLabelPlacement(align: AxisLabelAlign, start: number, end: number): AxisLabelPlacement {

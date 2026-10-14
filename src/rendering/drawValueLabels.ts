@@ -1,6 +1,7 @@
 import { labelGeometry, type LabelPoint } from "./labelGeometry";
 import { trianglePath } from "./symbolPath";
 import screenToSvg from "./screenToSvg";
+import { SVG_NS } from "./svgNamespace";
 
 export type LabelLineStyle = {
   readonly colour: string;
@@ -19,8 +20,6 @@ export type ValueLabelOptions = {
   /** Drag handlers are attached only when true (headless rendering passes false) */
   readonly interactive: boolean;
 };
-
-const SVG_NS = "http://www.w3.org/2000/svg";
 
 function append<K extends keyof SVGElementTagNameMap>(parent: Element, tag: K): SVGElementTagNameMap[K] {
   const element = parent.ownerDocument.createElementNS(SVG_NS, tag);

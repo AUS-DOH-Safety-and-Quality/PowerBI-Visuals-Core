@@ -1,4 +1,5 @@
 import { initialiseSvg } from "./initialiseSvg";
+import { SVG_NS } from "./svgNamespace";
 
 /** An empty view leaves a blank canvas rather than a message */
 export type ErrorKind = "internal" | "settings" | "empty";
@@ -18,8 +19,6 @@ const preambles: Readonly<Partial<Record<ErrorKind, string>>> = {
   internal: "Internal Error! Please file a bug report with the following text:",
   settings: "Invalid settings provided for all observations! First error:"
 };
-
-const SVG_NS = "http://www.w3.org/2000/svg";
 
 function addText(group: SVGGElement, x: number, y: number, text: string, colour: string): void {
   const element = group.ownerDocument.createElementNS(SVG_NS, "text");

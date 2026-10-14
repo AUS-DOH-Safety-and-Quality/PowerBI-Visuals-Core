@@ -1,3 +1,5 @@
+import { SVG_NS } from "./svgNamespace";
+
 export type LineLabelPosition = "above" | "below" | "beside" | "outside" | "inside";
 
 export type LineLabelPlacement = {
@@ -44,8 +46,6 @@ export function lineLabelGeometry(label: LineLabelPlacement, textHeight: number)
   }
   return { anchor: beside ? "start" : "end", dx: (beside ? 1 : -1) * label.hpad, dy };
 }
-
-const SVG_NS = "http://www.w3.org/2000/svg";
 
 /** Replaces the group's direct text children; the caller owns label eligibility and text */
 export function drawLineLabels(group: Element, labels: readonly LineLabel[], headless: boolean): void {

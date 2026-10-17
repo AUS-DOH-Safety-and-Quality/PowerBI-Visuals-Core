@@ -1,5 +1,7 @@
 import { select } from "d3-selection";
-import { drawAxisTicks, drawGridlines, axisLabelPlacement, xTickLabelOffsets, axisTitleOffset, measureAxisEdge } from "./axis";
+import {
+  drawAxisTicks, drawGridlines, axisLabelPlacement, xTickLabelOffsets, axisTitleOffset, measureAxisEdge, type AxisTitleMeasurement
+} from "./axis";
 import type { PlotFrame } from "./plotFrame";
 
 export type AxisDrawOptions = {
@@ -99,12 +101,13 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   const placement = isX
     ? axisLabelPlacement(properties.label_align, frame.xAxis.start_padding, frame.width - frame.xAxis.end_padding)
     : axisLabelPlacement(properties.label_align, frame.height - frame.yAxis.start_padding, frame.yAxis.end_padding);
-  const measured = options.measure && groupNode !== null ? measureAxisEdge(svg, groupNode, isX ? "bottom" : "left") : undefined;
-  const offset = axisTitleOffset(isX ? "bottom" : "left", isX ? frame.height : frame.width, measured, options.labelSize);
-  label
+  const side = isX ? "bottom" : "left";
+  const extent = isX ? frame.height : frame.width;
+  const position = (offset: number) => label
     .attr("x", isX ? placement.position : offset)
     .attr("y", isX ? offset : placement.position)
-    .attr("transform", isX ? null : `rotate(-90, ${offset}, ${placement.position})`)
+    .attr("transform", isX ? null : `rotate(-90, ${offset}, ${placement.position})`);
+  position(axisTitleOffset(side, extent, options.labelSize, undefined))
     .text(properties.label)
     .style("text-anchor", placement.anchor)
     .style("font-size", properties.label_size)
@@ -112,4 +115,12 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
     .style("font-family", properties.label_font)
     .style("fill", properties.label_colour)
     .attr("visibility", visibility);
+  const labelNode = label.node();
+  if (options.measure && groupNode !== null && labelNode !== null) {
+    // The box is measured from a zero baseline, before rotation
+    label.attr("x", 0).attr("y", 0).attr("transform", null);
+    const box = labelNode.getBBox();
+    const measurement: AxisTitleMeasurement = { axisEdge: measureAxisEdge(svg, groupNode, side), top: box.y, height: box.height };
+    position(axisTitleOffset(side, extent, options.labelSize, measurement));
+  }
 }

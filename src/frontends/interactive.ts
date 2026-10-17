@@ -50,6 +50,8 @@ export type WidgetData = {
 export type Widget = {
   renderValue(x: WidgetData): void;
   resize(width: number, height: number): void;
+  /** Pages retitle the chart through htmlwidgets' instance; undefined restores the rendered title */
+  setTitle(text: string | undefined): void;
 };
 
 function keysOf(column: Column): string[] {
@@ -68,6 +70,7 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
     const selectionHandle = new crosstalk.SelectionHandle();
     const viewport = { width, height };
     let x: WidgetData | undefined;
+    let titleText: string | undefined;
     let updateValues: WidgetUpdateValues = { dataViews: [], crosstalk_identities: [] };
     let dataViews: FrontendDataView[] = [];
 
@@ -177,11 +180,15 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       tooltipGroup.attr("transform", `translate(${left}, ${top})`);
     };
 
+    function drawTitle(): void {
+      if (x !== undefined) {
+        updateChartTitle(visual.svg, titleText === undefined ? x.title_settings : { ...x.title_settings, text: titleText });
+      }
+    }
+
     function updateVisual(type: powerbi.VisualUpdateType): void {
       visual.update({ dataViews: toDataViews(dataViews), viewport, type });
-      if (x !== undefined) {
-        updateChartTitle(visual.svg, x.title_settings);
-      }
+      drawTitle();
       visual.svg.selectAll(".chart-tooltip-group").data([null]).join("g").classed("chart-tooltip-group", true);
     }
 
@@ -216,6 +223,10 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
         viewport.width = newWidth;
         viewport.height = newHeight;
         updateVisual(updateType.resize);
+      },
+      setTitle: text => {
+        titleText = text;
+        drawTitle();
       }
     };
   };

@@ -25,6 +25,12 @@ export function paddedDataViews(chartType: string, dataViews: readonly FrontendD
         lowerPadding += 15;
       }
       canvas.lower_padding = Number(canvas.lower_padding) + lowerPadding;
+      // Centred tick labels overhang the last tick by half their width, labels rotated clockwise by their full width
+      const tickSize = Number(xAxis.xlimit_tick_size);
+      const rotation = Number(xAxis.xlimit_tick_rotation);
+      if (rotation >= 0) {
+        canvas.right_padding = Number(canvas.right_padding) + (rotation > 0 ? 4 : 2) * tickSize;
+      }
     }
     objects[i] = { ...settings, canvas };
   }

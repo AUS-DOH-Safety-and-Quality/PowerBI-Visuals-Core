@@ -85,6 +85,20 @@ describe("interactive widgets", () => {
     expect(selection.value).toBeNull();
   });
 
+  it("keeps a page's title through resizes and filtering, restoring the rendered title when unset", () => {
+    const { widget, visual, filter } = renderWidget();
+    const titled = { ...widgetData, title_settings: { ...widgetData.title_settings, text: "Statewide" } };
+    widget.renderValue(titled);
+    const titleText = () => visual.svg.select(".chart-title").text();
+    widget.setTitle("Alpha, Bravo");
+    expect(titleText()).toBe("Alpha, Bravo");
+    widget.resize(400, 250);
+    filter.set(["r1"]);
+    expect(titleText()).toBe("Alpha, Bravo");
+    widget.setTitle(undefined);
+    expect(titleText()).toBe("Statewide");
+  });
+
   it("removes tooltips on hide", () => {
     const { visual } = renderWidget();
     visual.host.tooltipService.show({ dataItems: [{ displayName: "Value", value: "4" }], coordinates: [10, 20], isTouchEvent: false, identities: [] });

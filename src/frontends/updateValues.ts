@@ -37,6 +37,7 @@ export type CrosstalkIdentities = string[][] | Record<string, string[]>;
 export type UpdateValues = {
   readonly dataViews: FrontendDataView[];
   readonly crosstalk_identities: CrosstalkIdentities;
+  readonly source_rows: Readonly<Record<string, readonly number[]>>;
 };
 
 /** R and Python round-trip data views as JSON, which drops the value columns' grouped() the visuals never call */
@@ -209,8 +210,10 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   const rowSettings = groupSettings(inputSettings);
   const byPosition: string[][] = [];
   const byCategory: Record<string, string[]> = {};
+  const sourceRows: Record<string, number[]> = {};
   for (let g = 0; g < groups.length; g++) {
     const group = groups[g];
+    sourceRows[String(g)] = group.rows;
     key.values.push(group.category);
     for (let i = 0; i < group.indicators.length; i++) {
       categoryColumns[i + 1].values.push(group.indicators[i]);
@@ -248,5 +251,5 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
       ? { columns: sources, objects: { misc: { group: groupCategoryRows([{ values: [String(group)] }], 1).keys[0] } } }
       : { columns: sources }
   };
-  return { dataViews: [dataView], crosstalk_identities: hasIndicators ? byPosition : byCategory };
+  return { dataViews: [dataView], crosstalk_identities: hasIndicators ? byPosition : byCategory, source_rows: sourceRows };
 }

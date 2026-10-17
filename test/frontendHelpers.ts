@@ -48,7 +48,7 @@ export class TestVisual implements FrontendVisual {
 registerChart("test", {
   Visual: TestVisual,
   settingsModel: {
-    canvas: card({ upper_padding: setting(10), left_padding: setting(10), lower_padding: setting(10) }),
+    canvas: card({ upper_padding: setting(10), left_padding: setting(10), lower_padding: setting(10), right_padding: setting(10) }),
     x_axis: card({ xlimit_tick_size: setting(10), xlimit_tick_rotation: setting(0) }),
     spc: card({ chart_type: setting("i") }),
     misc: card({ group: setting("", true) })

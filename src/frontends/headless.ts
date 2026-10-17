@@ -111,6 +111,11 @@ export function headlessChart(chartType: string, rawData: RawData, inputSettings
   if ("error" in titleSettings) {
     return titleSettings;
   }
-  const dataViews = makeUpdateValues(rawData, settings.settings, chartAggs.aggregations).dataViews;
-  return updateHeadlessVisual(chartType, dataViews, titleSettings.settings, width, height, staticPlot, limits);
+  const updateValues = makeUpdateValues(rawData, settings.settings, chartAggs.aggregations);
+  const result = updateHeadlessVisual(chartType, updateValues.dataViews, titleSettings.settings, width, height, staticPlot, limits);
+  // Frontends map limit rowIds to the input rows that contributed to them
+  if (!limits || "error" in result) {
+    return result;
+  }
+  return { ...result, source_rows: updateValues.source_rows };
 }

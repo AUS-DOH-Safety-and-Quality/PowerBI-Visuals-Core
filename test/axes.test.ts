@@ -79,14 +79,27 @@ describe("axis drawing", () => {
     expect(gridlines[0].style.strokeWidth).toBe("2");
   });
 
-  it("measures a drawn axis to place the title between it and the canvas edge", () => {
+  it("measures drawn axes to centre their titles beyond the tick labels, abutting them when the gap is too narrow", () => {
     const svg = svgElement();
-    drawAxis(svg, axisOptions(frame(), { measure: true }));
-    const group = must(svg.querySelector<SVGGElement>(".xaxisgroup"));
-    // Tick labels hang below the axis line at 390, so the measured edge lies beneath it
-    const edge = measureAxisEdge(svg, group, "bottom");
-    expect(edge).toBeGreaterThan(390);
-    expect(Number(must(svg.querySelector(".xaxislabel")).getAttribute("y"))).toBeCloseTo(400 - (400 - edge) / 2, 6);
+    const titled = frame({ settings: {
+      ...settings,
+      canvas: { ...settings.canvas, left_padding: 60 },
+      x_axis: { ...settings.x_axis, xlimit_label: "Source: a long axis title" },
+      y_axis: { ...settings.y_axis, ylimit_label: "Rate" }
+    } });
+    drawAxis(svg, axisOptions(titled, { measure: true }));
+    drawAxis(svg, axisOptions(titled, { axis: "y", measure: true }));
+    const bounds = svg.getBoundingClientRect();
+    // Tick labels hang below the axis line at 390, leaving less than a title's height
+    const xEdge = measureAxisEdge(svg, must(svg.querySelector<SVGGElement>(".xaxisgroup")), "bottom");
+    expect(xEdge).toBeGreaterThan(390);
+    const xTitle = must(svg.querySelector(".xaxislabel")).getBoundingClientRect();
+    expect(400 - xEdge).toBeLessThan(xTitle.height);
+    expect(xTitle.top - bounds.top).toBeCloseTo(xEdge, 6);
+    const yEdge = measureAxisEdge(svg, must(svg.querySelector<SVGGElement>(".yaxisgroup")), "left");
+    const yTitle = must(svg.querySelector(".yaxislabel")).getBoundingClientRect();
+    expect(yEdge).toBeGreaterThan(yTitle.width);
+    expect(yTitle.left - bounds.left).toBeCloseTo((yEdge - yTitle.width) / 2, 6);
   });
 
   it("draws no ticks when the axis has none", () => {

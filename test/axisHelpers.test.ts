@@ -10,17 +10,20 @@ describe("x tick label offsets", () => {
 });
 
 describe("axis title offset", () => {
-  it("centres a bottom title between the axis and the canvas edge", () => {
-    expect(axisTitleOffset("bottom", 500, 460, 10)).toBe(480);
+  // Titles 12 high, extending 9 above their baseline
+  it("centres each title's box between the axis and the canvas edge", () => {
+    expect(axisTitleOffset("bottom", 500, 10, { axisEdge: 460, top: -9, height: 12 })).toBe(483);
+    expect(axisTitleOffset("left", 500, 10, { axisEdge: 40, top: -9, height: 12 })).toBe(23);
   });
 
-  it("places a left title at 0.7 of the axis offset", () => {
-    expect(axisTitleOffset("left", 500, 40, 10)).toBeCloseTo(28, 10);
+  it("abuts the axis when the title does not fit, overflowing the canvas by the shortfall", () => {
+    expect(axisTitleOffset("bottom", 500, 10, { axisEdge: 497, top: -9, height: 12 })).toBe(506);
+    expect(axisTitleOffset("left", 500, 10, { axisEdge: 2, top: -9, height: 12 })).toBe(-1);
   });
 
   it("falls back to a label-size offset from the edge when the axis is unmeasured", () => {
-    expect(axisTitleOffset("bottom", 500, undefined, 12)).toBe(494);
-    expect(axisTitleOffset("left", 500, undefined, 12)).toBe(18);
+    expect(axisTitleOffset("bottom", 500, 12, undefined)).toBe(494);
+    expect(axisTitleOffset("left", 500, 12, undefined)).toBe(18);
   });
 });
 

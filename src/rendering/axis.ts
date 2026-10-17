@@ -51,15 +51,30 @@ export function xTickLabelOffsets(rotation: number): TickLabelOffsets {
 
 export type AxisTitleSide = "bottom" | "left";
 
+export type AxisTitleMeasurement = {
+  /** The axis's outer edge, as measureAxisEdge returns it */
+  readonly axisEdge: number;
+  /** The unrotated title's box above and below its baseline */
+  readonly top: number;
+  readonly height: number;
+};
+
 /**
- * Bottom titles sit midway between the axis and the canvas edge, left titles at 0.7 of the axis offset;
- * without a measurement the title sits a label size in from the edge
+ * Measured titles are centred between the axis and the canvas edge, abutting the axis when they do not fit so
+ * overflow fitting grows the padding by the shortfall; unmeasured titles sit a label size in from the edge
  */
-export function axisTitleOffset(side: AxisTitleSide, canvasExtent: number, axisEdge: number | undefined, labelSize: number): number {
-  if (side === "bottom") {
-    return axisEdge === undefined ? canvasExtent - labelSize / 2 : canvasExtent - (canvasExtent - axisEdge) / 2;
+export function axisTitleOffset(side: AxisTitleSide, canvasExtent: number, labelSize: number,
+                                measurement: AxisTitleMeasurement | undefined): number {
+  if (measurement === undefined) {
+    return side === "bottom" ? canvasExtent - labelSize / 2 : labelSize * 1.5;
   }
-  return axisEdge === undefined ? labelSize * 1.5 : axisEdge * 0.7;
+  const gap = side === "bottom" ? canvasExtent - measurement.axisEdge : measurement.axisEdge;
+  const inset = Math.max(0, (gap - measurement.height) / 2);
+  if (side === "bottom") {
+    return measurement.axisEdge + inset - measurement.top;
+  }
+  // The rotated y title's top faces left
+  return measurement.axisEdge - inset - measurement.height - measurement.top;
 }
 
 /** The axis's outer edge in the SVG's coordinates: bottom of a horizontal axis, left of a vertical one */

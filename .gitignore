@@ -3,3 +3,4 @@ coverage/
 *.md
 !README.md
 .vitest-attachments/
+.vitest/

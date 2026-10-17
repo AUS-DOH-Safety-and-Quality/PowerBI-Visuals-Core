@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { sequence, scaleLinear } from "../src/math/index";
 
 describe("sequence", () => {
+  it.each([0, -5, 1e100])("returns no values for zero count starting at %s", start => {
+    expect(sequence(start, 0, 1)).toEqual([]);
+  });
+
   it("produces exactly count values by repeated addition", () => {
     expect(sequence(1, 4, 1)).toEqual([1, 2, 3, 4]);
     expect(sequence(0, 5, 2)).toEqual([0, 2, 4, 6, 8]);

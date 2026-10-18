@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { chartAggregations, chartSettings, chartTitle, makeUpdateValues, paddedDataViews } from "../src/frontends/index";
+import {
+  chartAggregations, chartSettings, chartTitle, indicatorColumns, indicatorFields, makeUpdateValues, paddedDataViews, toDataViews, type Column
+} from "../src/frontends/index";
 import "./frontendHelpers";
 
 describe("frontend input validation", () => {
@@ -25,6 +27,46 @@ describe("frontend input validation", () => {
 });
 
 describe("frontend data views", () => {
+  const aggregations = { numerators: "sum", denominators: "sum", groupings: "first", xbar_sds: "first", tooltips: "first", labels: "first" } as const;
+
+  it.each<{ categories: Column; temporal: boolean }>([
+    { categories: [0, -1, 1, 1e100], temporal: false },
+    { categories: ["1", "2024", "01/02/2024", "Ward A", ""], temporal: false },
+    { categories: [true, false], temporal: false },
+    { categories: ["2024-01-01", "Ward A"], temporal: false },
+    { categories: ["2024-01-01", 0], temporal: false },
+    { categories: [null, NaN], temporal: false },
+    { categories: [], temporal: false },
+    { categories: "Ward A", temporal: false },
+    { categories: ["2024-13-01"], temporal: false },
+    { categories: ["2023-02-29"], temporal: false },
+    { categories: ["2024-01-01Tgarbage"], temporal: false },
+    { categories: ["2024-01-01T25:00:00"], temporal: false },
+    { categories: ["2024-01-01", "2024-02-29", null], temporal: true },
+    { categories: "2024-01-01", temporal: true },
+    { categories: ["2024-01-01T12:34:56.123Z", "2024-01-02T12:34:56+08:00"], temporal: true },
+    { categories: ["2024-01-01 12:34:56", "2024-01-02 12:34:56.123"], temporal: true }
+  ])("marks only ISO date/date-time columns as temporal: $categories", ({ categories, temporal }) => {
+    const result = makeUpdateValues({ categories }, {}, aggregations);
+    const expected = temporal ? { temporal: {} } : { text: true };
+    expect(result.dataViews[0].categorical.categories[0].source.type).toEqual(expected);
+    expect(result.dataViews[0].metadata.columns[0].type).toEqual(expected);
+    const restored = toDataViews(result.dataViews);
+    expect(restored[0].categorical?.categories?.[0].source.type).toEqual(expected);
+  });
+
+  it("keeps mixed keys as labels when filtering leaves only dates", () => {
+    const result = makeUpdateValues({
+      categories: ["Ward A", "2024-01-01"], crosstalk_identities: ["a", "b"], numerators: [1, 2]
+    }, { scatter: { size: [3, 4] } }, aggregations, ["b"]);
+    const key = result.dataViews[0].categorical.categories[0];
+    expect(key.source.type).toEqual({ text: true });
+    expect(key.values).toEqual(["2024-01-01"]);
+    expect(key.objects).toEqual([{ scatter: { size: 4 } }]);
+    expect(result.crosstalk_identities).toEqual({ "2024-01-01": ["b"] });
+    expect(result.source_rows).toEqual({ "0": [1] });
+  });
+
   it("retains contributing row indexes through sorting, grouping and Crosstalk filtering", () => {
     const input = {
       categories: ["b", "a", "a", "c", "b"], numerators: [1, 2, 3, 4, 5],
@@ -65,5 +107,22 @@ describe("frontend data views", () => {
     expect(rightPadding(45, true)).toBe(58);
     expect(rightPadding(-45, true)).toBe(10);
     expect(rightPadding(0, false)).toBe(10);
+  });
+});
+
+describe("indicator columns in the limits", () => {
+  it("appends underscores to indicators named like a limit column until unique", () => {
+    expect(indicatorColumns([], ["value"])).toEqual([]);
+    expect(indicatorColumns(["Region", "value"], ["value", "z"])).toEqual(["Region", "value_"]);
+    expect(indicatorColumns(["value", "value_"], ["value"])).toEqual(["value__", "value_"]);
+    expect(indicatorColumns(["value_", "value"], ["value"])).toEqual(["value_", "value__"]);
+    expect(indicatorColumns(["value", "z"], ["value", "value_", "z", "z_"])).toEqual(["value__", "z__"]);
+    expect(indicatorColumns(["Value", "value "], ["value"])).toEqual(["Value", "value "]);
+  });
+
+  it("keys indicator values by their columns, keeping their order", () => {
+    const fields = indicatorFields({ value: "a", Region: null, z: 1 }, ["value", "z"]);
+    expect(fields).toEqual({ value_: "a", Region: null, z_: 1 });
+    expect(Object.keys(fields)).toEqual(["value_", "Region", "z_"]);
   });
 });

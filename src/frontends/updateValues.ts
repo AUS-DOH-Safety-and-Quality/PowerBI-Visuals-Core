@@ -72,6 +72,27 @@ function namedColumns(columns: Readonly<Record<string, Column>> | null | undefin
   return { names, columns: values };
 }
 
+function hasDateCategories(categories: readonly Cell[]): boolean {
+  let hasDate = false;
+  for (let i = 0; i < categories.length; i++) {
+    const value = categories[i];
+    if (isMissing(value)) {
+      continue;
+    }
+    if (typeof value !== "string"
+      || !/^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})?)?$/.test(value)
+      || Number.isNaN(Date.parse(value))) {
+      return false;
+    }
+    const datePart = value.slice(0, 10);
+    if (new Date(datePart).toISOString().slice(0, 10) !== datePart) {
+      return false;
+    }
+    hasDate = true;
+  }
+  return hasDate;
+}
+
 type CategoryGroup = { category: string | null; indicators: Cell[]; rows: number[] };
 
 /** Rows sorted by indicator then category, and grouped by both; rows outside the Crosstalk filter are dropped */
@@ -186,8 +207,7 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   const groups = groupRows(categories, categoryOrder, indicators.columns, crosstalkIdentities, crosstalkFilters);
 
   const key: KeyColumn = {
-    // SPC reads keys as dates when the key column is temporal
-    source: { roles: { key: true }, type: { temporal: {} } },
+    source: { roles: { key: true }, type: hasDateCategories(categories) ? { temporal: {} } : { text: true } },
     values: [],
     objects: []
   };

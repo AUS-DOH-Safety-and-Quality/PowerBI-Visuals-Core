@@ -22,6 +22,8 @@ export type FrontendChart<V extends FrontendVisual = FrontendVisual> = {
   readonly Visual: new (options: VisualConstructorOptions) => V;
   /** The settings inputs are validated against */
   readonly settingsModel: SettingsModel;
+  /** Every column the limits can hold; indicators sharing a name are renamed */
+  readonly limitColumns: readonly string[];
   /** The calculated values returned alongside the plot */
   limits(visual: V): Readonly<Record<string, unknown>>;
   /** Why the view cannot be returned as a static plot, if it cannot */

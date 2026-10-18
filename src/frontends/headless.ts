@@ -1,9 +1,9 @@
 import { updateType, type UpdateOptions } from "../powerbi";
 import { SVG_NS } from "../rendering";
 import {
-  asArray, chartAggregations, chartNames, chartSettings, chartTitle, constructorOptions, frontendChart, makeUpdateValues,
-  paddedDataViews, toDataViews, updateChartTitle, type FrontendDataView, type FrontendServices, type FrontendVisual, type RawData,
-  type TitleSettings
+  asArray, chartAggregations, chartNames, chartSettings, chartTitle, constructorOptions, frontendChart, indicatorColumns,
+  makeUpdateValues, paddedDataViews, toDataViews, updateChartTitle, type FrontendDataView, type FrontendServices, type FrontendVisual,
+  type RawData, type TitleSettings
 } from ".";
 
 export type HeadlessResult = { readonly error: string } | Readonly<Record<string, unknown>>;
@@ -60,6 +60,33 @@ function svgDocument(content: string, width: number, height: number): string {
     + "</svg>";
 }
 
+/** Each indicator's column in a chart's limits, and a warning naming those renamed */
+export function limitIndicatorColumns(chartType: string, names: readonly string[]): { columns: string[]; warnings: string[] } {
+  const columns = indicatorColumns(names, frontendChart(chartType).limitColumns);
+  const renamed: string[] = [];
+  for (let i = 0; i < names.length; i++) {
+    if (columns[i] !== names[i]) {
+      renamed.push(`${names[i]} to ${columns[i]}`);
+    }
+  }
+  const warnings = renamed.length === 0
+    ? []
+    : [`Indicators renamed in the limits, as their names are limit columns: ${renamed.join(", ")}.`];
+  return { columns, warnings };
+}
+
+function indicatorNames(dataViews: readonly FrontendDataView[]): string[] {
+  const names: string[] = [];
+  const categories = dataViews[0]?.categorical.categories ?? [];
+  for (let i = 0; i < categories.length; i++) {
+    const source = categories[i].source;
+    if (source.roles?.indicator && source.displayName !== undefined) {
+      names.push(source.displayName);
+    }
+  }
+  return names;
+}
+
 export function updateHeadlessVisual(chartType: string, dataViews: readonly FrontendDataView[], titleSettings: TitleSettings,
                                      width: number, height: number, staticPlot: boolean, limits: boolean): HeadlessResult {
   const chart = frontendChart(chartType);
@@ -91,7 +118,7 @@ export function updateHeadlessVisual(chartType: string, dataViews: readonly Fron
     }
   }
   if (limits) {
-    result = { ...result, ...chart.limits(visual) };
+    result = { ...result, ...chart.limits(visual), warnings: limitIndicatorColumns(chartType, indicatorNames(dataViews)).warnings };
   }
   return result;
 }

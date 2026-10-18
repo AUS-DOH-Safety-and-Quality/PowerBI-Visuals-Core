@@ -53,5 +53,6 @@ registerChart("test", {
     spc: card({ chart_type: setting("i") }),
     misc: card({ group: setting("", true) })
   },
+  limitColumns: ["value"],
   limits: () => ({})
 });

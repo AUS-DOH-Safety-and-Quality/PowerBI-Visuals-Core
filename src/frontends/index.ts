@@ -3,6 +3,7 @@ export type { FrontendChart, FrontendVisual, RegisteredChart, SettingsModel } fr
 export { selectionId, constructorOptions } from "./host";
 export type { FrontendSelectionId, FrontendSelectionManager, FrontendServices } from "./host";
 export { asArray, isArray, limitValue } from "./values";
+export { indicatorColumns, indicatorFields } from "./indicatorColumns";
 export type { Cell, Column } from "./values";
 export { chartAggregations } from "./aggregations";
 export type { AggregationMethod, Aggregations, ValueRole } from "./aggregations";

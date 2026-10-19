@@ -1,4 +1,3 @@
-export { default as pickRows } from "./pickRows";
 export { default as formatNumber } from "./formatNumber";
 export { default as isNullOrUndefined } from "./isNullOrUndefined";
 export { default as isValidNumber } from "./isValidNumber";
@@ -14,7 +13,7 @@ export type { TableValue } from "./toCsv";
 export type { ValueFormatter } from "./valueFormatter";
 export { default as validateRows } from "./validateRows";
 export type { RowRule, RowValidation, ValidRows, InputDataResult } from "./validateRows";
-export { default as keptValues, keptValue } from "./keptValues";
+export { default as keptValue } from "./keptValue";
 export { quantity, valueAt, missingRule, nanRule, negativeRule, ratioRule } from "./inputRules";
 export type { NumberSeries, Quantity } from "./inputRules";
 export { default as deriveScaling } from "./deriveScaling";

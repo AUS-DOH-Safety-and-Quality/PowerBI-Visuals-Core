@@ -194,9 +194,8 @@ function drawTableCells<R extends TableRow>(div: TableSelection, options: Summar
   tableCells.each(function(d) {
     const cell = select(this);
     const kind = kinds[d.column];
-    if (kind !== "icon") {
-      cell.text(cellText(d, kind, options.formatValue)).classed("cell-text", true);
-    }
+    // Icon cells are emptied for the visual to fill afterwards
+    cell.text(kind === "icon" ? "" : cellText(d, kind, options.formatValue));
     const tableSettings = d.settings;
     cell.style("background-color", tableSettings.table_body_bg_colour)
         .style("font-weight", tableSettings.table_body_font_weight)
@@ -226,9 +225,6 @@ function drawTableCells<R extends TableRow>(div: TableSelection, options: Summar
 
 /** Draws the rows' table_row values under the columns; icon cells are left empty for the visual to fill afterwards */
 export function drawSummaryTable<R extends TableRow>(div: TableSelection, options: SummaryTableOptions<R>): void {
-  div.selectAll(".rowsvg").remove();
-  div.selectAll(".cell-text").remove();
-
   const rowSettings = options.rowSettings ?? (() => options.settings);
   drawTableHeaders(div, options);
   drawTableRows(div, options, rowSettings);

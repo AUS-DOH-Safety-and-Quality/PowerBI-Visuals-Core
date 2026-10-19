@@ -91,15 +91,46 @@ describe("axis drawing", () => {
     drawAxis(svg, axisOptions(titled, { axis: "y", measure: true }));
     const bounds = svg.getBoundingClientRect();
     // Tick labels hang below the axis line at 390, leaving less than a title's height
-    const xEdge = measureAxisEdge(svg, must(svg.querySelector<SVGGElement>(".xaxisgroup")), "bottom");
+    const xEdge = measureAxisEdge(must(svg.querySelector<SVGGElement>(".xaxisgroup")), 400 - titled.yAxis.start_padding, "bottom");
     expect(xEdge).toBeGreaterThan(390);
-    const xTitle = must(svg.querySelector(".xaxislabel")).getBoundingClientRect();
+    const xTitle = must(svg.querySelector<SVGTextElement>(".xaxislabel")).getBBox();
     expect(400 - xEdge).toBeLessThan(xTitle.height);
-    expect(xTitle.top - bounds.top).toBeCloseTo(xEdge, 6);
-    const yEdge = measureAxisEdge(svg, must(svg.querySelector<SVGGElement>(".yaxisgroup")), "left");
+    // SVG boxes are single precision
+    expect(xTitle.y).toBeCloseTo(xEdge, 4);
+    const yEdge = measureAxisEdge(must(svg.querySelector<SVGGElement>(".yaxisgroup")), titled.xAxis.start_padding, "left");
     const yTitle = must(svg.querySelector(".yaxislabel")).getBoundingClientRect();
     expect(yEdge).toBeGreaterThan(yTitle.width);
-    expect(yTitle.left - bounds.left).toBeCloseTo((yEdge - yTitle.width) / 2, 6);
+    expect(yTitle.left - bounds.left).toBeCloseTo((yEdge - yTitle.width) / 2, 2);
+  });
+
+  it("places measured titles in the svg's units, whatever its CSS scaling", () => {
+    const titled = frame({ settings: {
+      ...settings,
+      x_axis: { ...settings.x_axis, xlimit_label: "Month", xlimit_tick_rotation: -45 },
+      y_axis: { ...settings.y_axis, ylimit_label: "Rate" }
+    } });
+    function titles(scale: string): (string | null)[] {
+      const svg = svgElement();
+      must(svg.parentElement).style.transform = scale;
+      drawAxis(svg, axisOptions(titled, { measure: true }));
+      drawAxis(svg, axisOptions(titled, { axis: "y", measure: true }));
+      return [must(svg.querySelector(".xaxislabel")).getAttribute("y"), must(svg.querySelector(".yaxislabel")).getAttribute("x")];
+    }
+    // As reveal.js scales its slides
+    expect(titles("scale(0.5)")).toEqual(titles("none"));
+  });
+
+  it("keeps the unmeasured title placement while the svg is hidden", () => {
+    const svg = svgElement();
+    must(svg.parentElement).style.display = "none";
+    const titled = frame({ settings: {
+      ...settings, x_axis: { ...settings.x_axis, xlimit_label: "Month" }, y_axis: { ...settings.y_axis, ylimit_label: "Rate" }
+    } });
+    drawAxis(svg, axisOptions(titled, { measure: true }));
+    drawAxis(svg, axisOptions(titled, { axis: "y", measure: true }));
+    // A label size in from the canvas edge
+    expect(must(svg.querySelector(".xaxislabel")).getAttribute("y")).toBe("395");
+    expect(must(svg.querySelector(".yaxislabel")).getAttribute("x")).toBe("15");
   });
 
   it("draws no ticks when the axis has none", () => {

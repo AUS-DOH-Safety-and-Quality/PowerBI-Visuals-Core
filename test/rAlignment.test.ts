@@ -5,11 +5,14 @@ import { gammaCDF } from "../src/math/index";
 import { gammaQuantile } from "../src/math/index";
 import { chisqCDF } from "../src/math/index";
 import { poissonDensity } from "../src/math/index";
+import { normalCDF } from "../src/math/index";
+import { normalDensity } from "../src/math/index";
+import { normalQuantile } from "../src/math/index";
+import { chisqQuantile } from "../src/math/index";
+import { sinpi } from "../src/math/index";
+import { expectRel } from "./numericHelpers";
 
-/** Reference values from R 4.6.0. Tolerances are relative. */
-function expectRel(actual: number, expected: number, tol: number): void {
-  expect(Math.abs(actual / expected - 1), `${actual} vs ${expected}`).toBeLessThan(tol);
-}
+// Reference values from R 4.6.0. Tolerances are relative.
 
 describe("alignment with R nmath edge cases", () => {
   it("uses DBL_MIN, not the smallest subnormal, for the Poisson and gamma cutoffs", () => {
@@ -50,6 +53,46 @@ describe("alignment with R nmath edge cases", () => {
     expectRel(poissonDensity(10, 3, true), -7.1182896863944185, 1e-14);
     expectRel(poissonDensity(1000, 1000, true), -4.3728995060262967, 1e-14);
     expectRel(poissonDensity(0, 2.5, true), -2.5, 1e-14);
+  });
+
+  it("returns NaN for invalid parameters and NaN inputs, as R does", () => {
+    // R 4.6.1, e.g. pnorm(1, 0, -1), pgamma(1, -1, scale = 1), qgamma(0.5, 1, scale = 0), pchisq(1, -1)
+    const nan: readonly number[] = [
+      normalCDF(1, 0, -1), normalCDF(Number.POSITIVE_INFINITY, 0, -1), normalCDF(Number.NaN, 0, 1),
+      normalCDF(1, Number.NaN, 1), normalCDF(1, 0, Number.NaN),
+      normalDensity(1, 0, -1), normalDensity(1, 0, Number.NEGATIVE_INFINITY), normalDensity(Number.NaN, 0, 1),
+      normalDensity(1, Number.NaN, 1), normalDensity(1, 0, Number.NaN),
+      normalQuantile(0.5, 0, -1, true, false), normalQuantile(Number.NaN, 0, 1, true, false),
+      normalQuantile(0.5, Number.NaN, 1, true, false), normalQuantile(0.5, 0, Number.NaN, true, false),
+      gammaCDF(1, -1, 1), gammaCDF(1, 1, -1), gammaCDF(1, 1, 0), gammaCDF(-1, 1, -1), gammaCDF(1, 0, -1),
+      gammaCDF(Number.NaN, 1, 1), gammaCDF(1, Number.NaN, 1), gammaCDF(1, 1, Number.NaN), chisqCDF(1, -1),
+      gammaDensity(1, -1, 1, false), gammaDensity(1, 1, -1, false), gammaDensity(-1, -1, 1, false),
+      gammaDensity(-1, 1, -1, false), gammaDensity(1, 1, 0, false), gammaDensity(Number.NaN, 1, 1, false),
+      gammaDensity(1, Number.NaN, 1, false), gammaDensity(1, 1, Number.NaN, false),
+      gammaQuantile(0.5, -1, 1), gammaQuantile(0.5, 1, -1), gammaQuantile(0.5, 0, -1), gammaQuantile(0.5, 1, 0),
+      gammaQuantile(Number.NaN, 1, 1), gammaQuantile(0.5, Number.NaN, 1), gammaQuantile(0.5, 1, Number.NaN),
+      chisqQuantile(0.5, -1)
+    ];
+    for (let i = 0; i < nan.length; i++) {
+      expect(nan[i], `case ${i}`).toBeNaN();
+    }
+    // Probability boundaries come before the parameter checks
+    expect(normalQuantile(0, 0, -1, true, false)).toBe(Number.NEGATIVE_INFINITY);
+    expect(normalQuantile(1, 0, -1, true, false)).toBe(Number.POSITIVE_INFINITY);
+    expect(gammaQuantile(0, -1, 1)).toBe(0);
+    expect(gammaQuantile(1, 1, -1)).toBe(Number.POSITIVE_INFINITY);
+    expect(gammaQuantile(0, 1, 0)).toBe(0);
+  });
+
+  it("keeps sinpi accurate near odd integers", () => {
+    // R 4.6.1 sinpi, which uses glibc's correctly rounded sinpi
+    expectRel(sinpi(1 - 1e-8), 3.1415926693755392e-8, 1e-15);
+    expectRel(sinpi(1 + 1e-8), -3.1415926344968545e-8, 1e-15);
+    expectRel(sinpi(3 - 1e-7), 3.1415926484482773e-7, 1e-15);
+    expectRel(sinpi(-1 + 1e-9), -3.1415925647394851e-9, 1e-15);
+    expectRel(sinpi(1 - 3e-6), 9.4247779605520796e-6, 1e-15);
+    expectRel(sinpi(0.999), 0.0031415874858795661, 1e-15);
+    expectRel(sinpi(1.9999999), -3.141592655424014e-7, 1e-15);
   });
 
   it("frexp handles the top binade, subnormals and signs", () => {

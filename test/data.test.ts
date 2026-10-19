@@ -1,24 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { pickRows, formatNumber } from "../src/data/index";
+import { formatNumber } from "../src/data/index";
 import { indexColumnsByRole, formatPrimitiveValue } from "../src/powerbi/index";
 
 describe("row and display contracts", () => {
-  it("preserves requested order, duplicates and missing cells", () => {
-    expect(pickRows([10, 20], [1, 0, 1])).toEqual([20, 10, 20]);
-    expect(pickRows([undefined, false, 0, ""], [0, 3, 1, 2])).toEqual([undefined, "", false, 0]);
-    expect(pickRows([10], [])).toEqual([]);
-  });
-
-  it("allocates the selected array without copying or mutating its cells", () => {
-    const row = { value: 1 };
-    const input = [row];
-    const selected = pickRows(input, [0, 0]);
-    expect(selected).not.toBe(input);
-    expect(selected[0]).toBe(row);
-    expect(selected[1]).toBe(row);
-    expect(input).toEqual([row]);
-  });
-
   it("converts primitive values without treating zero, false or blank as missing", () => {
     expect(formatPrimitiveValue(null)).toBeUndefined();
     expect(formatPrimitiveValue(undefined)).toBeUndefined();

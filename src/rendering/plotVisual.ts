@@ -73,6 +73,7 @@ export type SelectionHighlightState = {
 };
 
 export type SvgSelection = Selection<SVGSVGElement, unknown, null, undefined>;
+export type MarksSelection = Selection<SVGGElement, unknown, null, undefined>;
 
 /** The update cycle, error display, plot frame and highlighting shared by the plot visuals */
 export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewModel<P, L>, S extends PlotVisualSettings,
@@ -117,8 +118,8 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
   protected drawAlternate(): boolean {
     return false;
   }
-  /** Draws any marks over the dots, below the context menu; by default there are none */
-  protected drawMarks(_svg: SVGSVGElement): void {}
+  /** Draws any marks into their layer over the dots; by default there are none */
+  protected drawMarks(_marks: MarksSelection): void {}
 
   /** Axes, tooltips, lines and their labels, dots, marks, context menu, download and value labels, in that order */
   drawVisual(): void {
@@ -142,7 +143,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       periodEnds: viewModel.periodEnds
     });
     drawPlotDots(svg, context, options.dots);
-    this.drawMarks(svg);
+    this.drawMarks(select(svg).select<SVGGElement>(".marksgroup"));
     this.addContextMenu(svg);
     drawPlotDownload(svg, context, () => {
       const points = context.points;
@@ -179,6 +180,8 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       }
 
       this.resizeCanvas(options.viewport.width, options.viewport.height);
+      // An alternate view keeps the svg, so the last plot's pointer handlers would otherwise act on it
+      this.svg.on(".plot", null);
       if (this.drawAlternate()) {
         this.currentPlotProperties = undefined;
         this.updateHighlighting();
@@ -260,19 +263,24 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
     });
   }
 
-  /** Context menu for the datum under the pointer; grouped rows supply their first identity, anything without one an empty one */
-  addContextMenu(root: GlobalEventHandlers | null, enabled = this.plotProperties.displayPlot): void {
+  /**
+   * Context menu for the nearest datum with an identity under the pointer, as table cells sit within their row;
+   * grouped rows supply their first identity, anything without one an empty one
+   */
+  addContextMenu(root: HTMLElement | SVGElement | null, enabled = this.plotProperties.displayPlot): void {
     if (root === null) {
       return;
     }
     bindContextMenu(root, {
       enabled,
       identity: target => {
-        const datum = select(target as BaseType).datum() as Partial<ContextMenuDatum> | undefined;
-        if (datum?.identity === undefined) {
-          return {} as ISelectionId;
+        for (let node = target instanceof Element ? target : null; node !== null && node !== root; node = node.parentElement) {
+          const datum = select<BaseType, Partial<ContextMenuDatum> | undefined>(node).datum();
+          if (datum?.identity !== undefined) {
+            return Array.isArray(datum.identity) ? datum.identity[0] : datum.identity;
+          }
         }
-        return Array.isArray(datum.identity) ? datum.identity[0] : datum.identity;
+        return {} as ISelectionId;
       },
       show: (identity, position) => {
         void this.selectionManager.showContextMenu(identity, position);

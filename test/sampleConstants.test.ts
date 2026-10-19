@@ -14,6 +14,18 @@ describe("sample constants", () => {
     expect(a3(n)).toBeCloseTo(expectedA3, 11);
   });
 
+  // 60-digit mpmath references: R's own lgamma difference cancels at these sizes
+  it.each([
+    [1000, 0.9997497811015132, 0.022369067648796488],
+    [3e4, 0.99999166642360561, 0.0040825339362065013],
+    [1e6, 0.99999974999978125, 0.00070710704635167333],
+    [1e8, 0.99999999749999998, 7.0710678383819796e-5],
+    [1e12, 0.99999999999975, 7.0710678118681269e-7]
+  ])("keeps c4 and c5 accurate for large n = %s", (n, expectedC4, expectedC5) => {
+    expect(Math.abs(c4(n) / expectedC4 - 1)).toBeLessThan(1e-14);
+    expect(Math.abs(c5(n) / expectedC5 - 1)).toBeLessThan(1e-13);
+  });
+
   it("approaches one from below as the sample grows", () => {
     expect(c4(1000)).toBeLessThan(1);
     expect(c4(1000)).toBeGreaterThan(c4(100));

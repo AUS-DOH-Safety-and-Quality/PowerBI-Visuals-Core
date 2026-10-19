@@ -103,7 +103,9 @@ export default function scaleLinear(): LinearScale {
     if (d0 === d1) {
       return [d0];
     }
-    const spec = tickSpec(d0, d1, count);
+    // As d3, a reversed domain gives the same ticks in descending order
+    const reverse = d1 < d0;
+    const spec = reverse ? tickSpec(d1, d0, count) : tickSpec(d0, d1, count);
     const i1 = spec[0];
     const i2 = spec[1];
     const inc = spec[2];
@@ -114,7 +116,8 @@ export default function scaleLinear(): LinearScale {
     const ticks = new Array<number>(n);
     // A negative increment is the reciprocal of a fractional step; dividing by it keeps ticks such as 0.3 exact
     for (let i = 0; i < n; ++i) {
-      ticks[i] = inc < 0 ? (i1 + i) / -inc : (i1 + i) * inc;
+      const index = reverse ? i2 - i : i1 + i;
+      ticks[i] = inc < 0 ? index / -inc : index * inc;
     }
     return ticks;
   };

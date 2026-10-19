@@ -6,6 +6,8 @@ import { asArray, isArray, isMissing, type Cell, type Column } from "./values";
 
 export type RawData = {
   readonly categories: Column;
+  /** Names the rows in the visuals' warnings */
+  readonly category_name: string;
   /** Categories with levels (e.g., R factors) are ordered by level rather than value */
   readonly category_levels?: Column | null;
   /** Rows without Crosstalk keys are identified by position */
@@ -16,7 +18,7 @@ export type RawData = {
 
 /** A column as the visuals read it; R and Python round-trip these as JSON */
 export type FrontendColumn = {
-  readonly source: Omit<powerbi.DataViewMetadataColumn, "displayName"> & { readonly displayName?: string };
+  readonly source: powerbi.DataViewMetadataColumn;
   readonly values: Cell[];
 };
 
@@ -31,8 +33,8 @@ export type FrontendDataView = {
   };
 };
 
-/** Each row's Crosstalk keys: by category name, or by position when indicators repeat the categories */
-export type CrosstalkIdentities = string[][] | Record<string, string[]>;
+/** Each data view row's Crosstalk keys, by position */
+export type CrosstalkIdentities = string[][];
 
 export type UpdateValues = {
   readonly dataViews: FrontendDataView[];
@@ -207,7 +209,7 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   const groups = groupRows(categories, categoryOrder, indicators.columns, crosstalkIdentities, crosstalkFilters);
 
   const key: KeyColumn = {
-    source: { roles: { key: true }, type: hasDateCategories(categories) ? { temporal: {} } : { text: true } },
+    source: { displayName: rawData.category_name, roles: { key: true }, type: hasDateCategories(categories) ? { temporal: {} } : { text: true } },
     values: [],
     objects: []
   };
@@ -217,7 +219,7 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   }
   const columns = new Array<FrontendColumn>(valueNames.length + tooltips.names.length);
   for (let i = 0; i < valueNames.length; i++) {
-    columns[i] = { source: { roles: { [valueNames[i]]: true } }, values: [] };
+    columns[i] = { source: { displayName: valueNames[i], roles: { [valueNames[i]]: true } }, values: [] };
   }
   // The visuals format tooltip values by type, and label them by name
   for (let i = 0; i < tooltips.names.length; i++) {
@@ -228,8 +230,7 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   }
 
   const rowSettings = groupSettings(inputSettings);
-  const byPosition: string[][] = [];
-  const byCategory: Record<string, string[]> = {};
+  const identities = new Array<string[]>(groups.length);
   const sourceRows: Record<string, number[]> = {};
   for (let g = 0; g < groups.length; g++) {
     const group = groups[g];
@@ -242,11 +243,7 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
     for (let i = 0; i < group.rows.length; i++) {
       groupIdentities[i] = String(crosstalkIdentities[group.rows[i]]);
     }
-    if (hasIndicators) {
-      byPosition.push(groupIdentities);
-    } else {
-      byCategory[String(group.category)] = groupIdentities;
-    }
+    identities[g] = groupIdentities;
     key.objects.push(rowSettings(group.rows[0]));
 
     const groupValues = new Array<Cell>(group.rows.length);
@@ -267,9 +264,10 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   const group = inputSettings.misc?.group;
   const dataView: FrontendDataView = {
     categorical: { categories: categoryColumns, values: columns },
-    metadata: hasIndicators && (typeof group === "string" || typeof group === "number")
+    // An empty group is the setting's default, which the visuals read as the first group
+    metadata: hasIndicators && ((typeof group === "string" && group !== "") || typeof group === "number")
       ? { columns: sources, objects: { misc: { group: groupCategoryRows([{ values: [String(group)] }], 1).keys[0] } } }
       : { columns: sources }
   };
-  return { dataViews: [dataView], crosstalk_identities: hasIndicators ? byPosition : byCategory, source_rows: sourceRows };
+  return { dataViews: [dataView], crosstalk_identities: identities, source_rows: sourceRows };
 }

@@ -2,34 +2,23 @@ import lgamma from "./lgamma";
 import gammaCDFImpl from "./gammaCDFImpl";
 import gammaNewtonIter from "./gammaNewtonIter";
 import chisqQuantileApprox from "./chisqQuantileApprox";
+import quantileBoundary from "./quantileBoundary";
 
 /** Gamma quantile (AS 91): qchisq_appr start, Taylor-series iteration, Newton steps; adapted from R's qgamma. */
 export default function gammaQuantile(p: number, alpha: number, scale: number,
                                       lower_tail: boolean = true,
                                       log_p: boolean = false): number {
-  if (log_p) {
-    if (p > 0) {
-      return Number.NaN;  // log(p) > 0 means p > 1
-    }
-    if (p === 0) {
-      return lower_tail ? Number.POSITIVE_INFINITY : 0;  // p = 1
-    }
-    if (p === Number.NEGATIVE_INFINITY) {
-      return lower_tail ? 0 : Number.POSITIVE_INFINITY;  // p = 0
-    }
-  } else {
-    if (p < 0 || p > 1) {
-      return Number.NaN;
-    }
-    if (p === 0) {
-      return lower_tail ? 0 : Number.POSITIVE_INFINITY;
-    }
-    if (p === 1) {
-      return lower_tail ? Number.POSITIVE_INFINITY : 0;
-    }
+  if (Number.isNaN(p) || Number.isNaN(alpha) || Number.isNaN(scale)) {
+    return Number.NaN;
   }
 
-  if (scale === 0) {
+  const boundary = quantileBoundary(p, lower_tail, log_p, 0, Number.POSITIVE_INFINITY);
+  if (boundary !== undefined) {
+    return boundary;
+  }
+
+  // R checks the parameters after the probability boundaries
+  if (alpha < 0 || scale <= 0) {
     return Number.NaN;
   }
 

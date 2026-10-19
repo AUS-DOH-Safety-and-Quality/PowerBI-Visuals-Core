@@ -1,5 +1,6 @@
 import { LOG_TWO_PI } from "./constants";
 import ldexp from "./ldexp";
+import quantileBoundary from "./quantileBoundary";
 
 /** q * P(x) / Q(x) by Horner's method; coefficients highest degree first. */
 function polyEval(x: number, q: number, num_coeffs: readonly number[], den_coeffs: readonly number[]): number {
@@ -17,26 +18,17 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
   let r: number;
   let val: number;
 
-  if (log_p) {
-    if (p > 0) {
-      return Number.NaN;  // log(p) > 0 means p > 1
-    }
-    if (p === 0) {
-      return lower_tail ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;  // p = 1
-    }
-    if (p === Number.NEGATIVE_INFINITY) {
-      return lower_tail ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;  // p = 0
-    }
-  } else {
-    if (p < 0 || p > 1) {
-      return Number.NaN;
-    }
-    if (p === 0) {
-      return lower_tail ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
-    }
-    if (p === 1) {
-      return lower_tail ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
-    }
+  if (Number.isNaN(p) || Number.isNaN(mu) || Number.isNaN(sigma)) {
+    return Number.NaN;
+  }
+
+  const boundary = quantileBoundary(p, lower_tail, log_p, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+  if (boundary !== undefined) {
+    return boundary;
+  }
+
+  if (sigma < 0) {
+    return Number.NaN;
   }
 
   if (sigma === 0) {

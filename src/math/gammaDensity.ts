@@ -2,7 +2,7 @@ import poissonDensity from "./poissonDensity";
 
 /** Gamma density; adapted from R's dgamma. */
 export default function gammaDensity(x: number, shape: number, scale: number, log_p: boolean): number {
-  if (scale === 0) {
+  if (Number.isNaN(x) || Number.isNaN(shape) || Number.isNaN(scale) || shape < 0 || scale <= 0) {
     return Number.NaN;
   }
 

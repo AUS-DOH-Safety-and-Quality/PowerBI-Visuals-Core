@@ -41,7 +41,7 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
   const scale = isX ? frame.xScale : frame.yScale;
   let values: number[] = [];
   if (properties.ticks) {
-    values = properties.tick_count !== 0 ? scale.ticks(properties.tick_count) : scale.ticks();
+    values = scale.ticks(properties.tick_count);
     if (options.integer) {
       const integers: number[] = [];
       for (let i = 0; i < values.length; i++) {
@@ -116,11 +116,12 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
     .style("fill", properties.label_colour)
     .attr("visibility", visibility);
   const labelNode = label.node();
-  if (options.measure && groupNode !== null && labelNode !== null) {
+  // A hidden (display: none) svg measures as empty, so its titles keep the unmeasured placement
+  if (options.measure && groupNode !== null && labelNode !== null && svg.getClientRects().length > 0) {
     // The box is measured from a zero baseline, before rotation
     label.attr("x", 0).attr("y", 0).attr("transform", null);
     const box = labelNode.getBBox();
-    const measurement: AxisTitleMeasurement = { axisEdge: measureAxisEdge(svg, groupNode, side), top: box.y, height: box.height };
+    const measurement: AxisTitleMeasurement = { axisEdge: measureAxisEdge(groupNode, edge, side), top: box.y, height: box.height };
     position(axisTitleOffset(side, extent, options.labelSize, measurement));
   }
 }

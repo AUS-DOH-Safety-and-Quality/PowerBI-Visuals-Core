@@ -31,22 +31,29 @@ function isAggregatedRole(name: string): name is AggregatedRole {
   return hasOwn(defaultAggregations, name);
 }
 
-/** Missing values are skipped; null when none remain */
+/** Missing values are skipped by every method; with none remaining the count is 0 and the rest null */
 export function aggregateColumn(column: readonly Cell[], aggregation: AggregationMethod): Cell {
-  if (aggregation === "first") {
-    return column[0];
-  }
-  if (aggregation === "last") {
-    return column[column.length - 1];
-  }
+  let first: Cell = null;
+  let last: Cell = null;
   const values: number[] = [];
   let sum = 0;
   for (let i = 0; i < column.length; i++) {
     const value = column[i];
     if (!isMissing(value)) {
+      first ??= value;
+      last = value;
       values.push(Number(value));
       sum += Number(value);
     }
+  }
+  if (aggregation === "first") {
+    return first;
+  }
+  if (aggregation === "last") {
+    return last;
+  }
+  if (aggregation === "count") {
+    return values.length;
   }
   if (values.length === 0) {
     return null;
@@ -56,8 +63,6 @@ export function aggregateColumn(column: readonly Cell[], aggregation: Aggregatio
       return sum;
     case "mean":
       return sum / values.length;
-    case "count":
-      return values.length;
     case "min":
       return Math.min(...values);
     case "max":

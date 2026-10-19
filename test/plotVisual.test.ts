@@ -1,15 +1,16 @@
 import type powerbi from "powerbi-visuals-api";
 import { describe, expect, it, vi } from "vitest";
-import { select, type Selection } from "d3-selection";
 import {
-  PlotVisual, PlotViewModelBase, type GroupResults, type GroupedLine, type PlotOptions, type PlotVisualPoint
+  PlotVisual, PlotViewModelBase, createTableContainer, drawSummaryTable, type GroupResults, type GroupedLine, type PlotOptions,
+  type PlotVisualPoint, type TableSelection, type MarksSelection
 } from "../src/rendering/index";
 import type { LinePoint } from "../src/rendering/drawLines";
 import SettingsStore from "../src/powerbi/settingsStore";
 import { formatPrimitiveValue, rowIdentity, selectionState, updateType, type CategoryGroups, type PrimitiveValue, type ValidatedDataView } from "../src/powerbi/index";
 import { createValueFormatter, type ValueFormatter } from "../src/data/index";
 import {
-  createAxisCard, createCanvasCard, createDownloadCard, createLabelsCard, createLineGroup, defineCard, dotOptions, type SettingsValues
+  createAxisCard, createCanvasCard, createDefaultValues, createDownloadCard, createLabelsCard, createLineGroup, createSummaryTableCard,
+  defineCard, dotOptions, type SettingsValues
 } from "../src/settings/index";
 import { buildDataView, createRenderer, must, sequentialKeys, type RowObjects } from "../src/testing/index";
 import { host, pluck } from "./browserHelpers";
@@ -102,13 +103,14 @@ class TestVisual extends PlotVisual<Point, TestModel, Settings> {
   markOverhang: number | undefined = undefined;
   /** Thrown while drawing the marks */
   drawFailure: unknown = undefined;
-  /** Grouped rows drawn instead of the plot, as a summary table draws them */
-  tableRows: { readonly identity: ISelectionId[] }[] | undefined = undefined;
-  readonly table: Selection<HTMLDivElement, unknown, null, undefined>;
+  /** Grouped rows drawn as a summary table instead of the plot */
+  tableRows: { readonly identity: ISelectionId[]; readonly highlighted: boolean; readonly table_row: { readonly name: string } }[]
+    | undefined = undefined;
+  readonly table: TableSelection;
 
   constructor(options: powerbi.extensibility.visual.VisualConstructorOptions) {
     super(options, visualHost => new TestModel(visualHost));
-    this.table = select(this.element).append("div");
+    this.table = createTableContainer(this.element);
   }
 
   protected get settings(): Settings {
@@ -133,12 +135,22 @@ class TestVisual extends PlotVisual<Point, TestModel, Settings> {
     if (this.tableRows === undefined) {
       return false;
     }
-    this.table.selectAll("p").data(this.tableRows).join("p").text("row");
+    drawSummaryTable(this.table, {
+      columns: [{ name: "name", label: "Name" }],
+      rows: this.tableRows,
+      kinds: {},
+      settings: createDefaultValues({ summary_table: createSummaryTableCard({ showDescription: "" }) }).summary_table,
+      formatValue: createValueFormatter(2, 0, "%"),
+      width: 500,
+      host: this.host,
+      selectionManager: this.selectionManager,
+      onSelectionChange: () => {}
+    });
     this.addContextMenu(this.table.node(), true);
     return true;
   }
 
-  protected override drawMarks(svg: SVGSVGElement): void {
+  protected override drawMarks(marks: MarksSelection): void {
     if (this.drawFailure !== undefined) {
       // eslint-disable-next-line @typescript-eslint/only-throw-error -- exercises the visual's handling of non-Error throws
       throw this.drawFailure;
@@ -146,7 +158,7 @@ class TestVisual extends PlotVisual<Point, TestModel, Settings> {
     if (this.markOverhang === undefined) {
       return;
     }
-    select(svg).selectAll("rect.mark").data([null]).join("rect")
+    marks.selectAll("rect.mark").data([null]).join("rect")
       .attr("class", "mark")
       .attr("x", this.plotProperties.xAxis.start_padding - this.markOverhang)
       .attr("y", 100)
@@ -296,6 +308,8 @@ describe("plot visual", () => {
     // The mark starts 50px past the default 10px padding
     expect(visual.plotProperties.xAxis.start_padding).toBe(60);
     expect(must(svg.querySelector("rect.mark")).getAttribute("x")).toBe("0");
+    // In their own layer, so their stacking does not depend on whether the fit redrew them
+    expect(must(svg.querySelector("rect.mark")).parentElement).toBe(svg.querySelector(":scope > .marksgroup"));
     expect(must(svg.querySelector(".yaxisgroup")).getAttribute("transform")).toBe("translate(60, 0)");
     send(visual, [dataView([10, 20], {})], true);
     expect(visual.plotProperties.xAxis.start_padding).toBe(10);
@@ -325,12 +339,46 @@ describe("plot visual", () => {
     const visual = rendered.visual;
     const show = vi.spyOn(visual.selectionManager, "showContextMenu").mockResolvedValue({});
     const points = visual.viewModel.plotPoints;
-    visual.tableRows = [{ identity: [points[1].identity, points[2].identity] }];
+    visual.tableRows = [{ identity: [points[1].identity, points[2].identity], highlighted: false, table_row: { name: "row" } }];
     rendered.update({});
     expect(() => visual.plotProperties).toThrow("Plot properties require validated data.");
     expect(events.finished).toHaveBeenCalledTimes(2);
-    must(rendered.element.querySelector("p")).dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 5, clientY: 6 }));
-    expect(show).toHaveBeenCalledWith(points[1].identity, { x: 5, y: 6 });
+    const cell = must(rendered.element.querySelector("tbody td"));
+    cell.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 5, clientY: 6 }));
+    expect(show).toHaveBeenLastCalledWith(points[1].identity, { x: 5, y: 6 });
+    // Icons are drawn inside the cell
+    const icon = cell.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"))
+      .appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
+    icon.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 7, clientY: 8 }));
+    expect(show).toHaveBeenLastCalledWith(points[1].identity, { x: 7, y: 8 });
+    must(rendered.element.querySelector("thead th")).dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 9, clientY: 10 }));
+    expect(show).toHaveBeenLastCalledWith({}, { x: 9, y: 10 });
+  });
+
+  it("drops the plot's pointer handlers while an alternate view replaces it, and rebinds them with the plot", () => {
+    const visualHost = host();
+    const rendered = render({}, [10, 20, 30], { host: visualHost });
+    const visual = rendered.visual;
+    const svg = must(rendered.element.querySelector("svg"));
+    const clear = vi.spyOn(visual.selectionManager, "clear");
+    const point = () => {
+      const box = svg.getBoundingClientRect();
+      svg.dispatchEvent(new MouseEvent("mousemove", { clientX: box.left + 250, clientY: box.top + 250 }));
+      svg.dispatchEvent(new MouseEvent("click"));
+    };
+    point();
+    expect(visualHost.tooltipService.show).toHaveBeenCalledTimes(1);
+    expect(clear).toHaveBeenCalledTimes(1);
+    visual.tableRows = [{ identity: [visual.viewModel.plotPoints[0].identity], highlighted: false, table_row: { name: "row" } }];
+    rendered.update({});
+    point();
+    expect(visualHost.tooltipService.show).toHaveBeenCalledTimes(1);
+    expect(clear).toHaveBeenCalledTimes(1);
+    visual.tableRows = undefined;
+    rendered.update({});
+    point();
+    expect(visualHost.tooltipService.show).toHaveBeenCalledTimes(2);
+    expect(clear).toHaveBeenCalledTimes(2);
   });
 
   it("downloads every plotted point's table row from the download button", () => {

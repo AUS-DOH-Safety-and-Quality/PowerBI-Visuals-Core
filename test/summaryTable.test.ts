@@ -233,6 +233,22 @@ describe("summary table rendering", () => {
     element.remove();
   });
 
+  it("updates cells in place and empties icon cells for the visual to fill", () => {
+    const columns = [{ name: "name", label: "Name" }, { name: "icon", label: "Icon" }];
+    const kinds = { icon: "icon" } as const;
+    const { element, rows, draw } = render({ columns, kinds });
+    const cells = must(element.querySelector("tbody tr")).querySelectorAll("td");
+    cells[1].append(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
+    rows[0] = row("a", { name: "Renamed" });
+    draw({ columns, kinds });
+    const redrawn = must(element.querySelector("tbody tr")).querySelectorAll("td");
+    expect(redrawn[0]).toBe(cells[0]);
+    expect(redrawn[1]).toBe(cells[1]);
+    expect(redrawn[0].textContent).toBe("Renamed");
+    expect(redrawn[1].childNodes).toHaveLength(0);
+    element.remove();
+  });
+
   it("styles each row from its own settings and restores its background after a hover", () => {
     const colours: Record<string, [string, string]> = { a: ["#111111", "#444444"], b: ["#222222", "#555555"] };
     const { element } = render({ rowSettings: d => ({

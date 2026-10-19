@@ -24,8 +24,9 @@ export type FrontendSelectionManager = {
 export type FrontendServices = {
   readonly selectionManager: FrontendSelectionManager;
   readonly tooltipService: Pick<ITooltipService, "show" | "hide">;
-  /** The keys of the category's row */
-  rowKeys(category: powerbi.DataViewCategoryColumn, index: number): readonly string[];
+  /** The keys of the data view's row */
+  rowKeys(index: number): readonly string[];
+  readonly displayWarningIcon: (hoverText: string, detailedText: string) => void;
 };
 
 function ignore(): void {}
@@ -36,8 +37,8 @@ export function constructorOptions(element: HTMLElement, services: FrontendServi
     createSelectionIdBuilder: () => {
       let keys: readonly string[] = [];
       const builder = {
-        withCategory: (category: powerbi.DataViewCategoryColumn, index: number) => {
-          keys = services.rowKeys(category, index);
+        withCategory: (_category: powerbi.DataViewCategoryColumn, index: number) => {
+          keys = services.rowKeys(index);
           return builder;
         },
         createSelectionId: () => selectionId(keys)
@@ -60,9 +61,7 @@ export function constructorOptions(element: HTMLElement, services: FrontendServi
     hostCapabilities: {
       allowInteractions: true
     },
-    displayWarningIcon: (hoverText: string, detailedText: string) => {
-      console.log(hoverText, detailedText);
-    }
+    displayWarningIcon: services.displayWarningIcon
   };
   // Outside Power BI there is no host; this implements the members the visuals call
   return { element, host: host as unknown as IVisualHost };

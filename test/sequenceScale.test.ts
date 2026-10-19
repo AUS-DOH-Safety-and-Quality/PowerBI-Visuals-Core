@@ -62,4 +62,12 @@ describe("scaleLinear", () => {
     expect(scaleLinear().domain([0.001, 0.0137]).ticks(9))
       .toEqual([0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.011, 0.012, 0.013]);
   });
+
+  it("gives a reversed domain the same ticks, descending, as d3 does", () => {
+    // d3-array 3.2.4 ticks(start, stop, count) with start > stop
+    expect(scaleLinear().domain([100, 0]).ticks(5)).toEqual([100, 80, 60, 40, 20, 0]);
+    expect(scaleLinear().domain([0.5, 0]).ticks(5)).toEqual([0.5, 0.4, 0.3, 0.2, 0.1, 0]);
+    expect(scaleLinear().domain([-3, -27]).ticks(4)).toEqual([-5, -10, -15, -20, -25]);
+    expect(scaleLinear().domain([1, 0.99]).ticks(1)).toEqual([1, 0.99]);
+  });
 });

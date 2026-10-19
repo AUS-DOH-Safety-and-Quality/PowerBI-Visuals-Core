@@ -16,4 +16,5 @@ export function initialiseSvg(svg: SVGSVGElement, removeAll: boolean = false): v
   selection.append("text").classed("yaxislabel", true);
   selection.append("g").classed("linesgroup", true);
   selection.append("g").classed("dotsgroup", true);
+  selection.append("g").classed("marksgroup", true);
 }

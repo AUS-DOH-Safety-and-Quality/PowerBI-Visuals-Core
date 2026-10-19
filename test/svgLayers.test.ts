@@ -12,7 +12,8 @@ describe("svg layers", () => {
       classes[i] = `${svg.children[i].tagName}.${svg.children[i].getAttribute("class")}`;
     }
     expect(classes).toEqual([
-      "line.ttip-line-x", "line.ttip-line-y", "g.gridgroup", "g.xaxisgroup", "text.xaxislabel", "g.yaxisgroup", "text.yaxislabel", "g.linesgroup", "g.dotsgroup"
+      "line.ttip-line-x", "line.ttip-line-y", "g.gridgroup", "g.xaxisgroup", "text.xaxislabel", "g.yaxisgroup", "text.yaxislabel", "g.linesgroup", "g.dotsgroup",
+      "g.marksgroup"
     ]);
   });
 
@@ -23,7 +24,7 @@ describe("svg layers", () => {
     const otherClick = vi.fn();
     select(svg).on("click.plot", plotClick).on("click.other", otherClick);
     initialiseSvg(svg, true);
-    expect(svg.children).toHaveLength(9);
+    expect(svg.children).toHaveLength(10);
     expect(svg.querySelector(".dotsgroup path")).toBeNull();
     svg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(plotClick).not.toHaveBeenCalled();

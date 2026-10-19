@@ -1,4 +1,5 @@
 import type { OutlierStatus } from "../data/flagDirection";
+import limitStatus from "./limitStatus";
 
 /**
  * Two-in-three rule: 2 of 3 consecutive points beyond the same 95% limit.
@@ -9,9 +10,8 @@ export default function twoInThree(val: readonly number[], ll95: readonly (numbe
   const outside95: number[] = new Array<number>(length);
   const two_in_three_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
   for (let i: number = 0; i < length; i++) {
-    const lower = ll95[i];
-    const upper = ul95[i];
-    outside95[i] = upper !== undefined && val[i] > upper ? 1 : (lower !== undefined && val[i] < lower ? -1 : 0);
+    const status = limitStatus(val[i], ll95[i], ul95[i]);
+    outside95[i] = status === "upper" ? 1 : (status === "lower" ? -1 : 0);
     two_in_three_detected[i] = "none";
 
     // Each side is counted separately, so a point beyond the other limit doesn't cancel a pair

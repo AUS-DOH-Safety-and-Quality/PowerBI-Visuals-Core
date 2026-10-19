@@ -96,9 +96,18 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
     // Marker distance along the drag angle; matches the initial draw's offset from the point
     const dragMarkerOffset = aesthetics.label_marker_offset + aesthetics.label_size / 2;
     group.style.setProperty("touch-action", "none");
+    let dragged = false;
+    // The click ending a drag would otherwise reach the plot's background handler and clear the selection
+    group.addEventListener("click", (event: MouseEvent) => {
+      if (dragged) {
+        event.stopPropagation();
+      }
+    });
     group.addEventListener("pointerdown", (event: PointerEvent) => {
       group.setPointerCapture(event.pointerId);
+      dragged = false;
       const onMove = (move: PointerEvent) => {
+        dragged = true;
         const pointer = screenToSvg(svg, move.clientX, move.clientY);
         const x = pointer.x;
         const y = pointer.y;

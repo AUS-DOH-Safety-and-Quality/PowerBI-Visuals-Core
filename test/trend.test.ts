@@ -80,8 +80,15 @@ describe("trend", () => {
     // Perla et al. (2011): like values neither make nor break a trend
     it("should count repeated values once, flagging them within the trend", () => {
         expect(trend([1, 2, 3, 3, 4, 5], 5)).toEqual(["upper", "upper", "upper", "upper", "upper", "upper"]);
-        expect(trend([2, 2, 3, 4], 3)).toEqual(["upper", "upper", "upper", "upper"]);
         expect(trend([1, 2, 2, 3, 4, 5], 6)).toEqual(["none", "none", "none", "none", "none", "none"]);
+        expect(trend([5, 5, 4, 4, 3, 3, 2], 3)).toEqual(["none", "lower", "lower", "lower", "lower", "lower", "lower"]);
+    });
+
+    it("should leave a plateau at either end of a trend unflagged", () => {
+        expect(trend([3, 3, 2, 1], 3)).toEqual(["none", "lower", "lower", "lower"]);
+        expect(trend([1, 2, 3, 3], 3)).toEqual(["upper", "upper", "upper", "none"]);
+        expect(trend([2, 2, 2, 3, 4, 4], 3)).toEqual(["none", "none", "upper", "upper", "upper", "none"]);
+        expect(trend([3, 3, 2, 1, 1, 2, 3], 3)).toEqual(["none", "lower", "lower", "lower", "upper", "upper", "upper"]);
     });
 
     it("should keep a turning point with the earlier trend", () => {

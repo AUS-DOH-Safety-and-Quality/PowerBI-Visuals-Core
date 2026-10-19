@@ -4,7 +4,7 @@ import gammaCDFImpl from "./gammaCDFImpl";
 export default function gammaCDF(x: number, alpha: number, scale: number,
                                   lower_tail: boolean = true,
                                   log_p: boolean = false): number {
-  if (scale === 0) {
+  if (Number.isNaN(x) || Number.isNaN(alpha) || Number.isNaN(scale) || alpha < 0 || scale <= 0) {
     return Number.NaN;
   }
 

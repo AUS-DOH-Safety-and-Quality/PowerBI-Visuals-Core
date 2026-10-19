@@ -1,5 +1,5 @@
 import { updateType, type UpdateOptions } from "../powerbi";
-import { SVG_NS } from "../rendering";
+import { SVG_NS, type ViewModelValidation } from "../rendering";
 import {
   asArray, chartAggregations, chartNames, chartSettings, chartTitle, constructorOptions, frontendChart, indicatorColumns,
   makeUpdateValues, paddedDataViews, toDataViews, updateChartTitle, type FrontendDataView, type FrontendServices, type FrontendVisual,
@@ -23,7 +23,9 @@ const services: FrontendServices = {
     show: () => {},
     hide: () => {}
   },
-  rowKeys: (_category, index) => [String(index)]
+  rowKeys: index => [String(index)],
+  // Returned with the result instead
+  displayWarningIcon: () => {}
 };
 
 /** The headless document stands in for the browser's */
@@ -80,7 +82,7 @@ function indicatorNames(dataViews: readonly FrontendDataView[]): string[] {
   const categories = dataViews[0]?.categorical.categories ?? [];
   for (let i = 0; i < categories.length; i++) {
     const source = categories[i].source;
-    if (source.roles?.indicator && source.displayName !== undefined) {
+    if (source.roles?.indicator) {
       names.push(source.displayName);
     }
   }
@@ -95,8 +97,9 @@ export function updateHeadlessVisual(chartType: string, dataViews: readonly Fron
   visual.update(updateOptions([], width, height));
 
   let result: Record<string, unknown> = {};
+  let status: ViewModelValidation;
   if (staticPlot) {
-    visual.update(updateOptions(paddedDataViews(chartType, dataViews, titleSettings, true), width, height));
+    status = visual.update(updateOptions(paddedDataViews(chartType, dataViews, titleSettings, true), width, height));
     updateChartTitle(visual.svg, titleSettings);
     const errorMessage = visual.svg.select(".errormessage");
     if (errorMessage.size() > 0) {
@@ -112,15 +115,17 @@ export function updateHeadlessVisual(chartType: string, dataViews: readonly Fron
     }
     result.svg = svgDocument(svg.innerHTML, width, height);
   } else {
-    const status = visual.viewModel.update(updateOptions(dataViews, width, height), visual.host);
+    status = visual.viewModel.update(updateOptions(dataViews, width, height), visual.host);
     if (!status.status) {
       return { error: status.error };
     }
   }
+  const warnings = status.status && status.warning !== undefined ? [status.warning] : [];
   if (limits) {
-    result = { ...result, ...chart.limits(visual), warnings: limitIndicatorColumns(chartType, indicatorNames(dataViews)).warnings };
+    result = { ...result, ...chart.limits(visual) };
+    warnings.push(...limitIndicatorColumns(chartType, indicatorNames(dataViews)).warnings);
   }
-  return result;
+  return { ...result, warnings };
 }
 
 /** Validates and processes raw inputs, then renders, for frontends without interactive plots */

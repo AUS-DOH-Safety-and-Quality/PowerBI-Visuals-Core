@@ -77,11 +77,13 @@ export function axisTitleOffset(side: AxisTitleSide, canvasExtent: number, label
   return measurement.axisEdge - inset - measurement.height - measurement.top;
 }
 
-/** The axis's outer edge in the SVG's coordinates: bottom of a horizontal axis, left of a vertical one */
-export function measureAxisEdge(svg: SVGSVGElement, axis: Element, side: AxisTitleSide): number {
-  const svgRect = svg.getBoundingClientRect();
-  const axisRect = axis.getBoundingClientRect();
-  return side === "bottom" ? axisRect.bottom - svgRect.top : axisRect.left - svgRect.left;
+/**
+ * The outer edge of an axis drawn at this offset, in the SVG's units: bottom of a horizontal axis, left of a vertical one.
+ * Client rects would be in screen pixels, which differ under CSS scaling.
+ */
+export function measureAxisEdge(axis: SVGGraphicsElement, offset: number, side: AxisTitleSide): number {
+  const box = axis.getBBox();
+  return side === "bottom" ? offset + box.y + box.height : offset + box.x;
 }
 
 export type AxisTicksOptions = {

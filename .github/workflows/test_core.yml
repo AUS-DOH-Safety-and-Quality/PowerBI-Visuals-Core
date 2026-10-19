@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # Away from UTC, so that date-only parsing is tested meaningfully
+  TZ: Australia/Perth
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -36,5 +40,58 @@ jobs:
 
     - name: Run unit tests
       run: |
+        sudo apt-get install -y fonts-liberation
+        npx playwright install chromium
+        npm run test
+
+  # The visuals' suites against this Core, overlaid on the Core they pin
+  visuals:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        visual: [PowerBI-SPC, PowerBI-Funnels]
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        path: core
+
+    - uses: actions/checkout@v7
+      with:
+        repository: AUS-DOH-Safety-and-Quality/${{ matrix.visual }}
+        path: visual
+
+    - name: Setup Node 24
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24
+        cache: 'npm'
+        cache-dependency-path: visual/package-lock.json
+
+    - name: Install Package Dependencies
+      working-directory: visual
+      run: |
+        npm ci
+
+    - name: Overlay Core
+      run: |
+        rm -rf visual/node_modules/powerbi-visuals-core/src visual/node_modules/powerbi-visuals-core/config visual/node_modules/.vite
+        cp -r core/src core/config core/package.json visual/node_modules/powerbi-visuals-core/
+
+    - name: Lint
+      working-directory: visual
+      run: |
+        npm run eslint
+
+    - name: Typecheck
+      working-directory: visual
+      run: |
+        npm run typecheck
+
+    - name: Run unit tests
+      working-directory: visual
+      run: |
+        sudo apt-get install -y fonts-liberation
         npx playwright install chromium
         npm run test

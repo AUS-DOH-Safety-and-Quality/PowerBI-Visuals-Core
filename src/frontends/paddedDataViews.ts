@@ -17,17 +17,17 @@ export function paddedDataViews(chartType: string, dataViews: readonly FrontendD
     canvas.upper_padding = Number(canvas.upper_padding) + titlePadding;
     if (staticPlot) {
       const xAxis = { ...defaults.x_axis, ...settings.x_axis };
-      canvas.left_padding = Number(canvas.left_padding) + 50;
-      // Headless plots are not fitted to their overflowing axis labels
-      let lowerPadding = 10 + Number(xAxis.xlimit_tick_size);
-      // Rotated tick labels hang further below the axis
-      if (xAxis.xlimit_tick_rotation !== 0) {
-        lowerPadding += 15;
-      }
-      canvas.lower_padding = Number(canvas.lower_padding) + lowerPadding;
-      // Centred tick labels overhang the last tick by half their width, labels rotated clockwise by their full width
       const tickSize = Number(xAxis.xlimit_tick_size);
       const rotation = Number(xAxis.xlimit_tick_rotation);
+      const radians = rotation * Math.PI / 180;
+      canvas.left_padding = Number(canvas.left_padding) + 50;
+      // Headless plots are not fitted to their overflowing axis labels. Rotated labels hang along their length,
+      // taken as a dd/mm/yyyy date's 5em beyond their 0.8em offset, and across their 9px drop and height
+      const lowerPadding = rotation === 0
+        ? 10 + tickSize
+        : 5.8 * tickSize * Math.abs(Math.sin(radians)) + (9 + 0.4 * tickSize) * Math.abs(Math.cos(radians));
+      canvas.lower_padding = Number(canvas.lower_padding) + lowerPadding;
+      // Centred tick labels overhang the last tick by half their width, labels rotated clockwise by their full width
       if (rotation >= 0) {
         canvas.right_padding = Number(canvas.right_padding) + (rotation > 0 ? 4 : 2) * tickSize;
       }

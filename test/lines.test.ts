@@ -146,7 +146,10 @@ describe("line labels", () => {
     expect(must(target.querySelector("text")).getAttribute("dy")).toBe("5px");
     drawLineLabels(target, [label], false);
     const text = must(target.querySelector("text"));
-    expect(text.getBoundingClientRect().height).toBeGreaterThan(0);
-    expect(text.getAttribute("dy")).toBe(`${text.getBoundingClientRect().height / 4}px`);
+    const box = text.getBoundingClientRect();
+    expect(box.height).toBeGreaterThan(0);
+    // Centred on the line, to within a tenth of the text's height
+    const centre = (box.top + box.bottom) / 2 - svg.getBoundingClientRect().top;
+    expect(Math.abs(centre - 40)).toBeLessThan(box.height / 10);
   });
 });

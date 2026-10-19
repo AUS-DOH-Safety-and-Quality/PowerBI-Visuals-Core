@@ -85,6 +85,15 @@ describe("value labels", () => {
       group.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1 }));
       group.dispatchEvent(new PointerEvent("pointermove", { pointerId: 1, ...client(svg, pointX + 90, pointY) }));
       expect(plotPoints[0].label.distance).toBeCloseTo(30, 6);
+      // The click ending a drag stays on the label; one without a drag reaches the plot like any background click
+      const background = vi.fn();
+      svg.addEventListener("click", background);
+      group.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      expect(background).not.toHaveBeenCalled();
+      group.dispatchEvent(new PointerEvent("pointerdown", { pointerId: 1, bubbles: true }));
+      group.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1 }));
+      group.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      expect(background).toHaveBeenCalledTimes(1);
     } finally {
       vi.restoreAllMocks();
     }

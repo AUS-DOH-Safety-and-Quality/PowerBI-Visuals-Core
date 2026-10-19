@@ -7,10 +7,6 @@ export default function chisqQuantileApprox(p: number, nu: number, g: number,
                                             lower_tail: boolean = true,
                                             log_p: boolean = false,
                                             tol: number): number {
-  if ((log_p && p > 0) || (!log_p && (p < 0 || p > 1))) {
-    return Number.NaN;
-  }
-
   const alpha: number = 0.5 * nu;
   let p1: number = logP(p, lower_tail, log_p);
 

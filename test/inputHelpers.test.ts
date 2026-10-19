@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveScaling, keptValues } from "../src/data/index";
+import { deriveScaling, keptValue } from "../src/data/index";
 import { readNumbers, readSettingsGroups } from "../src/powerbi/index";
 import { defineCard, numberOption } from "../src/settings/index";
 
@@ -28,10 +28,11 @@ describe("kept rows", () => {
     expect(readNumbers({ values: [2.5, null, "0", 4, undefined, ""] }, [0, 1, 2, 4, 5])).toEqual([2.5, undefined, 0, undefined, undefined]);
   });
 
-  it("compacts the kept positions' values and rejects a kept missing value", () => {
+  it("reads a kept position's value and rejects a kept missing value", () => {
     const numbers = [1, undefined, 3, 5];
-    expect(keptValues(numbers, [0, 2, 3])).toEqual([1, 3, 5]);
-    expect(() => keptValues(numbers, [1])).toThrow("missing value");
+    expect(keptValue(numbers, 2)).toBe(3);
+    expect(() => keptValue(numbers, 1)).toThrow("missing value");
+    expect(() => keptValue(undefined, 0)).toThrow("missing value");
   });
 });
 

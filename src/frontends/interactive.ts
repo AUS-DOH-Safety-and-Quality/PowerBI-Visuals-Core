@@ -2,18 +2,19 @@ import type powerbi from "powerbi-visuals-api";
 import { updateType } from "../powerbi";
 import { SVG_NS } from "../rendering";
 import {
-  asArray, isArray, constructorOptions, frontendChart, makeUpdateValues, paddedDataViews, selectionId, toDataViews, updateChartTitle,
+  asArray, constructorOptions, frontendChart, makeUpdateValues, paddedDataViews, selectionId, toDataViews, updateChartTitle,
   type Aggregations, type Column, type FrontendDataView, type FrontendSelectionId, type FrontendSelectionManager,
   type InputSettings, type RawData, type TitleSettings
 } from ".";
 
 type CrosstalkHandle = {
-  readonly value: string[] | null;
   setGroup(group: string | null): void;
   on(event: "change", listener: (event: { readonly value: string[] | null }) => void): string;
 };
-type CrosstalkSelectionHandle = CrosstalkHandle & { set(keys: string[]): void; clear(): void };
-declare const crosstalk: { FilterHandle: new () => CrosstalkHandle; SelectionHandle: new () => CrosstalkSelectionHandle };
+/** The group's combined filter, null when no filter is active */
+type CrosstalkFilterHandle = CrosstalkHandle & { readonly filteredKeys: string[] | null };
+type CrosstalkSelectionHandle = CrosstalkHandle & { readonly value: string[] | null; set(keys: string[]): void; clear(): void };
+declare const crosstalk: { FilterHandle: new () => CrosstalkFilterHandle; SelectionHandle: new () => CrosstalkSelectionHandle };
 
 type TooltipSettings = {
   readonly ttip_font_size: number;
@@ -29,7 +30,7 @@ type TooltipSettings = {
 /** R unboxes length-one vectors when serialising the widget data */
 type WidgetUpdateValues = {
   readonly dataViews: readonly FrontendDataView[];
-  readonly crosstalk_identities: readonly Column[] | Readonly<Record<string, Column>>;
+  readonly crosstalk_identities: readonly Column[];
 };
 
 /** Crosstalk data is aggregated here so that filtering can re-aggregate it; other data arrives aggregated */
@@ -79,7 +80,7 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       getSelectionIds: () => {
         const selectedKeys = selectionHandle.value ?? [];
         const selected = new Set(selectedKeys);
-        const groups = Object.values(updateValues.crosstalk_identities);
+        const groups = updateValues.crosstalk_identities;
         const identities = new Array<FrontendSelectionId>(selectedKeys.length);
         for (let i = 0; i < selectedKeys.length; i++) {
           identities[i] = selectionId([selectedKeys[i]]);
@@ -95,16 +96,30 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
         }
         return identities;
       },
+      // As in Power BI, multi-select toggles each identity, here selected when any of its keys are, as getSelectionIds has it
       select: (identity, multiSelect) => {
         const identities = Array.isArray(identity) ? identity : [identity];
-        const keys: string[] = [];
+        const selected = new Set(multiSelect === true ? selectionHandle.value ?? [] : []);
         for (let i = 0; i < identities.length; i++) {
-          keys.push(...identities[i].keys);
+          const keys = identities[i].keys;
+          let anySelected = false;
+          for (let j = 0; j < keys.length && !anySelected; j++) {
+            anySelected = selected.has(keys[j]);
+          }
+          for (let j = 0; j < keys.length; j++) {
+            if (anySelected) {
+              selected.delete(keys[j]);
+            } else {
+              selected.add(keys[j]);
+            }
+          }
         }
-        if (multiSelect === true && selectionHandle.value !== null) {
-          keys.push(...selectionHandle.value);
+        // Crosstalk reads an empty selection as one that excludes every row
+        if (selected.size === 0) {
+          selectionHandle.clear();
+        } else {
+          selectionHandle.set(Array.from(selected));
         }
-        selectionHandle.set(keys);
         return Promise.resolve();
       },
       clear: () => {
@@ -126,9 +141,9 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
           visual.svg.select(".chart-tooltip-group").selectChildren().remove();
         }
       },
-      rowKeys: (category, index) => {
-        const identities = updateValues.crosstalk_identities;
-        return keysOf(isArray(identities) ? identities[index] : identities[String(category.values[index])]);
+      rowKeys: index => keysOf(updateValues.crosstalk_identities[index]),
+      displayWarningIcon: (hoverText, detailedText) => {
+        console.log(hoverText, detailedText);
       }
     }));
     const svg = visual.svg.node();
@@ -180,23 +195,26 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       tooltipGroup.attr("transform", `translate(${left}, ${top})`);
     };
 
-    function drawTitle(): void {
-      if (x !== undefined) {
-        updateChartTitle(visual.svg, titleText === undefined ? x.title_settings : { ...x.title_settings, text: titleText });
-      }
+    /** The widget's title settings, with any title set since */
+    function titleSettings(data: WidgetData): TitleSettings {
+      return titleText === undefined ? data.title_settings : { ...data.title_settings, text: titleText };
     }
 
     function updateVisual(type: powerbi.VisualUpdateType): void {
       visual.update({ dataViews: toDataViews(dataViews), viewport, type });
-      drawTitle();
+      if (x !== undefined) {
+        updateChartTitle(visual.svg, titleSettings(x));
+      }
       visual.svg.selectAll(".chart-tooltip-group").data([null]).join("g").classed("chart-tooltip-group", true);
     }
 
-    function aggregate(data: WidgetData, filters?: readonly string[]): void {
+    /** Aggregates the rows within the group's active filter, if any */
+    function redraw(data: WidgetData): void {
       updateValues = data.is_crosstalk
-        ? makeUpdateValues(data.data_raw, data.input_settings, data.aggregations, filters)
+        ? makeUpdateValues(data.data_raw, data.input_settings, data.aggregations, filterHandle.filteredKeys ?? undefined)
         : data.update_values;
-      dataViews = paddedDataViews(chartType, updateValues.dataViews, data.title_settings, false);
+      dataViews = paddedDataViews(chartType, updateValues.dataViews, titleSettings(data), false);
+      updateVisual(updateType.data);
     }
 
     // The visual's selection functions already map identities to Crosstalk keys
@@ -204,29 +222,30 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       visual.updateHighlighting();
     });
     // Filtering re-aggregates the remaining rows
-    filterHandle.on("change", event => {
+    filterHandle.on("change", () => {
       if (x?.is_crosstalk === true) {
-        aggregate(x, event.value ?? undefined);
-        updateVisual(updateType.data);
+        redraw(x);
       }
     });
 
     return {
       renderValue: value => {
         x = value;
-        aggregate(value);
         selectionHandle.setGroup(value.crosstalk_group);
         filterHandle.setGroup(value.crosstalk_group);
-        updateVisual(updateType.data);
+        redraw(value);
       },
       resize: (newWidth, newHeight) => {
         viewport.width = newWidth;
         viewport.height = newHeight;
         updateVisual(updateType.resize);
       },
+      // The plot is padded again, as the title may be added or removed
       setTitle: text => {
         titleText = text;
-        drawTitle();
+        if (x !== undefined) {
+          redraw(x);
+        }
       }
     };
   };

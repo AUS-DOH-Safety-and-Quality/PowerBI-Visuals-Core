@@ -11,14 +11,17 @@ describe("x tick label offsets", () => {
 
 describe("axis title offset", () => {
   // Titles 12 high, extending 9 above their baseline
-  it("centres each title's box between the axis and the canvas edge", () => {
-    expect(axisTitleOffset("bottom", 500, 10, { axisEdge: 460, top: -9, height: 12 })).toBe(483);
-    expect(axisTitleOffset("left", 500, 10, { axisEdge: 40, top: -9, height: 12 })).toBe(23);
+  it("places each title half a label size beyond the axis, whatever the space to the canvas edge", () => {
+    expect(axisTitleOffset("bottom", 500, 10, { axisEdge: 460, top: -9, height: 12 })).toBe(474);
+    expect(axisTitleOffset("bottom", 600, 10, { axisEdge: 460, top: -9, height: 12 })).toBe(474);
+    expect(axisTitleOffset("left", 500, 10, { axisEdge: 40, top: -9, height: 12 })).toBe(32);
+    expect(axisTitleOffset("left", 500, 10, { axisEdge: 80, top: -9, height: 12 })).toBe(72);
+    expect(axisTitleOffset("left", 500, 20, { axisEdge: 40, top: -9, height: 12 })).toBe(27);
   });
 
-  it("abuts the axis when the title does not fit, overflowing the canvas by the shortfall", () => {
-    expect(axisTitleOffset("bottom", 500, 10, { axisEdge: 497, top: -9, height: 12 })).toBe(506);
-    expect(axisTitleOffset("left", 500, 10, { axisEdge: 2, top: -9, height: 12 })).toBe(-1);
+  it("overflows the canvas by the shortfall when the title and its gap do not fit", () => {
+    expect(axisTitleOffset("bottom", 500, 10, { axisEdge: 497, top: -9, height: 12 })).toBe(511);
+    expect(axisTitleOffset("left", 500, 10, { axisEdge: 2, top: -9, height: 12 })).toBe(-6);
   });
 
   it("falls back to a label-size offset from the edge when the axis is unmeasured", () => {

@@ -60,21 +60,20 @@ export type AxisTitleMeasurement = {
 };
 
 /**
- * Measured titles are centred between the axis and the canvas edge, abutting the axis when they do not fit so
- * overflow fitting grows the padding by the shortfall; unmeasured titles sit a label size in from the edge
+ * Measured titles sit half a label size beyond the axis, whatever the padding, so overflow fitting grows the padding
+ * by any shortfall; unmeasured titles sit a label size in from the edge
  */
 export function axisTitleOffset(side: AxisTitleSide, canvasExtent: number, labelSize: number,
                                 measurement: AxisTitleMeasurement | undefined): number {
   if (measurement === undefined) {
     return side === "bottom" ? canvasExtent - labelSize / 2 : labelSize * 1.5;
   }
-  const gap = side === "bottom" ? canvasExtent - measurement.axisEdge : measurement.axisEdge;
-  const inset = Math.max(0, (gap - measurement.height) / 2);
+  const gap = labelSize / 2;
   if (side === "bottom") {
-    return measurement.axisEdge + inset - measurement.top;
+    return measurement.axisEdge + gap - measurement.top;
   }
   // The rotated y title's top faces left
-  return measurement.axisEdge - inset - measurement.height - measurement.top;
+  return measurement.axisEdge - gap - measurement.height - measurement.top;
 }
 
 /**

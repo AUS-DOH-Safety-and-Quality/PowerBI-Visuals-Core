@@ -79,7 +79,7 @@ describe("axis drawing", () => {
     expect(gridlines[0].style.strokeWidth).toBe("2");
   });
 
-  it("measures drawn axes to centre their titles beyond the tick labels, abutting them when the gap is too narrow", () => {
+  it("measures drawn axes to set their titles half a label size beyond the tick labels, whatever the padding", () => {
     const svg = svgElement();
     const titled = frame({ settings: {
       ...settings,
@@ -90,17 +90,18 @@ describe("axis drawing", () => {
     drawAxis(svg, axisOptions(titled, { measure: true }));
     drawAxis(svg, axisOptions(titled, { axis: "y", measure: true }));
     const bounds = svg.getBoundingClientRect();
-    // Tick labels hang below the axis line at 390, leaving less than a title's height
+    // Tick labels hang below the axis line at 390, leaving less than the title and its gap
     const xEdge = measureAxisEdge(must(svg.querySelector<SVGGElement>(".xaxisgroup")), 400 - titled.yAxis.start_padding, "bottom");
     expect(xEdge).toBeGreaterThan(390);
     const xTitle = must(svg.querySelector<SVGTextElement>(".xaxislabel")).getBBox();
-    expect(400 - xEdge).toBeLessThan(xTitle.height);
+    expect(400 - xEdge).toBeLessThan(xTitle.height + settings.x_axis.xlimit_label_size / 2);
     // SVG boxes are single precision
-    expect(xTitle.y).toBeCloseTo(xEdge, 4);
+    expect(xTitle.y).toBeCloseTo(xEdge + settings.x_axis.xlimit_label_size / 2, 4);
+    // The wide left padding stays outside the title rather than centring it
     const yEdge = measureAxisEdge(must(svg.querySelector<SVGGElement>(".yaxisgroup")), titled.xAxis.start_padding, "left");
     const yTitle = must(svg.querySelector(".yaxislabel")).getBoundingClientRect();
-    expect(yEdge).toBeGreaterThan(yTitle.width);
-    expect(yTitle.left - bounds.left).toBeCloseTo((yEdge - yTitle.width) / 2, 2);
+    expect(yTitle.left - bounds.left).toBeGreaterThan(yEdge - yTitle.right + bounds.left);
+    expect(yTitle.right - bounds.left).toBeCloseTo(yEdge - settings.y_axis.ylimit_label_size / 2, 2);
   });
 
   it("places measured titles in the svg's units, whatever its CSS scaling", () => {

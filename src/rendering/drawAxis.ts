@@ -11,7 +11,7 @@ export type AxisDrawOptions = {
   readonly tickFormat: ((value: number) => string) | undefined;
   /** Drops fractional ticks */
   readonly integer: boolean;
-  /** Unscaled title size; places the title when the axis cannot be measured */
+  /** Unscaled title size; sets the title's gap from the axis, or its place when the axis cannot be measured */
   readonly labelSize: number;
   readonly measure: boolean;
 };

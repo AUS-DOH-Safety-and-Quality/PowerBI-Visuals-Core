@@ -25,7 +25,6 @@ export type SettingDefinition = {
   /** The pane clamps at the bound, so validation rejects it */
   exclusiveMin?: boolean;
   exclusiveMax?: boolean;
-  constant?: boolean;
 };
 export type SettingCard = {
   readonly displayName: string;

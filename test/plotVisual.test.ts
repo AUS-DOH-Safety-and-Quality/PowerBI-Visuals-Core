@@ -45,7 +45,7 @@ class TestModel extends PlotViewModelBase<typeof schema, { formatValue: ValueFor
   failure: Error | undefined = undefined;
 
   constructor(visualHost: IVisualHost) {
-    super(visualHost, new SettingsStore(schema, () => ({ formatValue: createValueFormatter(2, 0, "") })), ["numerators"]);
+    super(visualHost, new SettingsStore(schema, () => ({ formatValue: createValueFormatter(2, "") })), ["numerators"]);
   }
 
   protected get hasAxes(): boolean {
@@ -140,7 +140,7 @@ class TestVisual extends PlotVisual<Point, TestModel, Settings> {
       rows: this.tableRows,
       kinds: {},
       settings: createDefaultValues({ summary_table: createSummaryTableCard({ showDescription: "" }) }).summary_table,
-      formatValue: createValueFormatter(2, 0, "%"),
+      formatValue: createValueFormatter(2, "%"),
       width: 500,
       host: this.host,
       selectionManager: this.selectionManager,

@@ -36,10 +36,10 @@ export function valueTooltips(settings: ValueTooltipSettings, row: ValueTooltipR
     });
   }
   if (settings.ttip_show_numerator && !isNullOrUndefined(row.numerator)) {
-    tooltip.push({ displayName: settings.ttip_label_numerator, value: format(row.numerator, "integer") });
+    tooltip.push({ displayName: settings.ttip_label_numerator, value: format(row.numerator, "input") });
   }
   if (settings.ttip_show_denominator && !isNullOrUndefined(row.denominator)) {
-    tooltip.push({ displayName: settings.ttip_label_denominator, value: format(row.denominator, "integer") });
+    tooltip.push({ displayName: settings.ttip_label_denominator, value: format(row.denominator, "input") });
   }
   return tooltip;
 }

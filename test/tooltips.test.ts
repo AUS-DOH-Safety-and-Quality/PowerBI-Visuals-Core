@@ -4,7 +4,7 @@ import { createValueFormatter } from "../src/data/index";
 import { valueTooltips, limitTooltips, appendPatternTooltips, rowWarnings } from "../src/powerbi/index";
 import { pluck } from "./browserHelpers";
 
-const format = createValueFormatter(2, 0, "%");
+const format = createValueFormatter(2, "%");
 const targetLine = {
   showLabel: "Show",
   showDescription: "Draws the line.",

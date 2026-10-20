@@ -44,8 +44,8 @@ describe("summary table rendering", () => {
       drawSummaryTable(div, {
         columns: [{ name: "name", label: "Name" }, { name: "value", label: "Value" }, { name: "count", label: "Count" },
                   { name: "flag", label: "Flag" }, { name: "missing", label: "Missing" }],
-        kinds: { value: "number", count: "integer", flag: "flag" },
-        formatValue: createValueFormatter(2, 0, "%"),
+        kinds: { value: "number", count: "input", flag: "flag" },
+        formatValue: createValueFormatter(2, "%"),
         width: 500,
         host,
         selectionManager,
@@ -196,7 +196,7 @@ describe("summary table rendering", () => {
   it("aligns numbers right, text left and icons centrally unless an alignment is chosen", () => {
     const columns = [{ name: "name", label: "Name" }, { name: "value", label: "Value" }, { name: "count", label: "Count" },
                      { name: "flag", label: "Flag" }, { name: "when", label: "When" }, { name: "icon", label: "Icon" }];
-    const kinds = { value: "number", count: "integer", flag: "flag", when: "date", icon: "icon" } as const;
+    const kinds = { value: "number", count: "input", flag: "flag", when: "date", icon: "icon" } as const;
     const { element, draw } = render({ columns, kinds });
     const expected = ["left", "right", "right", "left", "left", "center"];
     const alignments = ["auto", "center"] as const;

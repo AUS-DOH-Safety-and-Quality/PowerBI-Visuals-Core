@@ -7,8 +7,8 @@ import { chartTitle, registerChart, type Aggregations, type FrontendVisual, type
 type IVisualHost = powerbi.extensibility.visual.IVisualHost;
 type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 
-function setting(value: string | number, constant?: boolean): SettingDefinition {
-  return { displayName: "", description: "", type: FormattingComponent.TextInput, default: value, constant };
+function setting(value: string | number): SettingDefinition {
+  return { displayName: "", description: "", type: FormattingComponent.TextInput, default: value };
 }
 
 function card(settings: Record<string, SettingDefinition>): SettingsModel[string] {
@@ -71,7 +71,7 @@ export const testSettingsModel: SettingsModel = {
   canvas: card({ upper_padding: setting(10), left_padding: setting(10), lower_padding: setting(10), right_padding: setting(10) }),
   x_axis: card({ xlimit_tick_size: setting(10), xlimit_tick_rotation: setting(0) }),
   spc: card({ chart_type: setting("i") }),
-  misc: card({ group: setting("", true) })
+  misc: card({ group: setting("") })
 };
 
 export const defaultAggregations: Aggregations = {

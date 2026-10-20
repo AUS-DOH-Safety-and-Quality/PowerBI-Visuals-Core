@@ -39,7 +39,7 @@ describe("line settings", () => {
 
   it("builds a line label from the plot label settings", () => {
     const prefixed = { ...lines, plot_label_prefix_99: "UCL " };
-    const label = lineLabel(prefixed, "99", { x: 10, y: 20, value: 1.234 }, false, createValueFormatter(1, 0, ""));
+    const label = lineLabel(prefixed, "99", { x: 10, y: 20, value: 1.234 }, false, createValueFormatter(1, ""));
     expect(label).toEqual({
       text: "UCL 1.2",
       x: 10,

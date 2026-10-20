@@ -11,8 +11,6 @@ export type ScalingSettings = {
 export type ScalingOptions = {
   /** Proportions report as percentages when the scaling asks for them automatically */
   readonly proportion: boolean;
-  /** Numerators and denominators are counts, so format without decimals */
-  readonly wholeCounts: boolean;
   /** Percent labels may be unsuitable, e.g. on transformed values */
   readonly percentAllowed: boolean;
 };
@@ -23,13 +21,13 @@ export type DerivedScaling = {
   readonly formatValue: ValueFormatter;
 };
 
-/** The multiplier, whether values show as percentages, and the formatter for values and integers */
+/** The multiplier, whether values show as percentages, and the formatter for values and input data */
 export default function deriveScaling(settings: ScalingSettings, options: ScalingOptions): DerivedScaling {
   const scaling = resolvePercentScaling(options.proportion, settings.perc_labels, settings.multiplier);
   const percentLabels = scaling.percentLabels && options.percentAllowed;
   return {
     multiplier: scaling.multiplier,
     percentLabels,
-    formatValue: createValueFormatter(settings.sig_figs, options.wholeCounts ? 0 : settings.sig_figs, percentLabels ? "%" : "")
+    formatValue: createValueFormatter(settings.sig_figs, percentLabels ? "%" : "")
   };
 }

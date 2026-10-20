@@ -1,21 +1,8 @@
 import { frontendChart } from "./charts";
-import type { SettingCard } from "../settings/definitions";
 import { hasOwn, isArray, isPlainObject } from "./values";
 
 /** Settings by card; a setting given per row is an array with one value per row */
 export type InputSettings = Readonly<Record<string, Readonly<Record<string, unknown>>>>;
-
-/** Power BI cannot conditionally format these, so they take one value for the whole chart */
-function isConstant(card: SettingCard, name: string): boolean {
-  const groupNames = Object.keys(card.settingsGroups);
-  for (let i = 0; i < groupNames.length; i++) {
-    const group = card.settingsGroups[groupNames[i]];
-    if (hasOwn(group, name)) {
-      return group[name].constant === true;
-    }
-  }
-  return false;
-}
 
 /** Settings are validated against the chart's settings model, and may give one value per row */
 export function chartSettings(chartType: string, inputSettings: Readonly<Record<string, unknown>>,
@@ -47,9 +34,6 @@ export function chartSettings(chartType: string, inputSettings: Readonly<Record<
       let value = group[names[j]];
       if (isArray(value) && value.length === 1) {
         value = value[0];
-      }
-      if (isArray(value) && isConstant(chart.settingsModel[groupName], names[j])) {
-        return { error: `Setting '${names[j]}' in group '${groupName}' must have one value.` };
       }
       if (isPlainObject(value) || (isArray(value) && value.length !== rowCount)) {
         return { error: `Setting '${names[j]}' in group '${groupName}' must have one value or ${rowCount} values.` };

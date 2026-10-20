@@ -12,7 +12,7 @@ type IVisualHost = powerbi.extensibility.visual.IVisualHost;
 export type TableSelection = Selection<HTMLDivElement, unknown, null, undefined>;
 export type TableColumn = { name: string; label: string };
 /** How a column's cells are written and aligned; icon cells are left for the visual to fill */
-export type ColumnKind = "text" | "number" | "integer" | "date" | "flag" | "icon";
+export type ColumnKind = "text" | "number" | "input" | "date" | "flag" | "icon";
 export type TableSettingValues = CardValues<SummaryTableCard<Record<never, never>>>;
 export type TableRow = HighlightPoint & { readonly table_row: Readonly<Record<string, string | number | undefined>> };
 
@@ -67,7 +67,7 @@ function columnAlignment(setting: string, kind: ColumnKind | undefined): string 
   if (kind === "icon") {
     return "center";
   }
-  return kind === "number" || kind === "integer" ? "right" : "left";
+  return kind === "number" || kind === "input" ? "right" : "left";
 }
 
 function drawTableHeaders<R extends TableRow>(div: TableSelection, options: SummaryTableOptions<R>): void {
@@ -166,7 +166,7 @@ function drawOuterBorder(div: TableSelection, tableSettings: TableSettingValues)
 
 function cellText(cell: Cell, kind: ColumnKind | undefined, formatValue: ValueFormatter): string {
   if (typeof cell.value === "number") {
-    return formatValue(cell.value, kind === "integer" ? "integer" : "value");
+    return formatValue(cell.value, kind === "input" ? "input" : "value");
   }
   if (cell.value === undefined) {
     return "";

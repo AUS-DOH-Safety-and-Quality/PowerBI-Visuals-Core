@@ -50,11 +50,9 @@ export default function buildFormattingModel<T extends Record<string, SettingCar
         const setting = definitions[settingName];
         descriptors.push({ objectName: name, propertyName: settingName });
         const descriptor: FormattingDescriptor = { objectName: name, propertyName: settingName };
-        if (!setting.constant) {
-          descriptor.selector = { data: [{ dataViewWildcard: { matchingOption: 0 } }] };
-          if (setting.type !== FormattingComponent.ToggleSwitch) {
-            descriptor.instanceKind = 3;
-          }
+        descriptor.selector = { data: [{ dataViewWildcard: { matchingOption: 0 } }] };
+        if (setting.type !== FormattingComponent.ToggleSwitch) {
+          descriptor.instanceKind = 3;
         }
         const value = values[settingName];
         const control: FormattingControl = { type: setting.type, properties: { descriptor, value } };

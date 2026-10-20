@@ -1,8 +1,13 @@
 import formatNumber from "./formatNumber";
 
-export type ValueFormatter = (value: number | undefined, name: "integer" | "value") => string;
+export type ValueFormatter = (value: number | undefined, name: "input" | "value") => string;
 
-/** "integer" formats with the integer places and no suffix; "value" with the decimal places and suffix */
-export default function createValueFormatter(decimalPlaces: number, integerPlaces: number, suffix: string): ValueFormatter {
-  return (value, name) => formatNumber(value, name === "integer" ? integerPlaces : decimalPlaces, name === "integer" ? "" : suffix) ?? "";
+/** "input" formats input data without suffix, integral values without decimals; "value" with the decimal places and suffix */
+export default function createValueFormatter(decimalPlaces: number, suffix: string): ValueFormatter {
+  return (value, name) => {
+    if (name === "value") {
+      return formatNumber(value, decimalPlaces, suffix) ?? "";
+    }
+    return formatNumber(value, Number.isInteger(value) ? 0 : decimalPlaces, "") ?? "";
+  };
 }

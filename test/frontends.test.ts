@@ -5,7 +5,6 @@ import {
 } from "../src/frontends/index";
 import { defaultAggregations, titleSettings } from "./frontendHelpers";
 import { drawAxis, select } from "../src/rendering/index";
-import { groupCategoryRows } from "../src/powerbi/index";
 import { svgElement, frame, settings } from "./browserHelpers";
 import { must } from "../src/testing/index";
 
@@ -24,9 +23,8 @@ describe("frontend input validation", () => {
       .toEqual({ error: "Setting 'chart_type' in group 'spc' must have one value or 3 values." });
   });
 
-  it("rejects per-row values for settings Power BI cannot conditionally format", () => {
-    expect(chartSettings("test", { misc: { group: ["x", "y", "z"] } }, 3))
-      .toEqual({ error: "Setting 'group' in group 'misc' must have one value." });
+  it("takes per-row values for every setting, as Power BI conditionally formats them all", () => {
+    expect(chartSettings("test", { misc: { group: ["x", "y", "z"] } }, 3)).toEqual({ settings: { misc: { group: ["x", "y", "z"] } } });
     expect(chartSettings("test", { misc: { group: ["x"] } }, 3)).toEqual({ settings: { misc: { group: "x" } } });
   });
 });
@@ -72,17 +70,11 @@ describe("frontend data views", () => {
     expect(result.source_rows).toEqual({ "0": [1] });
   });
 
-  it("passes the MISC group to the visuals as a category key, leaving an empty one unset", () => {
+  it("passes the MISC group on every row's settings, as Power BI delivers the pane value and rules", () => {
     const input = { categories: ["a", "b"], category_name: "key", numerators: [1, 2], indicators: { Measure: ["X", "Y"] } };
-    const metadata = (group: unknown) => makeUpdateValues(input, { misc: { group } }, aggregations).dataViews[0].metadata;
-    expect(metadata("b").objects).toEqual({ misc: { group: groupCategoryRows([{ values: ["b"] }], 1).keys[0] } });
-    expect(metadata(2).objects).toEqual({ misc: { group: groupCategoryRows([{ values: ["2"] }], 1).keys[0] } });
-    expect(metadata(0).objects).toEqual({ misc: { group: groupCategoryRows([{ values: ["0"] }], 1).keys[0] } });
-    expect(metadata("")).not.toHaveProperty("objects");
-    expect(metadata(null)).not.toHaveProperty("objects");
-    expect(metadata(true)).not.toHaveProperty("objects");
-    expect(makeUpdateValues({ ...input, indicators: null }, { misc: { group: "b" } }, aggregations).dataViews[0].metadata)
-      .not.toHaveProperty("objects");
+    const dataView = makeUpdateValues(input, { misc: { group: "b" } }, aggregations).dataViews[0];
+    expect(dataView.categorical.categories[0].objects).toEqual([{ misc: { group: "b" } }, { misc: { group: "b" } }]);
+    expect(dataView.metadata).toEqual({ columns: dataView.metadata.columns });
   });
 
   it("names each column, the key by the caller's name for it, as Power BI names fields", () => {

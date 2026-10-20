@@ -1,5 +1,4 @@
 import type powerbi from "powerbi-visuals-api";
-import groupCategoryRows from "../powerbi/groupCategoryRows";
 import { aggregateColumn, valueRoles, type Aggregations, type ValueRole } from "./aggregations";
 import type { InputSettings } from "./chartSettings";
 import { asArray, isArray, isMissing, type Cell, type Column } from "./values";
@@ -29,7 +28,6 @@ export type FrontendDataView = {
   readonly categorical: { readonly categories: readonly [KeyColumn, ...FrontendColumn[]]; readonly values: readonly FrontendColumn[] };
   readonly metadata: {
     readonly columns: readonly FrontendColumn["source"][];
-    readonly objects?: { readonly misc: { readonly group: string } };
   };
 };
 
@@ -181,7 +179,6 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   }
   const indicators = namedColumns(rawData.indicators);
   const tooltips = namedColumns(rawData.tooltips);
-  const hasIndicators = indicators.names.length > 0;
   const categories = asArray(rawData.categories);
   let crosstalkIdentities: readonly Cell[];
   if (rawData.crosstalk_identities == null) {
@@ -261,13 +258,9 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   for (let i = 0; i < sources.length; i++) {
     sources[i] = i < categoryColumns.length ? categoryColumns[i].source : columns[i - categoryColumns.length].source;
   }
-  const group = inputSettings.misc?.group;
   const dataView: FrontendDataView = {
     categorical: { categories: categoryColumns, values: columns },
-    // An empty group is the setting's default, which the visuals read as the first group
-    metadata: hasIndicators && ((typeof group === "string" && group !== "") || typeof group === "number")
-      ? { columns: sources, objects: { misc: { group: groupCategoryRows([{ values: [String(group)] }], 1).keys[0] } } }
-      : { columns: sources }
+    metadata: { columns: sources }
   };
   return { dataViews: [dataView], crosstalk_identities: identities, source_rows: sourceRows };
 }

@@ -10,18 +10,12 @@ function lastDrawn(visual: TestVisual): { numerators: unknown[]; settings: Reado
   return { numerators: dataView?.categorical?.values?.[0].values ?? [], settings: dataView?.categorical?.categories?.[0].objects?.[0] };
 }
 
-function drawnChartType(visual: TestVisual): unknown {
-  const spc = lastDrawn(visual).settings?.spc;
-  return typeof spc === "object" && spc !== null && "chart_type" in spc ? spc.chart_type : undefined;
-}
-
-/** Returns the drawn numerators as its limits, and refuses static plots for one chart type */
+/** Returns the drawn numerators as its limits */
 registerChart<TestVisual>("limited", {
   Visual: TestVisual,
   settingsModel: testSettingsModel,
   limitColumns: ["value"],
-  limits: visual => ({ value: lastDrawn(visual).numerators }),
-  staticError: visual => drawnChartType(visual) === "nostatic" ? "Cannot draw a static nostatic chart." : undefined
+  limits: visual => ({ value: lastDrawn(visual).numerators })
 });
 
 /** initialiseHeadless cannot run in a browser, whose document is not assignable, so the visuals are made as it makes them */
@@ -109,9 +103,9 @@ describe("headless charts", () => {
     expect(drawn).toHaveProperty("value", [5, 1]);
   });
 
-  it("refuses static plots the chart cannot draw, still calculating their limits", () => {
-    const settings = { spc: { chart_type: "nostatic" } };
-    expect(headlessChart("limited", raw, settings, null, null, 300, 200, true, true)).toEqual({ error: "Cannot draw a static nostatic chart." });
+  it("refuses static plots of a table view, still calculating its limits", () => {
+    const settings = { spc: { chart_type: "table" } };
+    expect(headlessChart("limited", raw, settings, null, null, 300, 200, true, true)).toEqual({ error: "Static plots are not available for summary tables." });
     expect(headlessChart("limited", raw, settings, null, null, 300, 200, false, true))
       .toEqual({ value: [5, 1], warnings: [], source_rows: { "0": [1, 2], "1": [0] } });
     expect(headlessChart("limited", raw, { spc: { chart_type: "i" } }, null, null, 300, 200, true, false)).not.toHaveProperty("error");

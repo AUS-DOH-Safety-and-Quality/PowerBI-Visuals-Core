@@ -30,6 +30,11 @@ function validate(options: UpdateOptions): ViewModelValidation {
   return missing === 0 ? { status: true } : { status: true, warning: `${missing} missing` };
 }
 
+/** The first row's chart type "table" stands for a visual's table view */
+function drawsTable(options: UpdateOptions): boolean {
+  return options.dataViews?.[0]?.categorical?.categories?.[0]?.objects?.[0]?.spc?.chart_type === "table";
+}
+
 /** Records its updates, drawing an error message when every value is missing */
 export class TestVisual implements FrontendVisual {
   static readonly instances: TestVisual[] = [];
@@ -39,6 +44,7 @@ export class TestVisual implements FrontendVisual {
   readonly viewModel: { options?: UpdateOptions; update(options: UpdateOptions): ViewModelValidation };
   readonly updates: UpdateOptions[] = [];
   highlights = 0;
+  showsTable = false;
 
   constructor(options: VisualConstructorOptions) {
     this.host = options.host;
@@ -56,6 +62,7 @@ export class TestVisual implements FrontendVisual {
     this.updates.push(options);
     this.svg.selectAll("*").remove();
     const status = this.viewModel.update(options);
+    this.showsTable = status.status && drawsTable(options);
     if (!status.status) {
       this.svg.append("text").classed("errormessage", true).text(status.error);
     }

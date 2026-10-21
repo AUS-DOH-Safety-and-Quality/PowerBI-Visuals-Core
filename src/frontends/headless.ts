@@ -105,9 +105,8 @@ export function updateHeadlessVisual(chartType: string, dataViews: readonly Fron
     if (errorMessage.size() > 0) {
       return { error: errorMessage.text() };
     }
-    const staticError = chart.staticError?.(visual);
-    if (staticError !== undefined) {
-      return { error: staticError };
+    if (visual.showsTable) {
+      return { error: "Static plots are not available for summary tables." };
     }
     const svg = visual.svg.node();
     if (svg === null) {

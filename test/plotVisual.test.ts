@@ -2,7 +2,7 @@ import type powerbi from "powerbi-visuals-api";
 import { describe, expect, it, vi } from "vitest";
 import {
   PlotVisual, PlotViewModelBase, createTableContainer, drawSummaryTable, type GroupResults, type GroupedLine, type PlotOptions,
-  type PlotVisualPoint, type TableSelection, type MarksSelection
+  type PlotVisualPoint, type TableSelection, type MarksSelection, type AlternateView
 } from "../src/rendering/index";
 import type { LinePoint } from "../src/rendering/drawLines";
 import SettingsStore from "../src/powerbi/settingsStore";
@@ -106,6 +106,8 @@ class TestVisual extends PlotVisual<Point, TestModel, Settings> {
   /** Grouped rows drawn as a summary table instead of the plot */
   tableRows: { readonly identity: ISelectionId[]; readonly highlighted: boolean; readonly table_row: { readonly name: string } }[]
     | undefined = undefined;
+  /** Draws an empty view into the svg instead of the plot */
+  svgAlternate: boolean = false;
   readonly table: TableSelection;
 
   constructor(options: powerbi.extensibility.visual.VisualConstructorOptions) {
@@ -131,9 +133,12 @@ class TestVisual extends PlotVisual<Point, TestModel, Settings> {
     this.highlightPlotPoints(selectionState(this.selectionManager, false), point => point.aesthetics);
   }
 
-  protected override drawAlternate(): boolean {
+  protected override drawAlternate(): AlternateView | undefined {
+    if (this.svgAlternate) {
+      return "svg";
+    }
     if (this.tableRows === undefined) {
-      return false;
+      return undefined;
     }
     drawSummaryTable(this.table, {
       columns: [{ name: "name", label: "Name" }],
@@ -147,7 +152,7 @@ class TestVisual extends PlotVisual<Point, TestModel, Settings> {
       onSelectionChange: () => {}
     });
     this.addContextMenu(this.table.node(), true);
-    return true;
+    return "table";
   }
 
   protected override drawMarks(marks: MarksSelection): void {
@@ -353,6 +358,28 @@ describe("plot visual", () => {
     expect(show).toHaveBeenLastCalledWith(points[1].identity, { x: 7, y: 8 });
     must(rendered.element.querySelector("thead th")).dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 9, clientY: 10 }));
     expect(show).toHaveBeenLastCalledWith({}, { x: 9, y: 10 });
+  });
+
+  it("reports whether the last update drew a table, not an svg view, the plot or an error", () => {
+    const rendered = render({}, [10, 20, 30]);
+    const visual = rendered.visual;
+    expect(visual.showsTable).toBe(false);
+    visual.tableRows = [{ identity: [visual.viewModel.plotPoints[0].identity], highlighted: false, table_row: { name: "row" } }];
+    rendered.update({});
+    expect(visual.showsTable).toBe(true);
+    send(visual, [missingNumerators({})]);
+    expect(visual.showsTable).toBe(false);
+    rendered.update({});
+    expect(visual.showsTable).toBe(true);
+    visual.svgAlternate = true;
+    rendered.update({});
+    expect(visual.showsTable).toBe(false);
+    visual.svgAlternate = false;
+    rendered.update({});
+    expect(visual.showsTable).toBe(true);
+    visual.tableRows = undefined;
+    rendered.update({});
+    expect(visual.showsTable).toBe(false);
   });
 
   it("drops the plot's pointer handlers while an alternate view replaces it, and rebinds them with the plot", () => {

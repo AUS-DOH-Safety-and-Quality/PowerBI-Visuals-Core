@@ -27,6 +27,14 @@ describe("frontend input validation", () => {
     expect(chartSettings("test", { misc: { group: ["x", "y", "z"] } }, 3)).toEqual({ settings: { misc: { group: ["x", "y", "z"] } } });
     expect(chartSettings("test", { misc: { group: ["x"] } }, 3)).toEqual({ settings: { misc: { group: "x" } } });
   });
+
+  it("writes numbers given for text settings as JavaScript names numeric keys, leaving other settings and values as given", () => {
+    expect(chartSettings("test", { misc: { group: 100000 } }, 3)).toEqual({ settings: { misc: { group: "100000" } } });
+    expect(chartSettings("test", { misc: { group: [0.1 + 0.2, 1e21, -0, "x", null] } }, 5))
+      .toEqual({ settings: { misc: { group: ["0.30000000000000004", "1e+21", "0", "x", null] } } });
+    expect(chartSettings("test", { misc: { group: [true] } }, 3)).toEqual({ settings: { misc: { group: true } } });
+    expect(chartSettings("test", { canvas: { upper_padding: [1, 2, 3] } }, 3)).toEqual({ settings: { canvas: { upper_padding: [1, 2, 3] } } });
+  });
 });
 
 describe("frontend data views", () => {

@@ -73,6 +73,8 @@ export type SelectionHighlightState = {
 };
 
 export type SvgSelection = Selection<SVGSVGElement, unknown, null, undefined>;
+/** A view drawn in place of the plot: into the svg, or as an HTML table that leaves the svg empty */
+export type AlternateView = "svg" | "table";
 export type MarksSelection = Selection<SVGGElement, unknown, null, undefined>;
 
 /** The update cycle, error display, plot frame and highlighting shared by the plot visuals */
@@ -84,6 +86,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
   readonly viewModel: VM;
   readonly selectionManager: powerbi.extensibility.ISelectionManager;
   private currentPlotProperties: PlotFrame | undefined;
+  private tableShown: boolean = false;
   /** Line names to their `createLineGroup` keys */
   protected abstract readonly lineKeys: Readonly<Record<string, string>>;
 
@@ -92,6 +95,11 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       throw new Error("Plot properties require validated data.");
     }
     return this.currentPlotProperties;
+  }
+
+  /** The last update drew an HTML table rather than the svg */
+  get showsTable(): boolean {
+    return this.tableShown;
   }
 
   constructor(options: VisualConstructorOptions | undefined, createViewModel: (host: IVisualHost) => VM) {
@@ -114,9 +122,9 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
   protected abstract get settings(): S;
   protected abstract plotOptions(): PlotOptions<P, L>;
   abstract updateHighlighting(): void;
-  /** Draws a view in place of the plot and returns true; by default there is none */
-  protected drawAlternate(): boolean {
-    return false;
+  /** Draws a view in place of the plot and returns its kind; by default there is none */
+  protected drawAlternate(): AlternateView | undefined {
+    return undefined;
   }
   /** Draws any marks into their layer over the dots; by default there are none */
   protected drawMarks(_marks: MarksSelection): void {}
@@ -161,6 +169,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       this.host.eventService.renderingStarted(options);
       // Remove printed error if refreshing after a previous error run
       this.svg.select(".errormessage").remove();
+      this.tableShown = false;
 
       const status = this.viewModel.update(options, this.host);
       if (!status.status) {
@@ -182,7 +191,9 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       this.resizeCanvas(options.viewport.width, options.viewport.height);
       // An alternate view keeps the svg, so the last plot's pointer handlers would otherwise act on it
       this.svg.on(".plot", null);
-      if (this.drawAlternate()) {
+      const alternate = this.drawAlternate();
+      if (alternate !== undefined) {
+        this.tableShown = alternate === "table";
         this.currentPlotProperties = undefined;
         this.updateHighlighting();
         this.host.eventService.renderingFinished(options);

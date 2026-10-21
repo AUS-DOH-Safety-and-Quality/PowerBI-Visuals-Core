@@ -36,7 +36,8 @@ export { PlotVisual } from "./plotVisual";
 export { PlotViewModelBase } from "./plotViewModel";
 export type { GroupResults } from "./plotViewModel";
 export type {
-  ViewModelValidation, PlotViewModel, PlotVisualSettings, PlotVisualPoint, PlotOptions, SelectionHighlightState, SvgSelection, MarksSelection
+  ViewModelValidation, PlotViewModel, PlotVisualSettings, PlotVisualPoint, PlotOptions, SelectionHighlightState, SvgSelection, MarksSelection,
+  AlternateView
 } from "./plotVisual";
 export { SVG_NS } from "./svgNamespace";
 export { select, selectAll } from "d3-selection";

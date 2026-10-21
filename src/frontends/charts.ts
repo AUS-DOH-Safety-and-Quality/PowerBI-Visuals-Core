@@ -10,6 +10,8 @@ type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOp
 export type FrontendVisual = {
   readonly host: IVisualHost;
   readonly svg: SvgSelection;
+  /** An HTML table has no static plot */
+  readonly showsTable: boolean;
   readonly viewModel: { update(options: UpdateOptions, host: IVisualHost): ViewModelValidation };
   update(options: UpdateOptions): ViewModelValidation;
   updateHighlighting(): void;
@@ -26,8 +28,6 @@ export type FrontendChart<V extends FrontendVisual = FrontendVisual> = {
   readonly limitColumns: readonly string[];
   /** The calculated values returned alongside the plot */
   limits(visual: V): Readonly<Record<string, unknown>>;
-  /** Why the view cannot be returned as a static plot, if it cannot */
-  staticError?(visual: V): string | undefined;
 };
 
 export type RegisteredChart = FrontendChart & { readonly defaultSettings: Readonly<Record<string, Readonly<Record<string, unknown>>>> };

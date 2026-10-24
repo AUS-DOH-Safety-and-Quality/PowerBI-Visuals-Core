@@ -2,8 +2,8 @@ import type powerbi from "powerbi-visuals-api";
 import { updateType } from "../powerbi";
 import { SVG_NS } from "../rendering";
 import {
-  asArray, constructorOptions, frontendChart, makeUpdateValues, paddedDataViews, selectionId, toDataViews, updateChartTitle,
-  type Aggregations, type Column, type FrontendDataView, type FrontendSelectionId, type FrontendSelectionManager,
+  asArray, chartPngBlob, chartSvgBlob, constructorOptions, frontendChart, makeUpdateValues, paddedDataViews, selectionId, toDataViews,
+  updateChartTitle, type Aggregations, type Column, type FrontendDataView, type FrontendSelectionId, type FrontendSelectionManager,
   svgTooltipService, type FrontendVisual, type InputSettings, type RawData, type TitleSettings, type TooltipSettings
 } from ".";
 
@@ -187,77 +187,6 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
   };
 }
 
-const exportedStyles = [
-  "fill", "fill-opacity", "stroke", "stroke-width", "stroke-opacity", "stroke-dasharray",
-  "font-family", "font-size", "font-weight", "font-style", "text-anchor",
-  "dominant-baseline", "opacity", "visibility", "display"
-];
-
-function inlineStyles(from: Element, to: ElementCSSInlineStyle): void {
-  const style = getComputedStyle(from);
-  for (let i = 0; i < exportedStyles.length; i++) {
-    to.style.setProperty(exportedStyles[i], style.getPropertyValue(exportedStyles[i]));
-  }
-}
-
-/** A standalone copy of the chart, with its computed styles inlined and the tooltip removed */
-function chartSvgBlob(svg: SVGSVGElement): Blob {
-  const copy = document.importNode(svg, true);
-  const width = svg.width.baseVal.value;
-  const height = svg.height.baseVal.value;
-  inlineStyles(svg, copy);
-  const originals = svg.querySelectorAll("*");
-  const copies = copy.querySelectorAll<SVGElement>("*");
-  for (let i = 0; i < originals.length; i++) {
-    inlineStyles(originals[i], copies[i]);
-  }
-  const tooltips = copy.querySelectorAll(".chart-tooltip-group");
-  for (let i = 0; i < tooltips.length; i++) {
-    tooltips[i].remove();
-  }
-  copy.setAttribute("xmlns", SVG_NS);
-  copy.setAttribute("width", String(width));
-  copy.setAttribute("height", String(height));
-  if (!copy.hasAttribute("viewBox")) {
-    copy.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  }
-  const backgroundColour = getComputedStyle(svg).backgroundColor;
-  copy.prepend(svgElement("rect", {
-    width: "100%",
-    height: "100%",
-    fill: backgroundColour === "rgba(0, 0, 0, 0)" ? "white" : backgroundColour
-  }));
-  return new Blob([new XMLSerializer().serializeToString(copy)], { type: "image/svg+xml;charset=utf-8" });
-}
-
-async function chartPngBlob(svgBlob: Blob, width: number, height: number): Promise<Blob> {
-  const url = URL.createObjectURL(svgBlob);
-  try {
-    const image = new Image();
-    image.src = url;
-    await image.decode();
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.ceil(width * 2);
-    canvas.height = Math.ceil(height * 2);
-    const context = canvas.getContext("2d");
-    if (context === null) {
-      throw new Error("PNG export failed");
-    }
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    return await new Promise((resolve, reject) => {
-      canvas.toBlob(blob => {
-        if (blob === null) {
-          reject(new Error("PNG export failed"));
-        } else {
-          resolve(blob);
-        }
-      }, "image/png");
-    });
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
 function fileName(svg: SVGSVGElement, chartType: string): string {
   const title = svg.querySelector(".chart-title")?.textContent || chartType;
   // eslint-disable-next-line no-control-regex -- file names cannot contain control characters
@@ -334,10 +263,7 @@ function addExportControl(el: HTMLElement, svg: SVGSVGElement, chartType: string
     status.textContent = "";
     setBusy(true);
     try {
-      let blob = chartSvgBlob(svg);
-      if (format === "png") {
-        blob = await chartPngBlob(blob, svg.width.baseVal.value, svg.height.baseVal.value);
-      }
+      const blob = format === "png" ? await chartPngBlob(svg) : chartSvgBlob(svg);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

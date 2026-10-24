@@ -279,6 +279,28 @@ describe("category order and per-row inputs", () => {
     expect(unlevelled.values[0].values).toEqual([6, 5, 2, 1, 3, 4]);
   });
 
+  it("orders each indicator by its own levels, unlisted ones last, keeping their values", () => {
+    const raw: RawData = {
+      categories: ["k", "k", "k", "k", "k", "j"],
+      category_name: "key",
+      indicators: {
+        Theme: ["Safety", "HSPR", "Access", "HSPR", "Other", "Access"],
+        Label: ["s", "h2", "a", "h1", "o", "a"]
+      },
+      indicator_levels: { Theme: ["Safety", "Access", "HSPR"] },
+      numerators: [1, 2, 3, 4, 5, 6]
+    };
+    const levelled = makeUpdateValues(raw, {}, defaultAggregations).dataViews[0].categorical;
+    expect(levelled.categories[1].values).toEqual(["Safety", "Access", "Access", "HSPR", "HSPR", "Other"]);
+    expect(levelled.categories[2].values).toEqual(["s", "a", "a", "h1", "h2", "o"]);
+    expect(levelled.categories[0].values).toEqual(["k", "j", "k", "k", "k", "k"]);
+    expect(levelled.values[0].values).toEqual([1, 6, 3, 4, 2, 5]);
+    const unlevelled = makeUpdateValues({ ...raw, indicator_levels: null }, {}, defaultAggregations).dataViews[0].categorical;
+    expect(unlevelled.categories[1].values).toEqual(["Access", "Access", "HSPR", "HSPR", "Other", "Safety"]);
+    const single = makeUpdateValues({ ...raw, indicator_levels: { Theme: "HSPR" } }, {}, defaultAggregations).dataViews[0].categorical;
+    expect(single.categories[1].values.slice(0, 2)).toEqual(["HSPR", "HSPR"]);
+  });
+
   it("ranks numeric levels by position rather than value, and accepts an unboxed single level", () => {
     const numeric = makeUpdateValues({ categories: [1, 10, 2], category_name: "key", category_levels: [10, 2, 1], numerators: [1, 2, 3] }, {}, defaultAggregations);
     expect(numeric.dataViews[0].categorical.categories[0].values).toEqual(["10", "2", "1"]);

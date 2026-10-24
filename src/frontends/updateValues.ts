@@ -12,6 +12,8 @@ export type RawData = {
   /** Rows without Crosstalk keys are identified by position */
   readonly crosstalk_identities?: Column | null;
   readonly indicators?: Readonly<Record<string, Column>> | null;
+  /** Levels of the indicators that have them, by indicator name, ordering those indicators as `category_levels` does */
+  readonly indicator_levels?: Readonly<Record<string, Column>> | null;
   readonly tooltips?: Readonly<Record<string, Column>> | null;
 } & { readonly [R in ValueRole]?: Column | null };
 
@@ -93,19 +95,37 @@ function hasDateCategories(categories: readonly Cell[]): boolean {
   return hasDate;
 }
 
+/** Values with levels rank by level position, and unlisted values rank as missing */
+function levelRanks(values: readonly Cell[], levels: Column | null | undefined): readonly (Cell | undefined)[] {
+  if (levels == null) {
+    return values;
+  }
+  const levelValues = asArray(levels);
+  const ranks = new Map<Cell, number>();
+  for (let i = 0; i < levelValues.length; i++) {
+    ranks.set(levelValues[i], i);
+  }
+  const ranked = new Array<number | undefined>(values.length);
+  for (let i = 0; i < values.length; i++) {
+    ranked[i] = ranks.get(values[i]);
+  }
+  return ranked;
+}
+
 type CategoryGroup = { category: string | null; indicators: Cell[]; rows: number[] };
 
 /** Rows sorted by indicator then category, and grouped by both; rows outside the Crosstalk filter are dropped */
 function groupRows(categories: readonly Cell[], categoryOrder: readonly (Cell | undefined)[], indicatorColumns: readonly (readonly Cell[])[],
-                   crosstalkIdentities: readonly Cell[], crosstalkFilters: readonly string[] | undefined): CategoryGroup[] {
+                   indicatorOrder: readonly (readonly (Cell | undefined)[])[], crosstalkIdentities: readonly Cell[],
+                   crosstalkFilters: readonly string[] | undefined): CategoryGroup[] {
   const filters = crosstalkFilters === undefined ? undefined : new Set(crosstalkFilters);
   const order = new Array<number>(categories.length);
   for (let i = 0; i < order.length; i++) {
     order[i] = i;
   }
   order.sort((a, b) => {
-    for (let i = 0; i < indicatorColumns.length; i++) {
-      const comparison = compareValues(indicatorColumns[i][a], indicatorColumns[i][b]);
+    for (let i = 0; i < indicatorOrder.length; i++) {
+      const comparison = compareValues(indicatorOrder[i][a], indicatorOrder[i][b]);
       if (comparison !== 0) {
         return comparison;
       }
@@ -190,20 +210,12 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   } else {
     crosstalkIdentities = asArray(rawData.crosstalk_identities);
   }
-  let categoryOrder: readonly (Cell | undefined)[] = categories;
-  if (rawData.category_levels != null) {
-    const levels = asArray(rawData.category_levels);
-    const ranks = new Map<Cell, number>();
-    for (let i = 0; i < levels.length; i++) {
-      ranks.set(levels[i], i);
-    }
-    const ranked = new Array<number | undefined>(categories.length);
-    for (let i = 0; i < categories.length; i++) {
-      ranked[i] = ranks.get(categories[i]);
-    }
-    categoryOrder = ranked;
+  const indicatorOrder = new Array<readonly (Cell | undefined)[]>(indicators.names.length);
+  for (let i = 0; i < indicators.names.length; i++) {
+    indicatorOrder[i] = levelRanks(indicators.columns[i], rawData.indicator_levels?.[indicators.names[i]]);
   }
-  const groups = groupRows(categories, categoryOrder, indicators.columns, crosstalkIdentities, crosstalkFilters);
+  const groups = groupRows(categories, levelRanks(categories, rawData.category_levels), indicators.columns, indicatorOrder,
+                         crosstalkIdentities, crosstalkFilters);
 
   const key: KeyColumn = {
     source: { displayName: rawData.category_name, roles: { key: true }, type: hasDateCategories(categories) ? { temporal: {} } : { text: true } },

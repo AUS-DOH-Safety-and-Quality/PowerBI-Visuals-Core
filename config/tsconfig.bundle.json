@@ -1,0 +1,19 @@
+{
+    "extends": "./tsconfig.visual.json",
+    "compilerOptions": {
+        "declaration": false,
+        "paths": {
+            "powerbi-visuals-core/*": [
+                "../src/*/index.ts"
+            ]
+        }
+    },
+    "files": [
+        "bundle/ccCore.ts",
+        "bundle/spc.ts",
+        "bundle/funnel.ts",
+        "bundle/ccHeadless.ts",
+        "bundle/ccInteractive.ts",
+        "bundle/minidom.ts"
+    ]
+}

@@ -14,3 +14,5 @@ export type { TitleSettings } from "./chartTitle";
 export { makeUpdateValues, toDataViews } from "./updateValues";
 export type { RawData, FrontendColumn, KeyColumn, FrontendDataView, CrosstalkIdentities, UpdateValues } from "./updateValues";
 export { paddedDataViews } from "./paddedDataViews";
+export { defaultTooltipSettings, showTooltip, hideTooltip, svgTooltipService } from "./tooltip";
+export type { TooltipSettings } from "./tooltip";

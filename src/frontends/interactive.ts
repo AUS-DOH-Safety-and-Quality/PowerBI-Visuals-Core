@@ -4,7 +4,7 @@ import { SVG_NS } from "../rendering";
 import {
   asArray, constructorOptions, frontendChart, makeUpdateValues, paddedDataViews, selectionId, toDataViews, updateChartTitle,
   type Aggregations, type Column, type FrontendDataView, type FrontendSelectionId, type FrontendSelectionManager,
-  type InputSettings, type RawData, type TitleSettings
+  svgTooltipService, type FrontendVisual, type InputSettings, type RawData, type TitleSettings, type TooltipSettings
 } from ".";
 
 type CrosstalkHandle = {
@@ -15,17 +15,6 @@ type CrosstalkHandle = {
 type CrosstalkFilterHandle = CrosstalkHandle & { readonly filteredKeys: string[] | null };
 type CrosstalkSelectionHandle = CrosstalkHandle & { readonly value: string[] | null; set(keys: string[]): void; clear(): void };
 declare const crosstalk: { FilterHandle: new () => CrosstalkFilterHandle; SelectionHandle: new () => CrosstalkSelectionHandle };
-
-type TooltipSettings = {
-  readonly ttip_font_size: number;
-  readonly ttip_font: string;
-  readonly ttip_font_color: string;
-  readonly ttip_background_color: string;
-  readonly ttip_opacity: number;
-  readonly ttip_border_radius: number;
-  readonly ttip_border_color: string;
-  readonly ttip_border_width: number;
-};
 
 /** R unboxes length-one vectors when serialising the widget data */
 type WidgetUpdateValues = {
@@ -129,18 +118,9 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       showContextMenu: () => Promise.resolve()
     };
 
-    const visual = new (frontendChart(chartType).Visual)(constructorOptions(el, {
+    const visual: FrontendVisual = new (frontendChart(chartType).Visual)(constructorOptions(el, {
       selectionManager,
-      tooltipService: {
-        show: options => {
-          if (x !== undefined && options.dataItems !== undefined) {
-            showTooltip(x.tooltip_settings, options.dataItems, options.coordinates);
-          }
-        },
-        hide: () => {
-          visual.svg.select(".chart-tooltip-group").selectChildren().remove();
-        }
-      },
+      tooltipService: svgTooltipService(() => visual.svg, () => x?.tooltip_settings),
       rowKeys: index => keysOf(updateValues.crosstalk_identities[index]),
       displayWarningIcon: (hoverText, detailedText) => {
         console.log(hoverText, detailedText);
@@ -152,49 +132,6 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
     }
     addExportControl(el, svg, chartType);
 
-    const showTooltip = (settings: TooltipSettings, items: readonly powerbi.extensibility.VisualTooltipDataItem[],
-                         coordinates: readonly number[]): void => {
-      const bounds = svg.getBoundingClientRect();
-      const tooltipGroup = visual.svg.select<SVGGElement>(".chart-tooltip-group");
-      tooltipGroup.raise();
-      const rect = tooltipGroup.selectAll("rect").data([0]).join("rect");
-      const texts = tooltipGroup.selectAll<SVGTextElement, unknown>("text")
-        .data(items)
-        .join("text")
-        .attr("x", 5)
-        .attr("y", (_, i) => 15 + 15 * i)
-        .text(d => `${d.displayName}: ${d.value}`)
-        .style("text-anchor", "left")
-        .style("font-size", `${settings.ttip_font_size}px`)
-        .style("font-family", settings.ttip_font)
-        .style("fill", settings.ttip_font_color)
-        .nodes();
-      let maxTextLength = 0;
-      for (let i = 0; i < texts.length; i++) {
-        maxTextLength = Math.max(maxTextLength, texts[i].getComputedTextLength());
-      }
-      let left = coordinates[0];
-      let top = coordinates[1];
-      // Keep the tooltip within the right and bottom edges
-      if (left + maxTextLength > bounds.width) {
-        left = left - maxTextLength - 10;
-      }
-      if (top + 15 * items.length > bounds.height) {
-        top = top - 15 * items.length - 5;
-      }
-      rect.attr("fill", settings.ttip_background_color)
-        .attr("stroke", settings.ttip_border_color)
-        .attr("stroke-width", settings.ttip_border_width)
-        .attr("opacity", settings.ttip_opacity)
-        .attr("rx", settings.ttip_border_radius)
-        .attr("ry", settings.ttip_border_radius)
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", maxTextLength + 10)
-        .attr("height", 15 * items.length + 5);
-      tooltipGroup.attr("transform", `translate(${left}, ${top})`);
-    };
-
     /** The widget's title settings, with any title set since */
     function titleSettings(data: WidgetData): TitleSettings {
       return titleText === undefined ? data.title_settings : { ...data.title_settings, text: titleText };
@@ -205,7 +142,6 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       if (x !== undefined) {
         updateChartTitle(visual.svg, titleSettings(x));
       }
-      visual.svg.selectAll(".chart-tooltip-group").data([null]).join("g").classed("chart-tooltip-group", true);
     }
 
     /** Aggregates the rows within the group's active filter, if any */

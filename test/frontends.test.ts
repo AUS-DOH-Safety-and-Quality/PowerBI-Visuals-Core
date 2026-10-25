@@ -66,6 +66,36 @@ describe("frontend data views", () => {
     expect(restored[0].categorical?.categories?.[0].source.type).toEqual(expected);
   });
 
+  it("splits date keys into the parts asked for, as a Power BI date hierarchy, in date order", () => {
+    const result = makeUpdateValues({
+      categories: ["2025-12-01", "2025-11-01", null, "2024-03-15"], category_name: "Date", category_date_parts: ["month", "year"],
+      numerators: [1, 2, 3, 4], indicators: { Site: ["A", "A", "A", "A"] }
+    }, { scatter: { size: [1, 2, 3, 4] } }, aggregations);
+    const categories = result.dataViews[0].categorical.categories;
+    expect(categories.length).toBe(3);
+    expect(categories[0].source).toEqual({ displayName: "Date", roles: { key: true }, type: { temporal: {}, category: "Months" } });
+    expect(categories[1].source).toEqual({ displayName: "Date", roles: { key: true }, type: { temporal: {}, category: "Years" } });
+    expect(categories[0].values).toEqual(["March", "November", "December", null]);
+    expect(categories[1].values).toEqual([2024, 2025, 2025, null]);
+    expect(categories[0].objects).toEqual([{ scatter: { size: 4 } }, { scatter: { size: 2 } }, { scatter: { size: 1 } }, { scatter: { size: 3 } }]);
+    expect(categories[2].source.roles).toEqual({ indicator: true });
+    expect(categories[2].values).toEqual(["A", "A", "A", "A"]);
+    expect(result.dataViews[0].metadata.columns.length).toBe(4);
+    const single = makeUpdateValues({ categories: ["2025-04-01", "2025-01-01"], category_name: "Date", category_date_parts: ["quarter"], numerators: [1, 2] }, {}, aggregations);
+    expect(single.dataViews[0].categorical.categories).toHaveLength(1);
+    expect(single.dataViews[0].categorical.categories[0].values).toEqual(["Qtr 1", "Qtr 2"]);
+    const days = makeUpdateValues({ categories: ["2025-04-09"], category_name: "Date", category_date_parts: ["day", "year"], numerators: [1] }, {}, aggregations);
+    expect(days.dataViews[0].categorical.categories[0].values).toEqual([9]);
+    expect(days.dataViews[0].categorical.categories[0].source.type).toEqual({ temporal: {}, category: "DayOfMonth" });
+  });
+
+  it("ignores date parts when a key is not all dates", () => {
+    const result = makeUpdateValues({ categories: ["2025-12-01", "Ward A"], category_name: "key", category_date_parts: ["year"], numerators: [1, 2] }, {}, aggregations);
+    expect(result.dataViews[0].categorical.categories).toHaveLength(1);
+    expect(result.dataViews[0].categorical.categories[0].source.type).toEqual({ text: true });
+    expect(result.dataViews[0].categorical.categories[0].values).toEqual(["2025-12-01", "Ward A"]);
+  });
+
   it("keeps mixed keys as labels when filtering leaves only dates", () => {
     const result = makeUpdateValues({
       categories: ["Ward A", "2024-01-01"], category_name: "key", crosstalk_identities: ["a", "b"], numerators: [1, 2]

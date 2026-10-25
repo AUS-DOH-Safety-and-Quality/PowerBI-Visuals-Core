@@ -4,12 +4,17 @@ import { aggregateColumn, valueRoles, type Aggregations, type ValueRole } from "
 import type { InputSettings } from "./chartSettings";
 import { asArray, isArray, isMissing, type Cell, type Column } from "./values";
 
+/** A date part a key shows, as Power BI's date hierarchy levels; "Qtr 1" style quarters and English month names */
+export type DatePart = "year" | "quarter" | "month" | "day";
+
 export type RawData = {
   readonly categories: Column;
   /** Names the rows in the visuals' warnings */
   readonly category_name: string;
   /** Categories with levels (e.g., R factors) are ordered by level rather than value */
   readonly category_levels?: Column | null;
+  /** ISO date categories labelled by these parts only (e.g. a yearly series by year); mixed keys stay labels */
+  readonly category_date_parts?: readonly DatePart[] | null;
   /** Rows without Crosstalk keys are identified by position */
   readonly crosstalk_identities?: Column | null;
   readonly indicators?: Readonly<Record<string, Column>> | null;
@@ -18,9 +23,12 @@ export type RawData = {
   readonly tooltips?: Readonly<Record<string, Column>> | null;
 } & Readonly<Partial<Record<ValueRole, Column | null>>>;
 
+/** Power BI's runtime types a date hierarchy level by its category, which the api's descriptor omits */
+export type DatePartCategory = "Years" | "Quarters" | "Months" | "DayOfMonth";
+
 /** A column as the visuals read it; R and Python round-trip these as JSON */
 export type FrontendColumn = {
-  readonly source: powerbi.DataViewMetadataColumn;
+  readonly source: powerbi.DataViewMetadataColumn & { readonly type?: powerbi.ValueTypeDescriptor & { readonly category?: DatePartCategory } };
   readonly values: Cell[];
 };
 
@@ -117,6 +125,36 @@ function levelRanks(values: readonly Cell[], levels: Column | null | undefined):
 }
 
 type CategoryGroup = { category: string | null; indicators: Cell[]; rows: number[] };
+
+const datePartCategories: Readonly<Record<DatePart, DatePartCategory>> = { year: "Years", quarter: "Quarters", month: "Months", day: "DayOfMonth" };
+
+const monthNames: readonly string[] = ["January", "February", "March", "April", "May", "June",
+                                       "July", "August", "September", "October", "November", "December"];
+
+type ColumnType = NonNullable<FrontendColumn["source"]["type"]>;
+
+function datePartType(part: DatePart): ColumnType {
+  return { temporal: {}, category: datePartCategories[part] };
+}
+
+/** The part of an ISO date category, as Power BI's hierarchy gives it */
+function datePartValue(category: string | null, part: DatePart): Cell {
+  if (category === null) {
+    return null;
+  }
+  const year = Number(category.slice(0, 4));
+  const month = Number(category.slice(5, 7));
+  switch (part) {
+    case "year":
+      return year;
+    case "quarter":
+      return `Qtr ${Math.ceil(month / 3)}`;
+    case "month":
+      return at(monthNames, month - 1);
+    case "day":
+      return Number(category.slice(8, 10));
+  }
+}
 
 /** Rows sorted by indicator then category, and grouped by both; rows outside the Crosstalk filter are dropped */
 function groupRows(categories: readonly Cell[], categoryOrder: readonly (Cell | undefined)[], indicatorColumns: readonly (readonly Cell[])[],
@@ -222,12 +260,19 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   const groups = groupRows(categories, levelRanks(categories, rawData.category_levels), indicators.columns, indicatorOrder,
                          crosstalkIdentities, crosstalkFilters);
 
-  const key: KeyColumn = {
-    source: { displayName: rawData.category_name, roles: { key: true }, type: hasDateCategories(categories) ? { temporal: {} } : { text: true } },
-    values: [],
-    objects: []
-  };
+  const temporal = hasDateCategories(categories);
+  const dateParts = temporal && rawData.category_date_parts != null ? rawData.category_date_parts : [];
+  let keyType: ColumnType = temporal ? { temporal: {} } : { text: true };
+  if (dateParts.length > 0) {
+    keyType = datePartType(at(dateParts, 0));
+  }
+  const key: KeyColumn = { source: { displayName: rawData.category_name, roles: { key: true }, type: keyType }, values: [], objects: [] };
   const categoryColumns: [KeyColumn, ...FrontendColumn[]] = [key];
+  // Each further part is another key column, as Power BI delivers a date hierarchy
+  for (let i = 1; i < dateParts.length; i++) {
+    categoryColumns.push({ source: { displayName: rawData.category_name, roles: { key: true }, type: datePartType(at(dateParts, i)) }, values: [] });
+  }
+  const keyColumnCount = categoryColumns.length;
   for (let i = 0; i < indicators.names.length; i++) {
     categoryColumns.push({ source: { displayName: at(indicators.names, i), roles: { indicator: true } }, values: [] });
   }
@@ -250,9 +295,14 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   for (let g = 0; g < groups.length; g++) {
     const group = at(groups, g);
     sourceRows[String(g)] = group.rows;
-    key.values.push(group.category);
+    if (dateParts.length === 0) {
+      key.values.push(group.category);
+    }
+    for (let i = 0; i < dateParts.length; i++) {
+      at(categoryColumns, i).values.push(datePartValue(group.category, at(dateParts, i)));
+    }
     for (let i = 0; i < group.indicators.length; i++) {
-      at(categoryColumns, i + 1).values.push(at(group.indicators, i));
+      at(categoryColumns, keyColumnCount + i).values.push(at(group.indicators, i));
     }
     const groupIdentities = new Array<string>(group.rows.length);
     for (let i = 0; i < group.rows.length; i++) {

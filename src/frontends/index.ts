@@ -12,7 +12,7 @@ export type { InputSettings } from "./chartSettings";
 export { chartTitle, updateChartTitle } from "./chartTitle";
 export type { TitleSettings } from "./chartTitle";
 export { makeUpdateValues, toDataViews } from "./updateValues";
-export type { RawData, FrontendColumn, KeyColumn, FrontendDataView, CrosstalkIdentities, UpdateValues } from "./updateValues";
+export type { RawData, DatePart, DatePartCategory, FrontendColumn, KeyColumn, FrontendDataView, CrosstalkIdentities, UpdateValues } from "./updateValues";
 export { paddedDataViews } from "./paddedDataViews";
 export { chartSvgBlob, chartPngBlob } from "./chartImage";
 export { defaultTooltipSettings, showTooltip, hideTooltip, svgTooltipService } from "./tooltip";

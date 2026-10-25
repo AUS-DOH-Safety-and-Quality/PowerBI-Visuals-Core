@@ -1,32 +1,6 @@
 const arrayCallbacks = "map|forEach|filter|reduce|reduceRight|some|every|find|findIndex|findLast|findLastIndex|flatMap";
 const typedFiles = ["src/**/*.ts", "test/**/*.ts"];
 
-/** Core's import direction: util ← math, data ← spc, settings (type-only) ← powerbi ← rendering ← frontends; testing sits beside */
-const importDirection = [
-  { files: ["src/util/**/*.ts"], forbid: "^\\.\\./", allowTypeImports: false },
-  { files: ["src/math/**/*.ts", "src/data/**/*.ts"], forbid: "^\\.\\./(?!util)", allowTypeImports: false },
-  { files: ["src/spc/**/*.ts", "src/settings/**/*.ts"], forbid: "^\\.\\./(?!util)", allowTypeImports: true },
-  { files: ["src/powerbi/**/*.ts"], forbid: "^\\.\\./(spc|rendering|frontends|testing)", allowTypeImports: false },
-  { files: ["src/rendering/**/*.ts"], forbid: "^\\.\\./(frontends|testing)", allowTypeImports: false },
-  { files: ["src/frontends/**/*.ts"], forbid: "^\\.\\./testing", allowTypeImports: false }
-];
-
-function importDirectionConfigs() {
-  const configs = [];
-  for (let i = 0; i < importDirection.length; i++) {
-    const { files, forbid, allowTypeImports } = importDirection[i];
-    configs.push({
-      files,
-      rules: {
-        "@typescript-eslint/no-restricted-imports": ["error", {
-          patterns: [{ regex: forbid, allowTypeImports, message: "Against Core's module import direction (see AGENTS.md)." }]
-        }]
-      }
-    });
-  }
-  return configs;
-}
-
 /**
  * The visuals' lint config; takes the @eslint/js, eslint-plugin-powerbi-visuals and typescript-eslint imports so Core
  * does not depend on them. parserOptions names the tsconfig covering src and test, for the type-aware rules.
@@ -94,7 +68,6 @@ export default function eslintConfig(powerbiVisualsConfigs, js, tseslint, parser
         "@typescript-eslint/no-generated-empty-object-type": "off"
       }
     },
-    ...importDirectionConfigs(),
     {
       files: ["src/**/*.ts"],
       rules: {

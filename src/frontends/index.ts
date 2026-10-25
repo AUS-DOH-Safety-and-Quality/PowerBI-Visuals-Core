@@ -1,6 +1,6 @@
 export { registerChart, frontendChart, chartNames } from "./charts";
 export type { FrontendChart, FrontendVisual, RegisteredChart, SettingsModel } from "./charts";
-export { selectionId, constructorOptions } from "./host";
+export { selectionId, createVisual, noSelection } from "./host";
 export type { FrontendSelectionId, FrontendSelectionManager, FrontendServices } from "./host";
 export { asArray, isArray, limitValue } from "./values";
 export { indicatorColumns, indicatorFields } from "./indicatorColumns";
@@ -17,3 +17,5 @@ export { paddedDataViews } from "./paddedDataViews";
 export { chartSvgBlob, chartPngBlob } from "./chartImage";
 export { defaultTooltipSettings, showTooltip, hideTooltip, svgTooltipService } from "./tooltip";
 export type { TooltipSettings } from "./tooltip";
+export { renderSettingsDialog } from "./settingsDialog";
+export type { SettingsDialogHandlers } from "./settingsDialog";

@@ -2,8 +2,8 @@ import { at } from "../util";
 import { updateType, type UpdateOptions } from "../powerbi";
 import { SVG_NS, type ViewModelValidation } from "../rendering";
 import {
-  asArray, chartAggregations, chartNames, chartSettings, chartTitle, constructorOptions, frontendChart, indicatorColumns,
-  makeUpdateValues, paddedDataViews, toDataViews, updateChartTitle, type FrontendDataView, type FrontendServices, type FrontendVisual,
+  asArray, chartAggregations, chartNames, chartSettings, chartTitle, createVisual, frontendChart, indicatorColumns, makeUpdateValues,
+  noSelection, paddedDataViews, toDataViews, updateChartTitle, type FrontendDataView, type FrontendServices, type FrontendVisual,
   type RawData, type TitleSettings
 } from ".";
 
@@ -13,17 +13,8 @@ export type HeadlessResult = { readonly error: string } | Readonly<Record<string
 export const visuals: Record<string, FrontendVisual> = {};
 
 const services: FrontendServices = {
-  selectionManager: {
-    registerOnSelectCallback: () => {},
-    getSelectionIds: () => [],
-    select: () => Promise.resolve(),
-    clear: () => Promise.resolve(),
-    showContextMenu: () => Promise.resolve()
-  },
-  tooltipService: {
-    show: () => {},
-    hide: () => {}
-  },
+  selectionManager: noSelection,
+  tooltipSettings: () => undefined,
   rowKeys: index => [String(index)],
   // Returned with the result instead
   displayWarningIcon: () => {}
@@ -39,7 +30,7 @@ export function initialiseHeadless(dom: { readonly document: Document; readonly 
     const container = dom.document.createElement("div");
     container.classList.add(`${name}-container`);
     dom.document.body.appendChild(container);
-    visuals[name] = new (frontendChart(name).Visual)(constructorOptions(container, services));
+    visuals[name] = createVisual(name, container, services);
   }
 }
 

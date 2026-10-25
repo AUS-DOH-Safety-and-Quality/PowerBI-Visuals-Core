@@ -3,9 +3,9 @@ import type powerbi from "powerbi-visuals-api";
 import { updateType } from "../powerbi";
 import { SVG_NS } from "../rendering";
 import {
-  asArray, chartPngBlob, chartSvgBlob, constructorOptions, frontendChart, makeUpdateValues, paddedDataViews, selectionId, toDataViews,
+  asArray, chartPngBlob, chartSvgBlob, createVisual, makeUpdateValues, paddedDataViews, selectionId, toDataViews,
   updateChartTitle, type Aggregations, type Column, type FrontendDataView, type FrontendSelectionId, type FrontendSelectionManager,
-  svgTooltipService, type FrontendVisual, type InputSettings, type RawData, type TitleSettings, type TooltipSettings
+  type InputSettings, type RawData, type TitleSettings, type TooltipSettings
 } from ".";
 
 type CrosstalkHandle = {
@@ -120,14 +120,14 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       showContextMenu: () => Promise.resolve()
     };
 
-    const visual: FrontendVisual = new (frontendChart(chartType).Visual)(constructorOptions(el, {
+    const visual = createVisual(chartType, el, {
       selectionManager,
-      tooltipService: svgTooltipService(() => visual.svg, () => x?.tooltip_settings),
+      tooltipSettings: () => x?.tooltip_settings,
       rowKeys: index => keysOf(at(updateValues.crosstalk_identities, index)),
       displayWarningIcon: (hoverText, detailedText) => {
         console.warn(hoverText, detailedText);
       }
-    }));
+    });
     const svg = visual.svg.node();
     if (svg === null) {
       throw new Error("The visual has no SVG.");

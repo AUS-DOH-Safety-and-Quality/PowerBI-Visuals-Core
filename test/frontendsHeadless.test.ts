@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { constructorOptions, makeUpdateValues, registerChart, type RawData } from "../src/frontends/index";
+import { createVisual, makeUpdateValues, noSelection, registerChart, type RawData } from "../src/frontends/index";
 import { headlessChart, limitIndicatorColumns, updateHeadlessVisual, visuals } from "../src/frontends/headless";
 import { must } from "../src/testing/index";
 import { defaultAggregations, testSettingsModel, titleSettings, TestVisual } from "./frontendHelpers";
@@ -20,15 +20,14 @@ registerChart<TestVisual>("limited", {
 
 /** initialiseHeadless cannot run in a browser, whose document is not assignable, so the visuals are made as it makes them */
 beforeAll(() => {
-  const ignore = () => Promise.resolve();
   const names = ["test", "limited"];
   for (let i = 0; i < names.length; i++) {
-    visuals[names[i]] = new TestVisual(constructorOptions(document.body.appendChild(document.createElement("div")), {
-      selectionManager: { registerOnSelectCallback: () => {}, getSelectionIds: () => [], select: ignore, clear: ignore, showContextMenu: ignore },
-      tooltipService: { show: () => {}, hide: () => {} },
+    visuals[names[i]] = createVisual(names[i], document.body.appendChild(document.createElement("div")), {
+      selectionManager: noSelection,
+      tooltipSettings: () => undefined,
       rowKeys: index => [String(index)],
       displayWarningIcon: () => {}
-    }));
+    });
   }
 });
 

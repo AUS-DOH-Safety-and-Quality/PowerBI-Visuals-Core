@@ -19,7 +19,8 @@
     "./rendering": "./src/rendering/index.ts",
     "./testing": "./src/testing/index.ts",
     "./spc": "./src/spc/index.ts",
-    "./frontends": "./src/frontends/index.ts"
+    "./frontends": "./src/frontends/index.ts",
+    "./frontends/settingsDialog.css": "./src/frontends/settingsDialog.css"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",

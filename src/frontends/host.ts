@@ -1,8 +1,9 @@
 import type powerbi from "powerbi-visuals-api";
+import { frontendChart, type FrontendVisual } from "./charts";
+import { svgTooltipService, type TooltipSettings } from "./tooltip";
 
 type IVisualHost = powerbi.extensibility.visual.IVisualHost;
 type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
-type ITooltipService = powerbi.extensibility.ITooltipService;
 
 /** A row's identity is its frontend keys; grouped rows carry every row's keys */
 export type FrontendSelectionId = { readonly keys: readonly string[]; getKey(): string };
@@ -21,9 +22,19 @@ export type FrontendSelectionManager = {
   showContextMenu(): Promise<void>;
 };
 
+/** Selection calls that do nothing, for hosts without linked selection */
+export const noSelection: FrontendSelectionManager = {
+  registerOnSelectCallback: () => {},
+  getSelectionIds: () => [],
+  select: () => Promise.resolve(),
+  clear: () => Promise.resolve(),
+  showContextMenu: () => Promise.resolve()
+};
+
 export type FrontendServices = {
   readonly selectionManager: FrontendSelectionManager;
-  readonly tooltipService: Pick<ITooltipService, "show" | "hide">;
+  /** Read on each tooltip; undefined shows none */
+  readonly tooltipSettings: () => TooltipSettings | undefined;
   /** The keys of the data view's row */
   rowKeys(index: number): readonly string[];
   readonly displayWarningIcon: (hoverText: string, detailedText: string) => void;
@@ -31,7 +42,8 @@ export type FrontendServices = {
 
 function ignore(): void {}
 
-export function constructorOptions(element: HTMLElement, services: FrontendServices): VisualConstructorOptions {
+function constructorOptions(element: HTMLElement, services: FrontendServices,
+                            tooltipService: Pick<powerbi.extensibility.ITooltipService, "show" | "hide">): VisualConstructorOptions {
   const host = {
     createSelectionManager: () => services.selectionManager,
     createSelectionIdBuilder: () => {
@@ -45,7 +57,7 @@ export function constructorOptions(element: HTMLElement, services: FrontendServi
       };
       return builder;
     },
-    tooltipService: services.tooltipService,
+    tooltipService,
     eventService: {
       renderingStarted: ignore,
       renderingFailed: ignore,
@@ -65,4 +77,10 @@ export function constructorOptions(element: HTMLElement, services: FrontendServi
   };
   // Outside Power BI there is no host; this implements the members the visuals call
   return { element, host: host as unknown as IVisualHost };
+}
+
+/** A registered chart's visual drawn in element, with tooltips in its own SVG */
+export function createVisual(chartType: string, element: HTMLElement, services: FrontendServices): FrontendVisual {
+  const visual: FrontendVisual = new (frontendChart(chartType).Visual)(constructorOptions(element, services, svgTooltipService(() => visual.svg, services.tooltipSettings)));
+  return visual;
 }

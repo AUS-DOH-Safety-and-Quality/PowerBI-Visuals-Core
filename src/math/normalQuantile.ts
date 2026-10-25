@@ -1,14 +1,15 @@
+import at from "../util/at";
 import { LOG_TWO_PI } from "./constants";
 import ldexp from "./ldexp";
 import quantileBoundary from "./quantileBoundary";
 
 /** q * P(x) / Q(x) by Horner's method; coefficients highest degree first. */
 function polyEval(x: number, q: number, num_coeffs: readonly number[], den_coeffs: readonly number[]): number {
-  let numerator = num_coeffs[0];
-  let denominator = den_coeffs[0];
+  let numerator = at(num_coeffs, 0);
+  let denominator = at(den_coeffs, 0);
   for (let i = 1; i < num_coeffs.length; i++) {
-    numerator = numerator * x + num_coeffs[i];
-    denominator = denominator * x + den_coeffs[i];
+    numerator = numerator * x + at(num_coeffs, i);
+    denominator = denominator * x + at(den_coeffs, i);
   }
   return q * numerator / denominator;
 }

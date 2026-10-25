@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { hasOwn, isMissing, isPlainObject, type Cell } from "./values";
 
 const aggregationMethods = ["first", "last", "sum", "mean", "min", "max", "median", "count"] as const;
@@ -38,7 +39,7 @@ export function aggregateColumn(column: readonly Cell[], aggregation: Aggregatio
   const values: number[] = [];
   let sum = 0;
   for (let i = 0; i < column.length; i++) {
-    const value = column[i];
+    const value = at(column, i);
     if (!isMissing(value)) {
       first ??= value;
       last = value;
@@ -70,7 +71,7 @@ export function aggregateColumn(column: readonly Cell[], aggregation: Aggregatio
     case "median": {
       values.sort((a, b) => a - b);
       const mid = Math.floor(values.length / 2);
-      return values.length % 2 !== 0 ? values[mid] : (values[mid - 1] + values[mid]) / 2;
+      return values.length % 2 !== 0 ? at(values, mid) : (at(values, mid - 1) + at(values, mid)) / 2;
     }
   }
 }
@@ -82,7 +83,7 @@ export function chartAggregations(aggregations: unknown): { aggregations: Aggreg
   const result: Record<AggregatedRole, AggregationMethod> = { ...defaultAggregations };
   const names = Object.keys(aggregations ?? {});
   for (let i = 0; i < names.length; i++) {
-    const name = names[i];
+    const name = at(names, i);
     const method = aggregations?.[name];
     if (!isAggregatedRole(name)) {
       const options = Object.keys(defaultAggregations).join(", ");

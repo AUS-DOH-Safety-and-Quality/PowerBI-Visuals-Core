@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import type { PrimitiveValue } from "../powerbi/columns";
 import cells from "./cells";
@@ -45,7 +46,7 @@ export default function buildDataView(inputs: DataViewInputs, objects?: RowObjec
   const categories: powerbi.DataViewCategoryColumn[] = [];
   const values: powerbi.DataViewValueColumns = Object.assign([], { grouped: () => [] });
   for (let c = 0; c < inputs.categories.length; c++) {
-    const column = inputs.categories[c];
+    const column = at(inputs.categories, c);
     const source = columnSource(column);
     columns.push(source);
     const category: powerbi.DataViewCategoryColumn = { source, values: cells(column.values.slice()) };
@@ -59,7 +60,7 @@ export default function buildDataView(inputs: DataViewInputs, objects?: RowObjec
     categories.push(category);
   }
   for (let v = 0; v < inputs.values.length; v++) {
-    const column = inputs.values[v];
+    const column = at(inputs.values, v);
     const source = columnSource(column);
     columns.push(source);
     values.push({ source, values: cells(column.values.slice()) });

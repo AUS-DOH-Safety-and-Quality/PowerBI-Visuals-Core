@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { SVG_NS } from "./svgNamespace";
 
 export type AxisLabelAlign = "left" | "center" | "right" | "bottom" | "top";
@@ -100,8 +101,8 @@ export function drawAxisTicks(group: SVGGElement, options: AxisTicksOptions): vo
   const bottom = options.side === "bottom";
   const k = bottom ? 1 : -1;
   const offset = window.devicePixelRatio > 1 ? 0 : 0.5;
-  const range0 = options.range[0] + offset;
-  const range1 = options.range[options.range.length - 1] + offset;
+  const range0 = at(options.range, 0) + offset;
+  const range1 = at(options.range, options.range.length - 1) + offset;
   const outer = k * options.tickSizeOuter;
   const document = group.ownerDocument;
   group.replaceChildren();
@@ -115,7 +116,7 @@ export function drawAxisTicks(group: SVGGElement, options: AxisTicksOptions): vo
   }
   group.appendChild(domain);
   for (let i = 0; i < options.values.length; i++) {
-    const value = options.values[i];
+    const value = at(options.values, i);
     const tick = document.createElementNS(SVG_NS, "g");
     tick.setAttribute("class", "tick");
     tick.setAttribute("opacity", "1");
@@ -144,13 +145,13 @@ export function drawGridlines(options: GridlineOptions): void {
   const className = options.className;
   const existing = container.querySelectorAll(`.${className}`);
   for (let i = 0; i < existing.length; i++) {
-    existing[i].remove();
+    at(existing, i).remove();
   }
   const vertical = options.orientation === "vertical";
   for (let i = 0; i < options.values.length; i++) {
     const line = container.ownerDocument.createElementNS(SVG_NS, "line");
     line.classList.add(className);
-    const position = String(options.scale(options.values[i]));
+    const position = String(options.scale(at(options.values, i)));
     line.setAttribute(vertical ? "x1" : "y1", position);
     line.setAttribute(vertical ? "x2" : "y2", position);
     line.setAttribute(vertical ? "y1" : "x1", String(options.from));

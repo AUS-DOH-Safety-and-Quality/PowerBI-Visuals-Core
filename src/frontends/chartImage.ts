@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { SVG_NS } from "../rendering";
 
 const exportedStyles = [
@@ -9,7 +10,8 @@ const exportedStyles = [
 function inlineStyles(from: Element, to: ElementCSSInlineStyle): void {
   const style = getComputedStyle(from);
   for (let i = 0; i < exportedStyles.length; i++) {
-    to.style.setProperty(exportedStyles[i], style.getPropertyValue(exportedStyles[i]));
+    const name = at(exportedStyles, i);
+    to.style.setProperty(name, style.getPropertyValue(name));
   }
 }
 
@@ -22,11 +24,11 @@ export function chartSvgBlob(svg: SVGSVGElement): Blob {
   const originals = svg.querySelectorAll("*");
   const copies = copy.querySelectorAll<SVGElement>("*");
   for (let i = 0; i < originals.length; i++) {
-    inlineStyles(originals[i], copies[i]);
+    inlineStyles(at(originals, i), at(copies, i));
   }
   const tooltips = copy.querySelectorAll(".chart-tooltip-group");
   for (let i = 0; i < tooltips.length; i++) {
-    tooltips[i].remove();
+    at(tooltips, i).remove();
   }
   copy.setAttribute("xmlns", SVG_NS);
   copy.setAttribute("width", String(width));

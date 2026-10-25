@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { SVG_NS } from "./svgNamespace";
 
 export type LineLabelPosition = "above" | "below" | "beside" | "outside" | "inside";
@@ -51,12 +52,13 @@ export function lineLabelGeometry(label: LineLabelPlacement, textHeight: number)
 export function drawLineLabels(group: Element, labels: readonly LineLabel[], headless: boolean): void {
   const children = group.children;
   for (let i = children.length - 1; i >= 0; i--) {
-    if (children[i].tagName === "text") {
-      children[i].remove();
+    const child = at(children, i);
+    if (child.tagName === "text") {
+      child.remove();
     }
   }
   for (let i = 0; i < labels.length; i++) {
-    const label = labels[i];
+    const label = at(labels, i);
     const text = group.ownerDocument.createElementNS(SVG_NS, "text");
     group.appendChild(text);
     text.textContent = label.text;

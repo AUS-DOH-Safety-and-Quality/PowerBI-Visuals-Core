@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import { select, type BaseType, type Selection } from "d3-selection";
 import { lineOpacity, lineStyle, type LineSettingValues } from "../settings/lineSettings";
@@ -141,13 +142,13 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
     const lines = viewModel.groupedLines;
     drawPlotAxes(svg, context, options.tickFormats);
     drawPlotTooltips(svg, context, options.verticalCrosshair);
-    drawPlotLines(svg, context, lines, (name, points, index) => lineStyle(options.lineSettings(points, index), this.lineKeys[name]));
+    drawPlotLines(svg, context, lines, (name, points, index) => lineStyle(options.lineSettings(points, index), this.lineKey(name)));
     drawPlotLineLabels(svg, context, {
       lines,
       settings: this.settings.lines,
       keys: this.lineKeys,
       lower: name => options.lowerLines.has(name),
-      format: viewModel.inputSettings.derivedSettings[0].formatValue,
+      format: at(viewModel.inputSettings.derivedSettings, 0).formatValue,
       periodEnds: viewModel.periodEnds
     });
     drawPlotDots(svg, context, options.dots);
@@ -157,7 +158,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
       const points = context.points;
       const rows = new Array<P["table_row"]>(points.length);
       for (let i = 0; i < points.length; i++) {
-        rows[i] = points[i].table_row;
+        rows[i] = at(points, i).table_row;
       }
       return rows;
     });
@@ -269,9 +270,17 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
     highlightPlot<P>(svg, {
       active: state.active,
       selected: state.selected,
-      lineOpacity: line => lineOpacity(this.settings.lines, this.lineKeys[line.name], state.active),
+      lineOpacity: line => lineOpacity(this.settings.lines, this.lineKey(line.name), state.active),
       dotOpacities
     });
+  }
+
+  private lineKey(name: string): string {
+    const key = this.lineKeys[name];
+    if (key === undefined) {
+      throw new Error(`No settings key for line ${name}`);
+    }
+    return key;
   }
 
   /**
@@ -288,7 +297,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
         for (let node = target instanceof Element ? target : null; node !== null && node !== root; node = node.parentElement) {
           const datum = select<BaseType, Partial<ContextMenuDatum> | undefined>(node).datum();
           if (datum?.identity !== undefined) {
-            return Array.isArray(datum.identity) ? datum.identity[0] : datum.identity;
+            return Array.isArray(datum.identity) ? at(datum.identity, 0) : datum.identity;
           }
         }
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- no row under the pointer; Power BI treats the id as opaque

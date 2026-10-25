@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { OutlierStatus } from "../data/flagDirection";
 
 /**
@@ -14,7 +15,7 @@ export default function shift(val: readonly number[], targets: readonly (number 
   for (let i: number = 0; i < length; i++) {
     shift_detected[i] = "none";
     const target = targets[i];
-    const sign: number = target === undefined ? NaN : Math.sign(val[i] - target);
+    const sign: number = target === undefined ? NaN : Math.sign(at(val, i) - target);
     if (Number.isNaN(sign)) {
       side = 0;
       continue;

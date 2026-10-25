@@ -1,3 +1,4 @@
+import at from "../util/at";
 /** Ordinary least-squares line through (i + 1, values[i]), evaluated at each position. */
 export default function calculateTrendLine(values: readonly number[]): number[] {
   const n: number = values.length;
@@ -14,7 +15,7 @@ export default function calculateTrendLine(values: readonly number[]): number[] 
 
   for (let i = 0; i < n; i++) {
     const x: number = i + 1;
-    const y: number = values[i];
+    const y: number = at(values, i);
 
     sumX += x;
     sumY += y;

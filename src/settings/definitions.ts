@@ -1,3 +1,4 @@
+import at from "../util/at";
 const FormattingComponent = {
   AlignmentGroup: "AlignmentGroup",
   ColorPicker: "ColorPicker",
@@ -188,9 +189,9 @@ function dropdownOption<const Values extends readonly string[]>(
   const items = new Array<DropdownItem<Values[number]>>(validValues.length);
   const transform = valueTransforms[displayTransform];
   for (let i = 0; i < validValues.length; i++) {
-    const value = validValues[i];
+    const value = at(validValues, i);
     valid[i] = value;
-    items[i] = { displayName: displayNames === undefined ? transform(value) : displayNames[i], value };
+    items[i] = { displayName: displayNames === undefined ? transform(value) : at(displayNames, i), value };
   }
   return {
     displayName,
@@ -282,12 +283,12 @@ export type MutableSettingsValues<T extends Record<string, SettingCard>> = {
 
 function defineCard<T extends SettingCard>(definition: T): T & SettingMembers<T> {
   const card = { ...definition };
-  const groups = Object.keys(card.settingsGroups);
+  const groups = Object.values(card.settingsGroups);
   for (let i = 0; i < groups.length; i++) {
-    const group = card.settingsGroups[groups[i]];
+    const group = at(groups, i);
     const names = Object.keys(group);
     for (let j = 0; j < names.length; j++) {
-      const name = names[j];
+      const name = at(names, j);
       Object.defineProperty(card, name, { get: () => group[name] });
     }
   }
@@ -301,18 +302,16 @@ function groupDisplayName(card: SettingCard, groupName: string): string {
 
 function createDefaultValues<T extends Record<string, SettingCard>>(schema: T): MutableSettingsValues<T> {
   const values: Record<string, Record<string, SettingValue>> = {};
-  const cards = Object.keys(schema);
+  const cards = Object.entries(schema);
   for (let i = 0; i < cards.length; i++) {
-    const name = cards[i];
-    const groups = schema[name].settingsGroups;
-    const groupNames = Object.keys(groups);
+    const [name, card] = at(cards, i);
+    const groups = Object.values(card.settingsGroups);
     const defaults: Record<string, SettingValue> = {};
-    for (let j = 0; j < groupNames.length; j++) {
-      const definitions = groups[groupNames[j]];
-      const names = Object.keys(definitions);
-      for (let k = 0; k < names.length; k++) {
-        const setting = names[k];
-        defaults[setting] = definitions[setting].default;
+    for (let j = 0; j < groups.length; j++) {
+      const definitions = Object.entries(at(groups, j));
+      for (let k = 0; k < definitions.length; k++) {
+        const [setting, definition] = at(definitions, k);
+        defaults[setting] = definition.default;
       }
     }
     values[name] = defaults;

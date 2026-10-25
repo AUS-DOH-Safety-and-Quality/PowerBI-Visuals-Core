@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { select } from "d3-selection";
 import {
   drawAxisTicks, drawGridlines, axisLabelPlacement, xTickLabelOffsets, axisTitleOffset, measureAxisEdge, type AxisTitleMeasurement
@@ -45,8 +46,9 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
     if (options.integer) {
       const integers: number[] = [];
       for (let i = 0; i < values.length; i++) {
-        if (Number.isInteger(values[i])) {
-          integers.push(values[i]);
+        const value = at(values, i);
+        if (Number.isInteger(value)) {
+          integers.push(value);
         }
       }
       values = integers;

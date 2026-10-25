@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 
 /** Tests pass the flags that skip rendering work; the host never sets them */
@@ -18,7 +19,7 @@ export const updateType = {
 export function combineUpdateTypes(types: readonly powerbi.VisualUpdateType[]): powerbi.VisualUpdateType {
   let combined = 0;
   for (let i = 0; i < types.length; i++) {
-    combined |= types[i];
+    combined |= at(types, i);
   }
   return combined;
 }

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { select } from "d3-selection";
 import toCsv, { type TableValue } from "../data/toCsv";
 import { drawAxis } from "./drawAxis";
@@ -47,7 +48,7 @@ export type PlotDotsOptions<P extends PlotPoint> = {
 export function visiblePoints<P extends PlotPoint>(frame: PlotFrame, points: readonly P[]): P[] {
   const visible: P[] = [];
   for (let i = 0; i < points.length; i++) {
-    const point = points[i];
+    const point = at(points, i);
     if (inPlot(frame, point.x, point.value)) {
       visible.push(point);
     }
@@ -113,7 +114,10 @@ export function drawPlotTooltips(svg: SVGSVGElement, context: PlotContext, inclu
       const pointer = screenToSvg(svg, event.clientX, event.clientY);
       const nearest = nearestPoint(
         points.length,
-        i => ({ x: frame.xScale(points[i].x), y: frame.yScale(points[i].value) }),
+        i => {
+          const point = at(points, i);
+          return { x: frame.xScale(point.x), y: frame.yScale(point.value) };
+        },
         pointer.x,
         pointer.y,
         includeVertical
@@ -121,7 +125,7 @@ export function drawPlotTooltips(svg: SVGSVGElement, context: PlotContext, inclu
       if (nearest === undefined) {
         return;
       }
-      const point = points[nearest.index];
+      const point = at(points, nearest.index);
       host.tooltipService.show({
         dataItems: point.tooltip,
         identities: [point.identity],
@@ -149,8 +153,7 @@ export function drawPlotLines<N extends string, L extends LinePoint>(svg: SVGSVG
   }
   const lines = new Array<PlotLine>(grouped.length);
   for (let i = 0; i < grouped.length; i++) {
-    const name = grouped[i][0];
-    const points = grouped[i][1];
+    const [name, points] = at(grouped, i);
     lines[i] = { name, points, style: index => style(name, points, index) };
   }
   drawLines(group, { frame: context.frame, lines, palette: context.palette });
@@ -169,11 +172,10 @@ export function drawPlotLineLabels<N extends string>(svg: SVGSVGElement, context
   const lastPeriod = periodEnds.length - 1;
   const labels: LineLabel[] = [];
   for (let r = 0; r < periodEnds.length; r++) {
-    const index = periodEnds[r];
-    const start = r === 0 ? 0 : periodEnds[r - 1] + 1;
+    const index = at(periodEnds, r);
+    const start = r === 0 ? 0 : at(periodEnds, r - 1) + 1;
     for (let l = 0; l < lines.length; l++) {
-      const name = lines[l][0];
-      const points = lines[l][1];
+      const [name, points] = at(lines, l);
       const key = options.keys[name];
       if (!lineSetting<boolean>(settings, "plot_label_show", key)) {
         continue;
@@ -186,9 +188,10 @@ export function drawPlotLineLabels<N extends string>(svg: SVGSVGElement, context
         }
       }
       for (let i = index; i >= start; i--) {
-        const value = points[i].line_value;
-        if (value !== undefined && inPlot(frame, points[i].x, value)) {
-          labels.push(lineLabel(settings, key, { x: frame.xScale(points[i].x), y: frame.yScale(value), value }, options.lower(name), options.format));
+        const point = at(points, i);
+        const value = point.line_value;
+        if (value !== undefined && inPlot(frame, point.x, value)) {
+          labels.push(lineLabel(settings, key, { x: frame.xScale(point.x), y: frame.yScale(value), value }, options.lower(name), options.format));
           break;
         }
       }

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import log1pmx from "./log1pmx";
 import ldexp from "./ldexp";
 import frexp from "./frexp";
@@ -183,9 +184,11 @@ export default function binomialDeviance(x: number, M: number): {yh: number, yl:
     return dev;
   }
 
+  const scale = at(bd0_scale, i);
+  const scale0 = at(bd0_scale, 0);
   for (let j: number = 0; j < 4; j++) {
-    addHighLow(dev, x * bd0_scale[i][j]);
-    addHighLow(dev, -x * bd0_scale[0][j] * e);
+    addHighLow(dev, x * at(scale, j));
+    addHighLow(dev, -x * at(scale0, j) * e);
     if (!Number.isFinite(dev.yh)) {
       return { yh: Number.POSITIVE_INFINITY, yl: 0};
     }

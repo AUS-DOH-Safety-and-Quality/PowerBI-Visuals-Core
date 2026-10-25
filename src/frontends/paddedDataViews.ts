@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { frontendChart } from "./charts";
 import { titleHeight, type TitleSettings } from "./chartTitle";
 import type { InputSettings } from "./chartSettings";
@@ -8,11 +9,11 @@ export function paddedDataViews(chartType: string, dataViews: readonly FrontendD
                                 staticPlot: boolean): FrontendDataView[] {
   const defaults = frontendChart(chartType).defaultSettings;
   const titlePadding = titleHeight(titleSettings);
-  const dataView = dataViews[0];
+  const dataView = at(dataViews, 0);
   const [key, ...indicators] = dataView.categorical.categories;
   const objects = new Array<InputSettings>(key.objects.length);
   for (let i = 0; i < objects.length; i++) {
-    const settings = key.objects[i];
+    const settings = at(key.objects, i);
     const canvas = { ...defaults.canvas, ...settings.canvas };
     canvas.upper_padding = Number(canvas.upper_padding) + titlePadding;
     if (staticPlot) {

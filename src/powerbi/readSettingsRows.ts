@@ -1,3 +1,4 @@
+import at from "../util/at";
 import {
   FormattingComponent, describeRange, type SettingCard, type SettingDefinition, type SettingValue, type CardValues
 } from "../settings/definitions";
@@ -63,14 +64,13 @@ export default function readSettingsRows<T extends SettingCard>(
   category: SettingsCategory, rawRowIndices: readonly number[]
 ): SettingsRows<CardValues<T>> {
   const defaultValues: Readonly<Record<string, SettingValue>> = defaults;
-  const groups = Object.keys(cardSchema.settingsGroups);
+  const groups = Object.values(cardSchema.settingsGroups);
   const entries: { name: string; definition: SettingDefinition; defaultValue: SettingValue }[] = [];
   for (let i = 0; i < groups.length; i++) {
-    const definitions = cardSchema.settingsGroups[groups[i]];
-    const names = Object.keys(definitions);
-    for (let j = 0; j < names.length; j++) {
-      const name = names[j];
-      entries.push({ name, definition: definitions[name], defaultValue: defaultValues[name] });
+    const definitions = Object.entries(at(groups, i));
+    for (let j = 0; j < definitions.length; j++) {
+      const [name, definition] = at(definitions, j);
+      entries.push({ name, definition, defaultValue: defaultValues[name] });
     }
   }
   const values = new Array<CardValues<T>>(rawRowIndices.length);
@@ -80,7 +80,7 @@ export default function readSettingsRows<T extends SettingCard>(
   // Rows without their own card objects all read the same way, so share the first; callers copy before writing
   let defaultRow: { values: CardValues<T>; messages: string[] } | undefined;
   for (let i = 0; i < rawRowIndices.length; i++) {
-    const objects = category.objects?.[rawRowIndices[i]]?.[cardName];
+    const objects = category.objects?.[at(rawRowIndices, i)]?.[cardName];
     if (objects == null && defaultRow !== undefined) {
       values[i] = defaultRow.values;
       messages[i] = defaultRow.messages;
@@ -90,9 +90,7 @@ export default function readSettingsRows<T extends SettingCard>(
     const row: Record<string, SettingValue> = {};
     const rowMessages: string[] = [];
     for (let j = 0; j < entries.length; j++) {
-      const name = entries[j].name;
-      const definition = entries[j].definition;
-      const defaultValue = entries[j].defaultValue;
+      const { name, definition, defaultValue } = at(entries, j);
       let value = readValue(objects?.[name], defaultValue, definition.type);
       const message = validationMessage(value, definition, name);
       if (message !== "") {
@@ -102,11 +100,12 @@ export default function readSettingsRows<T extends SettingCard>(
       }
       row[name] = value as SettingValue;
     }
-    values[i] = row as CardValues<T>;
+    const rowValues = row as CardValues<T>;
+    values[i] = rowValues;
     messages[i] = rowMessages;
     anyValid ||= rowMessages.length === 0;
     if (objects == null) {
-      defaultRow = { values: values[i], messages: rowMessages };
+      defaultRow = { values: rowValues, messages: rowMessages };
     }
   }
   return { values, validation: !anyValid && firstMessage !== undefined

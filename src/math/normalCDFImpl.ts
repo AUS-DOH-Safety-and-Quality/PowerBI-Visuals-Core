@@ -1,23 +1,24 @@
+import at from "../util/at";
 import { SQRT_THIRTY_TWO, ONE_DIV_SQRT_TWO_PI } from "./constants";
 import ldexp from "./ldexp";
 
 /** Standard normal CDF (Cody 1993, ACM TOMS 715); adapted from R's pnorm_both. */
 export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boolean): number {
-  const a: readonly number[] = [
+  const a = [
     2.2352520354606839287,
     161.02823106855587881,
     1067.6894854603709582,
     18154.981253343561249,
     0.065682337918207449113
-  ];
-  const b: readonly number[] = [
+  ] as const;
+  const b = [
     47.20258190468824187,
     976.09855173777669322,
     10260.932208618978205,
     45507.789335026729956
-  ];
+  ] as const;
 
-  const c: readonly number[] = [
+  const c = [
     0.39894151208813466764,
     8.8831497943883759412,
     93.506656132177855979,
@@ -27,8 +28,8 @@ export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boo
     11602.651437647350124,
     9842.7148383839780218,
     1.0765576773720192317e-8
-  ];
-  const d: readonly number[] = [
+  ] as const;
+  const d = [
     22.266688044328115691,
     235.38790178262499861,
     1519.377599407554805,
@@ -37,23 +38,23 @@ export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boo
     34900.952721145977266,
     38912.003286093271411,
     19685.429676859990727
-  ];
+  ] as const;
 
-  const p: readonly number[] = [
+  const p = [
     0.21589853405795699,
     0.1274011611602473639,
     0.022235277870649807,
     0.001421619193227893466,
     2.9112874951168792e-5,
     0.02307344176494017303
-  ];
-  const q: readonly number[] = [
+  ] as const;
+  const q = [
     1.28426009614491121,
     0.468238212480865118,
     0.0659881378689285515,
     0.00378239633202758244,
     7.29751555083966205e-5
-  ];
+  ] as const;
 
   let xden: number;
   let xnum: number;
@@ -77,8 +78,8 @@ export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boo
       xnum = a[4] * xsq;
       xden = xsq;
       for (i = 0; i < 3; ++i) {
-        xnum = (xnum + a[i]) * xsq;
-        xden = (xden + b[i]) * xsq;
+        xnum = (xnum + at(a, i)) * xsq;
+        xden = (xden + at(b, i)) * xsq;
       }
     } else {
       xnum = xden = 0.0;
@@ -103,8 +104,8 @@ export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boo
     xnum = c[8] * y;
     xden = y;
     for (i = 0; i < 7; ++i) {
-      xnum = (xnum + c[i]) * y;
-      xden = (xden + d[i]) * y;
+      xnum = (xnum + at(c, i)) * y;
+      xden = (xden + at(d, i)) * y;
     }
     temp = (xnum + c[7]) / (xden + d[7]);
 
@@ -134,8 +135,8 @@ export default function normalCDFImpl(x: number, lower_tail: boolean, log_p: boo
     xnum = p[5] * xsq;
     xden = xsq;
     for (i = 0; i < 4; ++i) {
-      xnum = (xnum + p[i]) * xsq;
-      xden = (xden + q[i]) * xsq;
+      xnum = (xnum + at(p, i)) * xsq;
+      xden = (xden + at(q, i)) * xsq;
     }
     temp = xsq * (xnum + p[4]) / (xden + q[4]);
     temp = (ONE_DIV_SQRT_TWO_PI - temp) / y;

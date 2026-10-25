@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { SvgSelection } from "../rendering/plotVisual";
 import { hasOwn, isPlainObject } from "./values";
 
@@ -46,7 +47,7 @@ export function chartTitle(title: unknown): { settings: TitleSettings } | { erro
   const named = isPlainObject(title) ? title : {};
   const names = Object.keys(named);
   for (let i = 0; i < names.length && valid; i++) {
-    const name = names[i];
+    const name = at(names, i);
     const value = named[name];
     if (!isTitleName(name) || (value != null && typeof value !== "string" && typeof value !== "number")) {
       valid = false;

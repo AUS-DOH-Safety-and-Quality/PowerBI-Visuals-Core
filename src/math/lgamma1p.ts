@@ -1,3 +1,4 @@
+import at from "../util/at";
 import lgamma from "./lgamma";
 import log1pmx from "./log1pmx";
 import logcf from "./logcf";
@@ -56,7 +57,7 @@ export default function lgamma1p(a: number): number {
   const c = 0.2273736845824652515226821577978691e-12;
   let lgam = c * logcf(-a / 2, N + 2, 1, 1e-14);
   for (let i = N - 1; i >= 0; i--) {
-    lgam = coeffs[i] - a * lgam;
+    lgam = at(coeffs, i) - a * lgam;
   }
   return (a * lgam - EULER) * a - log1pmx(a);
 }

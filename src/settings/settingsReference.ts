@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { FormattingComponent, describeRange, groupDisplayName, type SettingCard, type SettingDefinition } from "./definitions";
 
 function code(value: string): string {
@@ -15,11 +16,11 @@ function formatDefault(setting: SettingDefinition): string {
   if (typeof value === "number") {
     return String(value);
   }
-  if (setting.items !== undefined) {
-    for (let i = 0; i < setting.items.length; i++) {
-      if (setting.items[i].value === value) {
-        return setting.items[i].displayName;
-      }
+  const items = setting.items ?? [];
+  for (let i = 0; i < items.length; i++) {
+    const item = at(items, i);
+    if (item.value === value) {
+      return item.displayName;
     }
   }
   return code(value);
@@ -32,7 +33,7 @@ function formatValues(setting: SettingDefinition): string {
       const items = setting.items ?? [];
       const values = new Array<string>(items.length);
       for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+        const item = at(items, i);
         values[i] = "• " + (item.displayName === item.value ? code(item.value) : item.displayName + " (" + code(item.value) + ")");
       }
       return values.join("<br>");
@@ -41,7 +42,7 @@ function formatValues(setting: SettingDefinition): string {
       const valid = setting.valid ?? [];
       const values = new Array<string>(valid.length);
       for (let i = 0; i < valid.length; i++) {
-        values[i] = "• " + code(valid[i]);
+        values[i] = "• " + code(at(valid, i));
       }
       return values.join("<br>");
     }
@@ -61,24 +62,24 @@ function formatValues(setting: SettingDefinition): string {
 /** One Markdown table per format-pane group, keyed by card */
 export default function settingsReference(schema: Record<string, SettingCard>): Record<string, string> {
   const pages: Record<string, string> = {};
-  const cards = Object.keys(schema);
+  const cards = Object.entries(schema);
   for (let i = 0; i < cards.length; i++) {
-    const card = schema[cards[i]];
-    const groups = Object.keys(card.settingsGroups);
+    const [cardName, card] = at(cards, i);
+    const groups = Object.entries(card.settingsGroups);
     let markdown = "<!-- Generated from the settings model; edit the setting definitions, not this file. -->\n";
     for (let j = 0; j < groups.length; j++) {
-      const settings = card.settingsGroups[groups[j]];
-      const names = Object.keys(settings);
-      markdown += "\n### " + groupDisplayName(card, groups[j]) + "\n\n"
+      const [groupName, settings] = at(groups, j);
+      const definitions = Object.values(settings);
+      markdown += "\n### " + groupDisplayName(card, groupName) + "\n\n"
         + "| Setting | Description | Default | Values |\n"
         + "| --- | --- | --- | --- |\n";
-      for (let k = 0; k < names.length; k++) {
-        const setting = settings[names[k]];
+      for (let k = 0; k < definitions.length; k++) {
+        const setting = at(definitions, k);
         markdown += "| " + setting.displayName + " | " + setting.description + " | " + formatDefault(setting)
           + " | " + formatValues(setting) + " |\n";
       }
     }
-    pages[cards[i]] = markdown;
+    pages[cardName] = markdown;
   }
   return pages;
 }

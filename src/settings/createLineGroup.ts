@@ -1,3 +1,4 @@
+import at from "../util/at";
 import {
   toggleOption, numberOption, lineTypeOption, colourOption, textOption,
   fontOption, fontSizeOption, lineLabelPositionOption,
@@ -86,9 +87,10 @@ export type LineGroup<K extends string, O extends LineGroupOptions, E> =
   & Suffixed<K, ReturnType<typeof plotLabelShowDefinition> & ReturnType<typeof plotLabelDefinitions>>;
 
 function addSuffixed(group: Record<string, SettingDefinition>, key: string, definitions: Record<string, SettingDefinition>): void {
-  const names = Object.keys(definitions);
-  for (let i = 0; i < names.length; i++) {
-    group[`${names[i]}_${key}`] = definitions[names[i]];
+  const entries = Object.entries(definitions);
+  for (let i = 0; i < entries.length; i++) {
+    const [name, definition] = at(entries, i);
+    group[`${name}_${key}`] = definition;
   }
 }
 
@@ -98,9 +100,10 @@ export default function createLineGroup<const K extends string, const O extends 
   const group: Record<string, SettingDefinition> = {};
   addSuffixed(group, key, showDefinition(options));
   if (extras !== undefined) {
-    const names = Object.keys(extras);
-    for (let i = 0; i < names.length; i++) {
-      group[names[i]] = extras[names[i]];
+    const entries = Object.entries(extras);
+    for (let i = 0; i < entries.length; i++) {
+      const [name, definition] = at(entries, i);
+      group[name] = definition;
     }
   }
   addSuffixed(group, key, styleDefinitions(options));

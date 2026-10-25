@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { FlagDirection } from "./flagDirection";
 
 type RaisedFlag = Exclude<FlagDirection, "none">;
@@ -16,9 +17,9 @@ export default function applyFlagColours<P extends string>(
 ): void {
   let colour: string | undefined;
   for (let i = 0; i < flags.length; i++) {
-    const status = flags[i][0];
+    const [status, prefix] = at(flags, i);
     if (status !== "none") {
-      colour = colours[`${flags[i][1]}_${status}` as const];
+      colour = colours[`${prefix}_${status}` as const];
     }
   }
   if (colour === undefined) {

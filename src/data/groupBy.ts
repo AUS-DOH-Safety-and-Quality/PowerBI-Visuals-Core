@@ -1,8 +1,9 @@
+import at from "../util/at";
 /** Groups by SameValueZero key equality, preserving first-seen group order and row order. */
 export default function groupBy<T, K extends keyof T>(rows: readonly T[], key: K): [T[K], T[]][] {
   const groups = new Map<T[K], T[]>();
   for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
+    const row = at(rows, i);
     const keyValue = row[key];
     const group = groups.get(keyValue);
     if (group === undefined) {

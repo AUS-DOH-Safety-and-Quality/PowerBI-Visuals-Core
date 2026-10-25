@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { describe, expect, it } from "vitest";
 import { createDefaultValues, type SettingCard, type SettingsValues } from "../settings/definitions";
 import type createCanvasCard from "../settings/createCanvasCard";
@@ -14,8 +15,9 @@ export function settingsReferenceSuite(settingsModel: Record<string, SettingCard
     const pages = settingsReference(settingsModel);
     const cards = Object.keys(pages);
     for (let i = 0; i < cards.length; i++) {
-      it(`matches the docs for ${cards[i]}`, async () => {
-        await expect(pages[cards[i]]).toMatchFileSnapshot(`${directory}/${cards[i]}.md`);
+      const card = at(cards, i);
+      it(`matches the docs for ${card}`, async () => {
+        await expect(pages[card]).toMatchFileSnapshot(`${directory}/${card}.md`);
       });
     }
   });
@@ -39,7 +41,7 @@ export function formattingContractsSuite<M extends CanvasModel>(settingsModel: M
     }, [0]);
     expect(rows.values[0]).toMatchObject({ lower_padding: 0, show_errors: false });
     const pane = buildFormattingModel(settingsModel, { ...defaults, canvas: rows.values[0] });
-    expect(pane.cards[0].uid).toBe("canvas_card_uid");
+    expect(at(pane.cards, 0).uid).toBe("canvas_card_uid");
     expect(pane.cards).toHaveLength(Object.keys(defaultSettings).length);
   });
 }

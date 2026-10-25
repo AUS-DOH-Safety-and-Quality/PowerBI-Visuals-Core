@@ -1,3 +1,4 @@
+import at from "../util/at";
 const SQRT3 = Math.sqrt(3);
 const TAU = 2 * Math.PI;
 const STAR_KA = 0.8908130915292852;
@@ -17,9 +18,9 @@ export function round3(value: number): number {
 
 /** Closed polygon through consecutive x, y pairs */
 function polygon(vertices: readonly number[]): string {
-  let path = `M${round3(vertices[0])},${round3(vertices[1])}`;
+  let path = `M${round3(at(vertices, 0))},${round3(at(vertices, 1))}`;
   for (let i = 2; i < vertices.length; i += 2) {
-    path += `L${round3(vertices[i])},${round3(vertices[i + 1])}`;
+    path += `L${round3(at(vertices, i))},${round3(at(vertices, i + 1))}`;
   }
   return path + "Z";
 }
@@ -102,5 +103,9 @@ const SYMBOLS: Readonly<Record<string, (size: number) => string>> = {
 
 /** d3-shape's fill symbols by name, centred on the origin and sized by area */
 export function symbolPath(shape: string, size: number): string {
-  return SYMBOLS[shape](size);
+  const symbol = SYMBOLS[shape];
+  if (symbol === undefined) {
+    throw new Error(`Unknown symbol ${shape}`);
+  }
+  return symbol(size);
 }

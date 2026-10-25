@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import { indexColumnsByRole, type RoleColumns } from "./columns";
 
@@ -34,14 +35,15 @@ export function validateDataView<R extends string>(dataViews: readonly powerbi.D
   if (key === undefined) {
     return { status: "invalid", error: "No grouping/ID variable passed!" };
   }
-  const rowCount = key[0].values.length;
+  const rowCount = at(key, 0).values.length;
   if (rowCount === 0) {
     return { status: "empty", error: "No data present" };
   }
   const values = indexColumnsByRole(categorical.values ?? []);
   for (let i = 0; i < requiredValueRoles.length; i++) {
-    if (values[requiredValueRoles[i]] === undefined) {
-      return { status: "invalid", error: `No ${requiredValueRoles[i]} passed!` };
+    const role = at(requiredValueRoles, i);
+    if (values[role] === undefined) {
+      return { status: "invalid", error: `No ${role} passed!` };
     }
   }
   return {

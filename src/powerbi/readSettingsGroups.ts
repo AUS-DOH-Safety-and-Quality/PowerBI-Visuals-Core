@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { createDefaultValues, type SettingCard, type SettingsValues } from "../settings/definitions";
 import readSettingsRows, { type SettingsCategory, type SettingsRows, type SettingsValidation } from "./readSettingsRows";
 
@@ -21,11 +22,12 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
   const firstPositions = new Array<number>(groups.length);
   const messagePositionByRowIndex = new Map<number, number>();
   for (let i = 0; i < groups.length; i++) {
-    const rows = groups[i];
+    const rows = at(groups, i);
     firstPositions[i] = rawRows.length;
     for (let j = 0; j < rows.length; j++) {
-      messagePositionByRowIndex.set(rows[j], rawRows.length);
-      rawRows.push(rows[j]);
+      const row = at(rows, j);
+      messagePositionByRowIndex.set(row, rawRows.length);
+      rawRows.push(row);
     }
   }
   const defaults = createDefaultValues(schema);
@@ -36,18 +38,25 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
   const messages = new Array<string[]>(rawRows.length).fill(noMessages);
   let error: string | undefined;
   for (let i = 0; i < cards.length; i++) {
-    const result = readSettingsRows(schema[cards[i]], cards[i], defaults[cards[i]], category, rawRows);
+    const card = at(cards, i);
+    const cardSchema = schema[card];
+    if (cardSchema === undefined) {
+      throw new Error(`Missing schema for ${card}`);
+    }
+    const result = readSettingsRows(cardSchema, card, defaults[card], category, rawRows);
     perCard[i] = result;
     for (let j = 0; j < rawRows.length; j++) {
-      const row = result.validation.messages[j];
+      const row = at(result.validation.messages, j);
       if (row.length === 0) {
         continue;
       }
-      if (messages[j] === noMessages) {
-        messages[j] = [];
+      let rowMessages = at(messages, j);
+      if (rowMessages === noMessages) {
+        rowMessages = [];
+        messages[j] = rowMessages;
       }
       for (let k = 0; k < row.length; k++) {
-        messages[j].push(row[k]);
+        rowMessages.push(at(row, k));
       }
     }
     if (result.validation.status !== 0) {
@@ -57,34 +66,36 @@ export default function readSettingsGroups<T extends Record<string, SettingCard>
   const values = new Array<SettingsValues<T>>(groups.length);
   const rowValues = new Array<SettingsValues<T>[]>(groups.length);
   for (let i = 0; i < groups.length; i++) {
-    const position = firstPositions[i];
-    const count = groups[i].length;
+    const position = at(firstPositions, i);
+    const count = at(groups, i).length;
     const group: Record<string, unknown> = {};
-    rowValues[i] = new Array<SettingsValues<T>>(count);
+    const groupRows = new Array<SettingsValues<T>>(count);
     for (let k = 0; k < count; k++) {
       const row: Record<string, unknown> = {};
       for (let c = 0; c < cards.length; c++) {
-        row[cards[c]] = perCard[c].values[position + k];
+        row[at(cards, c)] = at(perCard, c).values[position + k];
       }
-      rowValues[i][k] = row as SettingsValues<T>;
+      groupRows[k] = row as SettingsValues<T>;
     }
+    rowValues[i] = groupRows;
     for (let c = 0; c < cards.length; c++) {
+      const card = at(perCard, c);
       // The group's first row with valid values for this card; otherwise its first row, with defaults
       let chosen = position;
       for (let k = position; k < position + count; k++) {
-        if (perCard[c].validation.messages[k].length === 0) {
+        if (at(card.validation.messages, k).length === 0) {
           chosen = k;
           break;
         }
       }
-      group[cards[c]] = perCard[c].values[chosen];
+      group[at(cards, c)] = card.values[chosen];
     }
     values[i] = group as SettingsValues<T>;
   }
   let validation: SettingsValidation = error === undefined ? { status: 0, messages } : { status: 1, messages, error };
   for (let i = 0; validation.status === 0 && i < groups.length; i++) {
     for (let r = 0; validation.status === 0 && r < rules.length; r++) {
-      const ruleError = rules[r](values[i], i);
+      const ruleError = at(rules, r)(at(values, i), i);
       if (ruleError !== undefined) {
         validation = { status: 1, messages, error: ruleError };
       }

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { OutlierStatus } from "../data/flagDirection";
 import limitStatus from "./limitStatus";
 
@@ -5,7 +6,7 @@ import limitStatus from "./limitStatus";
 export default function astronomical(val: readonly number[], ll99: readonly (number | undefined)[], ul99: readonly (number | undefined)[]): OutlierStatus[] {
   const rtn = new Array<OutlierStatus>(val.length);
   for (let i = 0; i < val.length; i++) {
-    rtn[i] = limitStatus(val[i], ll99[i], ul99[i]);
+    rtn[i] = limitStatus(at(val, i), ll99[i], ul99[i]);
   }
   return rtn;
 }

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import isNullOrUndefined from "../data/isNullOrUndefined";
 import type { ValueFormatter } from "../data/valueFormatter";
@@ -58,7 +59,7 @@ export function limitTooltips(settings: LimitTooltipSettings, row: LimitTooltipR
     }
   };
   for (let i = 0; i < levels.length; i++) {
-    limit(levels[i], "upper");
+    limit(at(levels, i), "upper");
   }
   if (settings.show_target && settings.ttip_show_target) {
     tooltip.push({ displayName: settings.ttip_label_target, value: format(row.target, "value") });
@@ -67,7 +68,7 @@ export function limitTooltips(settings: LimitTooltipSettings, row: LimitTooltipR
     tooltip.push({ displayName: settings.ttip_label_alt_target, value: format(row.alt_target, "value") });
   }
   for (let i = levels.length - 1; i >= 0; i--) {
-    limit(levels[i], "lower");
+    limit(at(levels, i), "lower");
   }
   return tooltip;
 }
@@ -79,6 +80,6 @@ export function appendPatternTooltips(tooltip: VisualTooltipDataItem[], patterns
     tooltip.push({ displayName: "Pattern(s)", value: patterns.join("\n") });
   }
   for (let i = 0; i < custom.length; i++) {
-    tooltip.push(custom[i]);
+    tooltip.push(at(custom, i));
   }
 }

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import { aggregateColumn, valueRoles, type Aggregations, type ValueRole } from "./aggregations";
 import type { InputSettings } from "./chartSettings";
@@ -66,10 +67,13 @@ function compareValues(a: Cell | undefined, b: Cell | undefined): number {
 }
 
 function namedColumns(columns: Readonly<Record<string, Column>> | null | undefined): { names: string[]; columns: (readonly Cell[])[] } {
-  const names = Object.keys(columns ?? {});
-  const values = new Array<readonly Cell[]>(names.length);
-  for (let i = 0; i < names.length; i++) {
-    values[i] = asArray(columns?.[names[i]] ?? null);
+  const entries = Object.entries(columns ?? {});
+  const names = new Array<string>(entries.length);
+  const values = new Array<readonly Cell[]>(entries.length);
+  for (let i = 0; i < entries.length; i++) {
+    const [name, column] = at(entries, i);
+    names[i] = name;
+    values[i] = asArray(column);
   }
   return { names, columns: values };
 }
@@ -103,11 +107,11 @@ function levelRanks(values: readonly Cell[], levels: Column | null | undefined):
   const levelValues = asArray(levels);
   const ranks = new Map<Cell, number>();
   for (let i = 0; i < levelValues.length; i++) {
-    ranks.set(levelValues[i], i);
+    ranks.set(at(levelValues, i), i);
   }
   const ranked = new Array<number | undefined>(values.length);
   for (let i = 0; i < values.length; i++) {
-    ranked[i] = ranks.get(values[i]);
+    ranked[i] = ranks.get(at(values, i));
   }
   return ranked;
 }
@@ -125,7 +129,8 @@ function groupRows(categories: readonly Cell[], categoryOrder: readonly (Cell | 
   }
   order.sort((a, b) => {
     for (let i = 0; i < indicatorOrder.length; i++) {
-      const comparison = compareValues(indicatorOrder[i][a], indicatorOrder[i][b]);
+      const ranks = at(indicatorOrder, i);
+      const comparison = compareValues(ranks[a], ranks[b]);
       if (comparison !== 0) {
         return comparison;
       }
@@ -135,14 +140,14 @@ function groupRows(categories: readonly Cell[], categoryOrder: readonly (Cell | 
 
   const groups = new Map<string, CategoryGroup>();
   for (let i = 0; i < order.length; i++) {
-    const row = order[i];
+    const row = at(order, i);
     if (filters !== undefined && !filters.has(String(crosstalkIdentities[row]))) {
       continue;
     }
     const category = isMissing(categories[row]) ? null : String(categories[row]);
     const indicators = new Array<Cell>(indicatorColumns.length);
     for (let j = 0; j < indicatorColumns.length; j++) {
-      indicators[j] = indicatorColumns[j][row];
+      indicators[j] = at(at(indicatorColumns, j), row);
     }
     const groupKey = JSON.stringify([category, ...indicators]);
     let group = groups.get(groupKey);
@@ -157,13 +162,12 @@ function groupRows(categories: readonly Cell[], categoryOrder: readonly (Cell | 
 
 /** Settings given per row arrive as arrays, and each group takes the value of its first row */
 function groupSettings(inputSettings: InputSettings): (row: number) => InputSettings {
-  const groupNames = Object.keys(inputSettings);
+  const groups = Object.entries(inputSettings);
   let conditional = false;
-  for (let i = 0; i < groupNames.length && !conditional; i++) {
-    const group = inputSettings[groupNames[i]];
-    const names = Object.keys(group);
-    for (let j = 0; j < names.length && !conditional; j++) {
-      conditional = isArray(group[names[j]]);
+  for (let i = 0; i < groups.length && !conditional; i++) {
+    const values = Object.values(at(groups, i)[1]);
+    for (let j = 0; j < values.length && !conditional; j++) {
+      conditional = isArray(values[j]);
     }
   }
   if (!conditional) {
@@ -171,15 +175,15 @@ function groupSettings(inputSettings: InputSettings): (row: number) => InputSett
   }
   return row => {
     const settings: Record<string, Record<string, unknown>> = {};
-    for (let i = 0; i < groupNames.length; i++) {
-      const group = inputSettings[groupNames[i]];
+    for (let i = 0; i < groups.length; i++) {
+      const [groupName, group] = at(groups, i);
       const rowGroup: Record<string, unknown> = {};
-      const names = Object.keys(group);
-      for (let j = 0; j < names.length; j++) {
-        const value = group[names[j]];
-        rowGroup[names[j]] = isArray(value) ? value[row] : value;
+      const entries = Object.entries(group);
+      for (let j = 0; j < entries.length; j++) {
+        const [name, value] = at(entries, j);
+        rowGroup[name] = isArray(value) ? value[row] : value;
       }
-      settings[groupNames[i]] = rowGroup;
+      settings[groupName] = rowGroup;
     }
     return settings;
   };
@@ -191,9 +195,10 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   const valueNames: ValueRole[] = [];
   const valueColumns: (readonly Cell[])[] = [];
   for (let i = 0; i < valueRoles.length; i++) {
-    const column = rawData[valueRoles[i]];
+    const role = at(valueRoles, i);
+    const column = rawData[role];
     if (column != null) {
-      valueNames.push(valueRoles[i]);
+      valueNames.push(role);
       valueColumns.push(asArray(column));
     }
   }
@@ -212,7 +217,7 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   }
   const indicatorOrder = new Array<readonly (Cell | undefined)[]>(indicators.names.length);
   for (let i = 0; i < indicators.names.length; i++) {
-    indicatorOrder[i] = levelRanks(indicators.columns[i], rawData.indicator_levels?.[indicators.names[i]]);
+    indicatorOrder[i] = levelRanks(at(indicators.columns, i), rawData.indicator_levels?.[at(indicators.names, i)]);
   }
   const groups = groupRows(categories, levelRanks(categories, rawData.category_levels), indicators.columns, indicatorOrder,
                          crosstalkIdentities, crosstalkFilters);
@@ -224,16 +229,17 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   };
   const categoryColumns: [KeyColumn, ...FrontendColumn[]] = [key];
   for (let i = 0; i < indicators.names.length; i++) {
-    categoryColumns.push({ source: { displayName: indicators.names[i], roles: { indicator: true } }, values: [] });
+    categoryColumns.push({ source: { displayName: at(indicators.names, i), roles: { indicator: true } }, values: [] });
   }
   const columns = new Array<FrontendColumn>(valueNames.length + tooltips.names.length);
   for (let i = 0; i < valueNames.length; i++) {
-    columns[i] = { source: { displayName: valueNames[i], roles: { [valueNames[i]]: true } }, values: [] };
+    const name = at(valueNames, i);
+    columns[i] = { source: { displayName: name, roles: { [name]: true } }, values: [] };
   }
   // The visuals format tooltip values by type, and label them by name
   for (let i = 0; i < tooltips.names.length; i++) {
     columns[valueNames.length + i] = {
-      source: { displayName: tooltips.names[i], roles: { tooltips: true }, type: { text: true } },
+      source: { displayName: at(tooltips.names, i), roles: { tooltips: true }, type: { text: true } },
       values: []
     };
   }
@@ -242,33 +248,33 @@ export function makeUpdateValues(rawData: RawData, inputSettings: InputSettings,
   const identities = new Array<string[]>(groups.length);
   const sourceRows: Record<string, number[]> = {};
   for (let g = 0; g < groups.length; g++) {
-    const group = groups[g];
+    const group = at(groups, g);
     sourceRows[String(g)] = group.rows;
     key.values.push(group.category);
     for (let i = 0; i < group.indicators.length; i++) {
-      categoryColumns[i + 1].values.push(group.indicators[i]);
+      at(categoryColumns, i + 1).values.push(at(group.indicators, i));
     }
     const groupIdentities = new Array<string>(group.rows.length);
     for (let i = 0; i < group.rows.length; i++) {
-      groupIdentities[i] = String(crosstalkIdentities[group.rows[i]]);
+      groupIdentities[i] = String(crosstalkIdentities[at(group.rows, i)]);
     }
     identities[g] = groupIdentities;
-    key.objects.push(rowSettings(group.rows[0]));
+    key.objects.push(rowSettings(at(group.rows, 0)));
 
     const groupValues = new Array<Cell>(group.rows.length);
     for (let i = 0; i < columns.length; i++) {
       const isValue = i < valueNames.length;
-      const column = isValue ? valueColumns[i] : tooltips.columns[i - valueNames.length];
+      const column = isValue ? at(valueColumns, i) : at(tooltips.columns, i - valueNames.length);
       for (let j = 0; j < group.rows.length; j++) {
-        groupValues[j] = column[group.rows[j]];
+        groupValues[j] = at(column, at(group.rows, j));
       }
-      columns[i].values.push(aggregateColumn(groupValues, isValue ? aggregations[valueNames[i]] : aggregations.tooltips));
+      at(columns, i).values.push(aggregateColumn(groupValues, isValue ? aggregations[at(valueNames, i)] : aggregations.tooltips));
     }
   }
 
   const sources = new Array<FrontendColumn["source"]>(categoryColumns.length + columns.length);
   for (let i = 0; i < sources.length; i++) {
-    sources[i] = i < categoryColumns.length ? categoryColumns[i].source : columns[i - categoryColumns.length].source;
+    sources[i] = i < categoryColumns.length ? at(categoryColumns, i).source : at(columns, i - categoryColumns.length).source;
   }
   const dataView: FrontendDataView = {
     categorical: { categories: categoryColumns, values: columns },

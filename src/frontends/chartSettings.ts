@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { frontendChart } from "./charts";
 import { hasOwn, isArray, isPlainObject } from "./values";
 
@@ -27,33 +28,34 @@ export function chartSettings(chartType: string, inputSettings: Readonly<Record<
   const settings: Record<string, Record<string, unknown>> = {};
   const groupNames = Object.keys(inputSettings);
   for (let i = 0; i < groupNames.length; i++) {
-    const groupName = groupNames[i];
+    const groupName = at(groupNames, i);
     const group = inputSettings[groupName];
     if (group == null) {
       continue;
     }
-    if (!hasOwn(defaults, groupName)) {
+    const groupDefaults = hasOwn(defaults, groupName) ? defaults[groupName] : undefined;
+    if (groupDefaults === undefined) {
       return { error: `'${groupName}' is not a valid settings group. Valid options are: ${Object.keys(defaults).join(", ")}.` };
     }
     if (!isPlainObject(group)) {
       return { error: `Settings in group '${groupName}' must be named.` };
     }
-    const groupDefaults = defaults[groupName];
     const groupSettings: Record<string, unknown> = {};
     const names = Object.keys(group);
     for (let j = 0; j < names.length; j++) {
-      if (!hasOwn(groupDefaults, names[j])) {
+      const name = at(names, j);
+      if (!hasOwn(groupDefaults, name)) {
         const options = Object.keys(groupDefaults).join("', '");
-        return { error: `Invalid setting '${names[j]}' in group '${groupName}'. Valid settings are: '${options}'.` };
+        return { error: `Invalid setting '${name}' in group '${groupName}'. Valid settings are: '${options}'.` };
       }
-      let value = group[names[j]];
+      let value = group[name];
       if (isArray(value) && value.length === 1) {
         value = value[0];
       }
       if (isPlainObject(value) || (isArray(value) && value.length !== rowCount)) {
-        return { error: `Setting '${names[j]}' in group '${groupName}' must have one value or ${rowCount} values.` };
+        return { error: `Setting '${name}' in group '${groupName}' must have one value or ${rowCount} values.` };
       }
-      groupSettings[names[j]] = typeof groupDefaults[names[j]] === "string" ? asText(value) : value;
+      groupSettings[name] = typeof groupDefaults[name] === "string" ? asText(value) : value;
     }
     settings[groupName] = groupSettings;
   }

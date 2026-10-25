@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { formatPrimitiveValue, type PrimitiveValue } from "./columns";
 
 /** `labels` joins each group's names for messages and captions; blank when there are no columns */
@@ -33,7 +34,7 @@ export default function groupCategoryRows(
     const parts = new Array<readonly [string, string]>(columns.length);
     const names = new Array<string>(columns.length);
     for (let j = 0; j < columns.length; j++) {
-      const value = columns[j].values[i];
+      const value = at(columns, j).values[i];
       names[j] = value instanceof Date ? dateName(value) : formatPrimitiveValue(value) ?? "";
       if (value == null) {
         parts[j] = ["undefined", ""];
@@ -53,7 +54,7 @@ export default function groupCategoryRows(
       groups.keys.push(key);
       groups.labels.push(names.join(" / "));
     }
-    groups.rows[index].push(i);
+    at(groups.rows, index).push(i);
   }
   return groups;
 }

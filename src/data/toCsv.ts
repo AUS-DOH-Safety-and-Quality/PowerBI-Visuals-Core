@@ -1,3 +1,4 @@
+import at from "../util/at";
 /**
  * Fields holding a comma, quote or line break are quoted, with embedded quotes doubled.
  * Text a spreadsheet would read as a formula is prefixed with ' (OWASP CSV injection).
@@ -18,17 +19,18 @@ export default function toCsv(rows: readonly Readonly<Record<string, TableValue>
   if (rows.length === 0) {
     return "";
   }
-  const columns = Object.keys(rows[0]);
+  const columns = Object.keys(at(rows, 0));
   const lines = new Array<string>(rows.length + 1);
   const header = new Array<string>(columns.length);
   for (let j = 0; j < columns.length; j++) {
-    header[j] = csvField(columns[j]);
+    header[j] = csvField(at(columns, j));
   }
   lines[0] = header.join(",");
   for (let i = 0; i < rows.length; i++) {
+    const row = at(rows, i);
     const values = new Array<string>(columns.length);
     for (let j = 0; j < columns.length; j++) {
-      values[j] = csvField(rows[i][columns[j]]);
+      values[j] = csvField(row[at(columns, j)]);
     }
     lines[i + 1] = values.join(",");
   }

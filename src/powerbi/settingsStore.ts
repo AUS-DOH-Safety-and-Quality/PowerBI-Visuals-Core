@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { createDefaultValues, type SettingCard, type SettingsValues } from "../settings/definitions";
 import buildFormattingModel, { type FormattingModel } from "./buildFormattingModel";
 import readSettingsGroups, { type SettingsGroupRule } from "./readSettingsGroups";
@@ -26,7 +27,7 @@ export default class SettingsStore<T extends Record<string, SettingCard>, D> {
     this.derive = derive;
     this.rules = rules;
     this.settings = [createDefaultValues(schema)];
-    this.derivedSettings = [derive(this.settings[0])];
+    this.derivedSettings = [derive(at(this.settings, 0))];
   }
 
   update(category: SettingsCategory, groups: readonly (readonly number[])[]): void {
@@ -37,16 +38,16 @@ export default class SettingsStore<T extends Record<string, SettingCard>, D> {
     this.messagePositionByRowIndex = result.messagePositionByRowIndex;
     this.derivedSettings = new Array<D>(result.values.length);
     for (let i = 0; i < result.values.length; i++) {
-      this.derivedSettings[i] = this.derive(result.values[i]);
+      this.derivedSettings[i] = this.derive(at(result.values, i));
     }
   }
 
   group(index: number): GroupSettings<T, D> {
-    return { settings: this.settings[index], derivedSettings: this.derivedSettings[index] };
+    return { settings: at(this.settings, index), derivedSettings: at(this.derivedSettings, index) };
   }
 
   /** The pane for the first group */
   getFormattingModel(): FormattingModel {
-    return buildFormattingModel(this.schema, this.settings[0]);
+    return buildFormattingModel(this.schema, at(this.settings, 0));
   }
 }

@@ -1,3 +1,4 @@
+import at from "../util/at";
 /** Clenshaw evaluation of a Chebyshev series; adapted from R's chebyshev_eval. */
 export default function chebyshevPolynomial(x: number, a: readonly number[], n: number): number {
   const twox = x * 2;
@@ -7,7 +8,7 @@ export default function chebyshevPolynomial(x: number, a: readonly number[], n: 
   for (let i = 1; i <= n; i++) {
     b2 = b1;
     b1 = b0;
-    b0 = twox * b1 - b2 + a[n - i];
+    b0 = twox * b1 - b2 + at(a, n - i);
   }
   return (b0 - b2) * 0.5;
 }

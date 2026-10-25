@@ -1,3 +1,4 @@
+import { at } from "../util";
 import { updateType, type UpdateOptions } from "../powerbi";
 import { SVG_NS, type ViewModelValidation } from "../rendering";
 import {
@@ -34,10 +35,11 @@ export function initialiseHeadless(dom: { readonly document: Document; readonly 
   globalThis.window = dom.window;
   const names = chartNames();
   for (let i = 0; i < names.length; i++) {
+    const name = at(names, i);
     const container = dom.document.createElement("div");
-    container.classList.add(`${names[i]}-container`);
+    container.classList.add(`${name}-container`);
     dom.document.body.appendChild(container);
-    visuals[names[i]] = new (frontendChart(names[i]).Visual)(constructorOptions(container, services));
+    visuals[name] = new (frontendChart(name).Visual)(constructorOptions(container, services));
   }
 }
 
@@ -81,7 +83,7 @@ function indicatorNames(dataViews: readonly FrontendDataView[]): string[] {
   const names: string[] = [];
   const categories = dataViews[0]?.categorical.categories ?? [];
   for (let i = 0; i < categories.length; i++) {
-    const source = categories[i].source;
+    const source = at(categories, i).source;
     if (source.roles?.indicator) {
       names.push(source.displayName);
     }
@@ -93,6 +95,9 @@ export function updateHeadlessVisual(chartType: string, dataViews: readonly Fron
                                      width: number, height: number, staticPlot: boolean, limits: boolean): HeadlessResult {
   const chart = frontendChart(chartType);
   const visual = visuals[chartType];
+  if (visual === undefined) {
+    throw new Error(`No visual initialised for ${chartType}.`);
+  }
   // Clear the previous view
   visual.update(updateOptions([], width, height));
 

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import { select, type Selection } from "d3-selection";
 import { identitySelected, selectionState } from "../powerbi/selection";
@@ -154,8 +155,9 @@ function drawOuterBorder(div: TableSelection, tableSettings: TableSettingValues)
 
   const sides = ["top", "right", "bottom", "left"] as const;
   for (let i = 0; i < sides.length; i++) {
-    if (!tableSettings[`table_outer_border_${sides[i]}`]) {
-      table.style(`border-${sides[i]}`, "none");
+    const side = at(sides, i);
+    if (!tableSettings[`table_outer_border_${side}`]) {
+      table.style(`border-${side}`, "none");
     }
   }
 
@@ -171,7 +173,8 @@ function cellText(cell: Cell, kind: ColumnKind | undefined, formatValue: ValueFo
   if (cell.value === undefined) {
     return "";
   }
-  return kind === "flag" ? flagLabels[cell.value] : cell.value;
+  // A flag outside the known set shows as stored
+  return kind === "flag" ? flagLabels[cell.value] ?? cell.value : cell.value;
 }
 
 function drawTableCells<R extends TableRow>(div: TableSelection, options: SummaryTableOptions<R>,
@@ -185,7 +188,8 @@ function drawTableCells<R extends TableRow>(div: TableSelection, options: Summar
                           const settings = rowSettings(d);
                           const cells = new Array<Cell>(columns.length);
                           for (let i = 0; i < columns.length; i++) {
-                            cells[i] = { column: columns[i].name, value: d.table_row[columns[i].name], settings };
+                            const column = at(columns, i);
+                            cells[i] = { column: column.name, value: d.table_row[column.name], settings };
                           }
                           return cells;
                         })

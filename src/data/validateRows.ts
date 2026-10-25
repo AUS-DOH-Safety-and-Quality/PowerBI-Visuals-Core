@@ -1,3 +1,4 @@
+import at from "../util/at";
 /** Valid input carries the positions of the rows no rule rejected */
 export type RowValidation = { status: 0; messages: string[]; kept: number[] } | { status: 1; messages: string[]; error: string };
 export type ValidRows = Extract<RowValidation, { status: 0 }>;
@@ -16,17 +17,18 @@ export default function validateRows(count: number, rules: readonly RowRule[]): 
   const messages = new Array<string>(count);
   const kept: number[] = [];
   let sameRule = true;
-  let firstRule = -1;
+  let firstRule: RowRule | undefined;
   for (let i = 0; i < count; i++) {
-    let failed = -1;
+    let failed: RowRule | undefined;
     for (let j = 0; j < rules.length; j++) {
-      if (rules[j].fails(i)) {
-        failed = j;
+      const rule = at(rules, j);
+      if (rule.fails(i)) {
+        failed = rule;
         break;
       }
     }
-    messages[i] = failed === -1 ? "" : rules[failed].message;
-    if (failed === -1) {
+    messages[i] = failed === undefined ? "" : failed.message;
+    if (failed === undefined) {
       kept.push(i);
     }
     if (i === 0) {
@@ -39,5 +41,5 @@ export default function validateRows(count: number, rules: readonly RowRule[]): 
     return { status: 0, messages, kept };
   }
   // A single shared failure names it; mixed failures or no rows get the generic error
-  return { status: 1, messages, error: sameRule && count > 0 ? rules[firstRule].all : "No valid data found!" };
+  return { status: 1, messages, error: sameRule && firstRule !== undefined ? firstRule.all : "No valid data found!" };
 }

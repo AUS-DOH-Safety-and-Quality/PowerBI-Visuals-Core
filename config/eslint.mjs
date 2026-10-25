@@ -1,10 +1,11 @@
 const arrayCallbacks = "map|forEach|filter|reduce|reduceRight|some|every|find|findIndex|findLast|findLastIndex|flatMap";
 const typedFiles = ["src/**/*.ts", "test/**/*.ts"];
 
-/** Core's import direction: math, data ← spc, settings (type-only) ← powerbi ← rendering ← frontends; testing sits beside */
+/** Core's import direction: util ← math, data ← spc, settings (type-only) ← powerbi ← rendering ← frontends; testing sits beside */
 const importDirection = [
-  { files: ["src/math/**/*.ts", "src/data/**/*.ts"], forbid: "^\\.\\./", allowTypeImports: false },
-  { files: ["src/spc/**/*.ts", "src/settings/**/*.ts"], forbid: "^\\.\\./", allowTypeImports: true },
+  { files: ["src/util/**/*.ts"], forbid: "^\\.\\./", allowTypeImports: false },
+  { files: ["src/math/**/*.ts", "src/data/**/*.ts"], forbid: "^\\.\\./(?!util)", allowTypeImports: false },
+  { files: ["src/spc/**/*.ts", "src/settings/**/*.ts"], forbid: "^\\.\\./(?!util)", allowTypeImports: true },
   { files: ["src/powerbi/**/*.ts"], forbid: "^\\.\\./(spc|rendering|frontends|testing)", allowTypeImports: false },
   { files: ["src/rendering/**/*.ts"], forbid: "^\\.\\./(frontends|testing)", allowTypeImports: false },
   { files: ["src/frontends/**/*.ts"], forbid: "^\\.\\./testing", allowTypeImports: false }

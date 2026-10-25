@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { select } from "d3-selection";
 import { round3 } from "./symbolPath";
 import type { AxisPalette } from "./axisProperties";
@@ -31,13 +32,18 @@ function sameStyle(a: LineStyle, b: LineStyle): boolean {
   return a.colour === b.colour && a.width === b.width && a.type === b.type;
 }
 
+/** A point placed on the plot, with the drawn length up to it so dashes run on across segments */
+type Vertex = { readonly x: number; readonly y: number; readonly valid: boolean; readonly style: LineStyle; readonly along: number };
+type Segment = { readonly from: Vertex; readonly to: Vertex };
+
 /** Path through runs of valid points; a run of one point is closed, as d3-shape's line does */
-function linePath(x: readonly number[], y: readonly number[], valid: readonly boolean[]): string {
+function linePath(vertices: readonly Vertex[]): string {
   let path = "";
   let run = 0;
-  for (let i = 0; i <= x.length; i++) {
-    if (i < x.length && valid[i]) {
-      path += `${run === 0 ? "M" : "L"}${round3(x[i])},${round3(y[i])}`;
+  for (let i = 0; i <= vertices.length; i++) {
+    const vertex = vertices[i];
+    if (vertex?.valid) {
+      path += `${run === 0 ? "M" : "L"}${round3(vertex.x)},${round3(vertex.y)}`;
       run++;
     } else {
       if (run === 1) {
@@ -60,31 +66,34 @@ export function drawLines(group: SVGGElement, options: LinesOptions): void {
     .attr("class", line => `${line.name}-linegroup`)
     .each(function(line) {
       const n = line.points.length;
-      const x = new Array<number>(n);
-      const y = new Array<number>(n);
-      const valid = new Array<boolean>(n);
-      const styles = new Array<LineStyle>(n);
-      // Drawn length up to each point, so dashes run on across segments
-      const along = new Array<number>(n).fill(0);
-      // Start indices of segments with an end in the plot
-      const segments: number[] = [];
+      const vertices = new Array<Vertex>(n);
+      // Segments with an end in the plot
+      const segments: Segment[] = [];
+      let previous: Vertex | undefined;
       let anyValid = false;
       let uniform = true;
       for (let i = 0; i < n; i++) {
-        const point = line.points[i];
-        x[i] = frame.xScale(point.x);
-        y[i] = frame.yScale(point.line_value ?? NaN);
-        valid[i] = inPlot(frame, point.x, point.line_value);
-        anyValid = anyValid || valid[i];
+        const point = at(line.points, i);
+        const x = frame.xScale(point.x);
+        const y = frame.yScale(point.line_value ?? NaN);
+        const valid = inPlot(frame, point.x, point.line_value);
         const style = line.style(i);
-        styles[i] = palette.isHighContrast ? { ...style, colour: palette.foregroundColour } : style;
-        if (i > 0) {
-          uniform = uniform && sameStyle(styles[i], styles[i - 1]);
-          along[i] = along[i - 1] + (valid[i - 1] && valid[i] ? Math.hypot(x[i] - x[i - 1], y[i] - y[i - 1]) : 0);
-          if (valid[i - 1] || valid[i]) {
-            segments.push(i - 1);
+        const vertex: Vertex = {
+          x,
+          y,
+          valid,
+          style: palette.isHighContrast ? { ...style, colour: palette.foregroundColour } : style,
+          along: previous === undefined ? 0 : previous.along + (previous.valid && valid ? Math.hypot(x - previous.x, y - previous.y) : 0)
+        };
+        vertices[i] = vertex;
+        anyValid = anyValid || valid;
+        if (previous !== undefined) {
+          uniform = uniform && sameStyle(vertex.style, previous.style);
+          if (previous.valid || valid) {
+            segments.push({ from: previous, to: vertex });
           }
         }
+        previous = vertex;
       }
 
       const container = select(this);
@@ -93,32 +102,33 @@ export function drawLines(group: SVGGElement, options: LinesOptions): void {
         return;
       }
       if (uniform) {
+        const style = at(vertices, 0).style;
         container.selectAll("line").remove();
         container
           .selectAll("path")
           .data([line.points])
           .join("path")
-          .attr("d", linePath(x, y, valid))
+          .attr("d", linePath(vertices))
           .attr("fill", "none")
-          .attr("stroke", styles[0].colour)
-          .attr("stroke-width", styles[0].width)
-          .attr("stroke-dasharray", styles[0].type);
+          .attr("stroke", style.colour)
+          .attr("stroke-width", style.width)
+          .attr("stroke-dasharray", style.type);
         return;
       }
       // An invalid endpoint collapses its segment onto the other end; the dash offset keeps the pattern continuous
       container.selectAll("path").remove();
       container
-        .selectAll<SVGLineElement, number>("line")
+        .selectAll<SVGLineElement, Segment>("line")
         .data(segments)
         .join("line")
-        .attr("x1", i => valid[i] ? x[i] : x[i + 1])
-        .attr("y1", i => valid[i] ? y[i] : y[i + 1])
-        .attr("x2", i => valid[i + 1] ? x[i + 1] : x[i])
-        .attr("y2", i => valid[i + 1] ? y[i + 1] : y[i])
+        .attr("x1", s => s.from.valid ? s.from.x : s.to.x)
+        .attr("y1", s => s.from.valid ? s.from.y : s.to.y)
+        .attr("x2", s => s.to.valid ? s.to.x : s.from.x)
+        .attr("y2", s => s.to.valid ? s.to.y : s.from.y)
         .attr("fill", "none")
-        .attr("stroke", i => styles[i].colour)
-        .attr("stroke-width", i => styles[i].width)
-        .attr("stroke-dasharray", i => styles[i].type)
-        .attr("stroke-dashoffset", i => along[i]);
+        .attr("stroke", s => s.from.style.colour)
+        .attr("stroke-width", s => s.from.style.width)
+        .attr("stroke-dasharray", s => s.from.style.type)
+        .attr("stroke-dashoffset", s => s.from.along);
     });
 }

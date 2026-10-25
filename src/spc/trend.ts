@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { OutlierStatus } from "../data/flagDirection";
 
 /**
@@ -14,7 +15,7 @@ export default function trend(val: readonly number[], n: number): OutlierStatus[
 
   for (let i: number = 0; i < length; i++) {
     trend_detected[i] = "none";
-    const change: number = i === 0 ? NaN : Math.sign(val[i] - val[i - 1]);
+    const change: number = i === 0 ? NaN : Math.sign(at(val, i) - at(val, i - 1));
     if (Number.isNaN(change)) {
       direction = 0;
       continue;

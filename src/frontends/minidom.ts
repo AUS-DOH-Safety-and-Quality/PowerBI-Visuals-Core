@@ -1,3 +1,4 @@
+import at from "../util/at";
 // Minimal SVG DOM for headless rendering in QuickJS; no HTML parsing, CSS cascade, or layout.
 import type { initialiseHeadless } from "./headless";
 
@@ -187,11 +188,11 @@ class MiniStyle {
     const styles = Array.from(this.styles);
     let text = "";
     for (let i = 0; i < styles.length; i++) {
-      const style = styles[i][1];
+      const [name, style] = at(styles, i);
       if (i > 0) {
         text += ";";
       }
-      text += styles[i][0] + ":" + style.value;
+      text += name + ":" + style.value;
       if (style.priority) {
         text += " !important";
       }
@@ -207,7 +208,7 @@ class MiniStyle {
 
 function clearChildren(element: MiniElement): void {
   for (let i = 0; i < element.childNodes.length; i++) {
-    const child = element.childNodes[i];
+    const child = at(element.childNodes, i);
     child.parentNode = null;
     child.nextSibling = null;
     child.previousSibling = null;
@@ -221,10 +222,10 @@ function parseSelector(selector: string): string[][][] {
   const groups = selector.trim().split(/\s*,\s*/);
   const selectors = new Array<string[][]>(groups.length);
   for (let i = 0; i < groups.length; i++) {
-    const parts = groups[i].split(/\s+/);
+    const parts = at(groups, i).split(/\s+/);
     const compounds = new Array<string[]>(parts.length);
     for (let j = 0; j < parts.length; j++) {
-      compounds[j] = parts[j].split(/(?=[.#])/);
+      compounds[j] = at(parts, j).split(/(?=[.#])/);
     }
     selectors[i] = compounds;
   }
@@ -233,7 +234,7 @@ function parseSelector(selector: string): string[][][] {
 
 function matchesSimple(element: MiniElement, parts: readonly string[]): boolean {
   for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
+    const part = at(parts, i);
     if (part.startsWith(".")) {
       if (!element.classList.contains(part.slice(1))) {
         return false;
@@ -251,14 +252,14 @@ function matchesSimple(element: MiniElement, parts: readonly string[]): boolean 
 
 function matches(element: MiniElement, selectors: readonly string[][][]): boolean {
   for (let i = 0; i < selectors.length; i++) {
-    const parts = selectors[i];
-    if (!matchesSimple(element, parts[parts.length - 1])) {
+    const parts = at(selectors, i);
+    if (!matchesSimple(element, at(parts, parts.length - 1))) {
       continue;
     }
     let node = element.parentNode;
     let j = parts.length - 2;
     while (j >= 0 && node !== null && node.nodeType === 1) {
-      if (matchesSimple(node, parts[j])) {
+      if (matchesSimple(node, at(parts, j))) {
         j--;
       }
       node = node.parentNode;
@@ -282,7 +283,7 @@ function query(element: MiniElement, selector: string, firstOnly: boolean): Mini
       }
     }
     for (let i = 0; i < node.childNodes.length; i++) {
-      if (traverse(node.childNodes[i])) {
+      if (traverse(at(node.childNodes, i))) {
         return true;
       }
     }
@@ -290,7 +291,7 @@ function query(element: MiniElement, selector: string, firstOnly: boolean): Mini
   }
 
   for (let i = 0; i < element.childNodes.length; i++) {
-    if (traverse(element.childNodes[i])) {
+    if (traverse(at(element.childNodes, i))) {
       break;
     }
   }
@@ -342,7 +343,7 @@ class MiniElement {
   get children(): MiniElement[] {
     const children: MiniElement[] = [];
     for (let i = 0; i < this.childNodes.length; i++) {
-      const child = this.childNodes[i];
+      const child = at(this.childNodes, i);
       if (child.nodeType === 1) {
         children.push(child);
       }
@@ -352,7 +353,7 @@ class MiniElement {
 
   get firstElementChild(): MiniElement | null {
     for (let i = 0; i < this.childNodes.length; i++) {
-      const child = this.childNodes[i];
+      const child = at(this.childNodes, i);
       if (child.nodeType === 1) {
         return child;
       }
@@ -363,7 +364,7 @@ class MiniElement {
   get innerHTML(): string {
     let html = "";
     for (let i = 0; i < this.childNodes.length; i++) {
-      const child = this.childNodes[i];
+      const child = at(this.childNodes, i);
       if (child.nodeType === 3) {
         html += escapeText(child.nodeValue);
       } else if (child.nodeType === 1) {
@@ -371,8 +372,9 @@ class MiniElement {
         const attributes = Array.from(child.attributeMap);
         const declared = new Set<string>();
         for (let j = 0; j < attributes.length; j++) {
-          let name = attributes[j][0];
-          const attribute = attributes[j][1];
+          const entry = at(attributes, j);
+          let name = entry[0];
+          const attribute = entry[1];
           if (attribute.namespaceURI !== null && attribute.namespaceURI !== XMLNS_NAMESPACE) {
             const colon = name.indexOf(":");
             let prefix = name.slice(0, colon);
@@ -412,7 +414,7 @@ class MiniElement {
   get textContent(): string {
     let text = "";
     for (let i = 0; i < this.childNodes.length; i++) {
-      const child = this.childNodes[i];
+      const child = at(this.childNodes, i);
       if (child.nodeType === 3) {
         text += child.nodeValue;
       } else if (child.nodeType === 1) {
@@ -457,7 +459,7 @@ class MiniElement {
   replaceChildren(...nodes: (MiniNode | string)[]): void {
     clearChildren(this);
     for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
+      const node = at(nodes, i);
       this.appendChild(typeof node === "string" ? new MiniText(node, this.ownerDocument) : node);
     }
   }
@@ -549,7 +551,7 @@ class MiniElement {
 
   querySelector(selector: string): MiniElement | null {
     const found = query(this, selector, true);
-    return found.length > 0 ? found[0] : null;
+    return found[0] ?? null;
   }
 
   querySelectorAll(selector: string): MiniElement[] {
@@ -564,11 +566,12 @@ class MiniElement {
     const clone = new MiniElement(this.tagName, this.namespaceURI, this.ownerDocument);
     const attributes = Array.from(this.attributeMap);
     for (let i = 0; i < attributes.length; i++) {
-      clone.setAttributeNS(attributes[i][1].namespaceURI, attributes[i][0], attributes[i][1].value);
+      const [name, attribute] = at(attributes, i);
+      clone.setAttributeNS(attribute.namespaceURI, name, attribute.value);
     }
     if (deep === true) {
       for (let i = 0; i < this.childNodes.length; i++) {
-        clone.appendChild(this.childNodes[i].cloneNode(true));
+        clone.appendChild(at(this.childNodes, i).cloneNode(true));
       }
     }
     return clone;
@@ -611,8 +614,8 @@ class MiniElement {
     if (j < 0) {
       return CONTAINS | PRECEDING;
     }
-    const siblings = ancestors[i + 1].childNodes;
-    return siblings.indexOf(ancestors[i]) < siblings.indexOf(otherAncestors[j]) ? FOLLOWING : PRECEDING;
+    const siblings = at(ancestors, i + 1).childNodes;
+    return siblings.indexOf(at(ancestors, i)) < siblings.indexOf(at(otherAncestors, j)) ? FOLLOWING : PRECEDING;
   }
 
   contains(other: MiniNode | null): boolean {
@@ -660,9 +663,9 @@ class MiniElement {
   private attributeNameNS(namespaceURI: string | null, localName: string): string | null {
     const attributes = Array.from(this.attributeMap);
     for (let i = 0; i < attributes.length; i++) {
-      const attribute = attributes[i][1];
+      const [name, attribute] = at(attributes, i);
       if (attribute.namespaceURI === (namespaceURI || null) && attribute.localName === localName) {
-        return attributes[i][0];
+        return name;
       }
     }
     return null;

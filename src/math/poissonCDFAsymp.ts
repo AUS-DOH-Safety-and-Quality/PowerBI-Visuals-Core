@@ -1,3 +1,4 @@
+import at from "../util/at";
 import log1pmx from "./log1pmx";
 import normalCDF from "./normalCDF";
 import normalDensity from "./normalDensity";
@@ -50,8 +51,8 @@ export default function poissonCDFAsymp(x: number, lambda: number,
   res1_ig = res1_term = Math.sqrt(x);
   res2_ig = res2_term = s2pt;
   for (i = 1; i < 8; i++) {
-    res12 += res1_ig * coefs_a[i];
-    res12 += res2_ig * coefs_b[i];
+    res12 += res1_ig * at(coefs_a, i);
+    res12 += res2_ig * at(coefs_b, i);
     res1_term *= pt_ / i;
     res2_term *= 2 * pt_ / (2 * i + 1);
     res1_ig = res1_ig / x + res1_term;
@@ -61,7 +62,7 @@ export default function poissonCDFAsymp(x: number, lambda: number,
   elfb = x;
   elfb_term = 1;
   for (i = 1; i < 8; i++) {
-    elfb += elfb_term * coefs_b[i];
+    elfb += elfb_term * at(coefs_b, i);
     elfb_term /= x;
   }
   if (!lower_tail) {

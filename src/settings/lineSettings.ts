@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { ValueFormatter } from "../data/valueFormatter";
 import type { LineLabel, LineLabelPosition } from "../rendering/lineLabels";
 import type { LineStyle } from "../rendering/drawLines";
@@ -28,7 +29,7 @@ export function limitColumns(lines: LimitLineSettings, controlLimits: boolean): 
     }
   };
   for (let i = 0; i < levels.length; i++) {
-    limit(levels[i], "upper");
+    limit(at(levels, i), "upper");
   }
   if (lines.show_target) {
     columns.push({ name: "target", label: lines.ttip_label_target });
@@ -37,7 +38,7 @@ export function limitColumns(lines: LimitLineSettings, controlLimits: boolean): 
     columns.push({ name: "alt_target", label: lines.ttip_label_alt_target });
   }
   for (let i = levels.length - 1; i >= 0; i--) {
-    limit(levels[i], "lower");
+    limit(at(levels, i), "lower");
   }
   return columns;
 }

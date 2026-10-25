@@ -11,6 +11,7 @@
     "./config/tsconfig.visual.json": "./config/tsconfig.visual.json",
     "./config/eslint": "./config/eslint.mjs",
     "./config/vitest": "./config/vitest.mjs",
+    "./util": "./src/util/index.ts",
     "./math": "./src/math/index.ts",
     "./settings": "./src/settings/index.ts",
     "./powerbi": "./src/powerbi/index.ts",
@@ -21,7 +22,7 @@
     "./frontends": "./src/frontends/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
     "eslint": "npx eslint .",
     "test": "vitest run"
   },

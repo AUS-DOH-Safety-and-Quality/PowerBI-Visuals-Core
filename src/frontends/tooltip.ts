@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import type { SvgSelection } from "../rendering/plotVisual";
 
@@ -51,10 +52,10 @@ export function showTooltip(svg: SvgSelection, settings: TooltipSettings, items:
     .nodes();
   let maxTextLength = 0;
   for (let i = 0; i < texts.length; i++) {
-    maxTextLength = Math.max(maxTextLength, texts[i].getComputedTextLength());
+    maxTextLength = Math.max(maxTextLength, at(texts, i).getComputedTextLength());
   }
-  let left = coordinates[0];
-  let top = coordinates[1];
+  let left = at(coordinates, 0);
+  let top = at(coordinates, 1);
   // Keep the tooltip within the right and bottom edges
   if (left + maxTextLength > bounds.width) {
     left = left - maxTextLength - 10;
@@ -84,7 +85,7 @@ export function svgTooltipService(svg: () => SvgSelection, settings: () => Toolt
   return {
     show: options => {
       const current = settings();
-      if (current !== undefined && options.dataItems !== undefined) {
+      if (current !== undefined) {
         showTooltip(svg(), current, options.dataItems, options.coordinates);
       }
     },

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 import { formatPrimitiveValue, type PrimitiveValue, type RoleColumns } from "./columns";
 
@@ -39,10 +40,11 @@ export function readRowAnnotations<S, L>(
     label_formatting: new Array<L>(kept.length)
   };
   for (let k = 0; k < kept.length; k++) {
-    const position = kept[k];
-    const row = rows[position];
-    result.scatter_formatting[k] = rowSettings[position].scatter;
-    result.label_formatting[k] = rowSettings[position].labels;
+    const position = at(kept, k);
+    const row = at(rows, position);
+    const settings = at(rowSettings, position);
+    result.scatter_formatting[k] = settings.scatter;
+    result.label_formatting[k] = settings.labels;
     const label = labels === undefined ? undefined : formatPrimitiveValue(labels.values[row]);
     result.labels[k] = label;
     result.anyLabels ||= label !== undefined && label !== "";
@@ -51,9 +53,10 @@ export function readRowAnnotations<S, L>(
     result.anyHighlights ||= highlight !== undefined;
     const rowTooltips = new Array<VisualTooltipDataItem>(tooltips.length);
     for (let j = 0; j < tooltips.length; j++) {
+      const column = at(tooltips, j);
       rowTooltips[j] = {
-        displayName: tooltips[j].source.displayName,
-        value: formatPrimitiveValue(tooltips[j].values[row]) ?? ""
+        displayName: column.source.displayName,
+        value: formatPrimitiveValue(column.values[row]) ?? ""
       };
     }
     result.tooltips[k] = rowTooltips;
@@ -77,10 +80,10 @@ export function rowWarnings(groupName: string, rows: readonly number[], keys: re
       warnings.push(`${groupName} ${key} removed due to: ${rowMessages[i]}.`);
       continue;
     }
-    const position = settings.messagePositionByRowIndex.get(rows[i]);
-    const messages = position === undefined ? [] : settings.messages[position];
+    const position = settings.messagePositionByRowIndex.get(at(rows, i));
+    const messages = position === undefined ? [] : at(settings.messages, position);
     for (let j = 0; j < messages.length; j++) {
-      warnings.push(`Conditional formatting for ${groupName} ${key} ignored due to: ${messages[j]}.`);
+      warnings.push(`Conditional formatting for ${groupName} ${key} ignored due to: ${at(messages, j)}.`);
     }
   }
   return warnings;

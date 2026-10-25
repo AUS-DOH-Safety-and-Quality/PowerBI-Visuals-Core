@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { FormattingComponentKeys, SettingCard } from "../settings/definitions";
 
 export type CapabilitiesObjects = Record<string, { properties: Record<string, { type: object }> }>;
@@ -21,7 +22,8 @@ function canonical(value: unknown): string {
   const keys = Object.keys(record).sort();
   const parts = new Array<string>(keys.length);
   for (let i = 0; i < keys.length; i++) {
-    parts[i] = `${JSON.stringify(keys[i])}:${canonical(record[keys[i]])}`;
+    const key = at(keys, i);
+    parts[i] = `${JSON.stringify(key)}:${canonical(record[key])}`;
   }
   return `{${parts.join(",")}}`;
 }
@@ -30,23 +32,23 @@ function canonical(value: unknown): string {
 export default function capabilitiesMismatches(settingsModel: Record<string, SettingCard>, objects: CapabilitiesObjects,
                                                otherObjects: readonly string[] = []): string[] {
   const mismatches: string[] = [];
-  const cards = Object.keys(settingsModel);
+  const cards = Object.entries(settingsModel);
   for (let i = 0; i < cards.length; i++) {
-    const card = cards[i];
+    const [card, cardModel] = at(cards, i);
     const object = objects[card];
     if (object === undefined) {
       mismatches.push(`${card}: no capabilities object`);
       continue;
     }
     const modelled = new Set<string>();
-    const groups = Object.values(settingsModel[card].settingsGroups);
+    const groups = Object.values(cardModel.settingsGroups);
     for (let j = 0; j < groups.length; j++) {
-      const names = Object.keys(groups[j]);
-      for (let k = 0; k < names.length; k++) {
-        const name = names[k];
+      const definitions = Object.entries(at(groups, j));
+      for (let k = 0; k < definitions.length; k++) {
+        const [name, definition] = at(definitions, k);
         modelled.add(name);
         const property = object.properties[name];
-        const component = groups[j][name].type;
+        const component = definition.type;
         if (property === undefined) {
           mismatches.push(`${card}.${name}: missing`);
         } else if (!persistedTypes[component].includes(canonical(property.type))) {
@@ -56,20 +58,23 @@ export default function capabilitiesMismatches(settingsModel: Record<string, Set
     }
     const properties = Object.keys(object.properties);
     for (let j = 0; j < properties.length; j++) {
-      if (!modelled.has(properties[j])) {
-        mismatches.push(`${card}.${properties[j]}: not in the settings model`);
+      const property = at(properties, j);
+      if (!modelled.has(property)) {
+        mismatches.push(`${card}.${property}: not in the settings model`);
       }
     }
   }
   const names = Object.keys(objects);
   for (let i = 0; i < names.length; i++) {
-    if (settingsModel[names[i]] === undefined && !otherObjects.includes(names[i])) {
-      mismatches.push(`${names[i]}: not in the settings model`);
+    const name = at(names, i);
+    if (settingsModel[name] === undefined && !otherObjects.includes(name)) {
+      mismatches.push(`${name}: not in the settings model`);
     }
   }
   for (let i = 0; i < otherObjects.length; i++) {
-    if (objects[otherObjects[i]] === undefined) {
-      mismatches.push(`${otherObjects[i]}: no capabilities object`);
+    const other = at(otherObjects, i);
+    if (objects[other] === undefined) {
+      mismatches.push(`${other}: no capabilities object`);
     }
   }
   return mismatches;

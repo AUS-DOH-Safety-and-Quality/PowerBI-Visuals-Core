@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type powerbi from "powerbi-visuals-api";
 
 /** Anything with a Power BI selection key; ISelectionId satisfies it without importing the API */
@@ -7,7 +8,7 @@ export type SelectionKeyed = { getKey(): string };
 export function selectedKeys(selected: readonly SelectionKeyed[]): Set<string> {
   const keys = new Set<string>();
   for (let i = 0; i < selected.length; i++) {
-    keys.add(selected[i].getKey());
+    keys.add(at(selected, i).getKey());
   }
   return keys;
 }
@@ -18,7 +19,7 @@ export function identitySelected(identity: SelectionKeyed | readonly SelectionKe
     return selected.has(identity.getKey());
   }
   for (let i = 0; i < identity.length; i++) {
-    if (selected.has(identity[i].getKey())) {
+    if (selected.has(at(identity, i).getKey())) {
       return true;
     }
   }
@@ -30,7 +31,7 @@ export function rowIdentity(host: powerbi.extensibility.visual.IVisualHost,
                             columns: readonly powerbi.DataViewCategoryColumn[], row: number): powerbi.visuals.ISelectionId {
   const builder = host.createSelectionIdBuilder();
   for (let i = 0; i < columns.length; i++) {
-    builder.withCategory(columns[i], row);
+    builder.withCategory(at(columns, i), row);
   }
   return builder.createSelectionId();
 }

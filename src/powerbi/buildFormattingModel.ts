@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { FormattingComponent, groupDisplayName, type SettingCard, type SettingDefinition, type SettingValue, type SettingsValues } from "../settings/definitions";
 
 export type FormattingDescriptor = {
@@ -32,22 +33,22 @@ export default function buildFormattingModel<T extends Record<string, SettingCar
 ): FormattingModel {
   const settingsValues: Readonly<Record<string, Readonly<Record<string, SettingValue>>>> = values;
   const cards: FormattingCard[] = [];
-  const names = Object.keys(schema);
-  for (let i = 0; i < names.length; i++) {
-    const name = names[i];
-    const definition: SettingCard = schema[name];
+  const cardEntries = Object.entries<SettingCard>(schema);
+  for (let i = 0; i < cardEntries.length; i++) {
+    const [name, definition] = at(cardEntries, i);
     const groups = [];
     const descriptors: FormattingDescriptor[] = [];
-    const groupNames = Object.keys(definition.settingsGroups);
-    const values: Readonly<Record<string, SettingValue>> = settingsValues[name];
-    for (let j = 0; j < groupNames.length; j++) {
-      const groupName = groupNames[j];
-      const definitions = definition.settingsGroups[groupName];
-      const settingNames = Object.keys(definitions);
+    const groupEntries = Object.entries(definition.settingsGroups);
+    const values = settingsValues[name];
+    if (values === undefined) {
+      throw new Error(`Missing settings for ${name}`);
+    }
+    for (let j = 0; j < groupEntries.length; j++) {
+      const [groupName, definitions] = at(groupEntries, j);
+      const settingEntries = Object.entries(definitions);
       const slices = [];
-      for (let k = 0; k < settingNames.length; k++) {
-        const settingName = settingNames[k];
-        const setting = definitions[settingName];
+      for (let k = 0; k < settingEntries.length; k++) {
+        const [settingName, setting] = at(settingEntries, k);
         descriptors.push({ objectName: name, propertyName: settingName });
         const descriptor: FormattingDescriptor = { objectName: name, propertyName: settingName };
         descriptor.selector = { data: [{ dataViewWildcard: { matchingOption: 0 } }] };
@@ -65,8 +66,9 @@ export default function buildFormattingModel<T extends Record<string, SettingCar
           control.properties.items = setting.items;
           control.properties.value = undefined;
           for (let l = 0; l < setting.items.length; l++) {
-            if (setting.items[l].value === value) {
-              control.properties.value = setting.items[l];
+            const item = at(setting.items, l);
+            if (item.value === value) {
+              control.properties.value = item;
               break;
             }
           }

@@ -1,3 +1,4 @@
+import at from "../util/at";
 import type { OutlierStatus } from "../data/flagDirection";
 import limitStatus from "./limitStatus";
 
@@ -10,7 +11,7 @@ export default function twoInThree(val: readonly number[], ll95: readonly (numbe
   const outside95: number[] = new Array<number>(length);
   const two_in_three_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
   for (let i: number = 0; i < length; i++) {
-    const status = limitStatus(val[i], ll95[i], ul95[i]);
+    const status = limitStatus(at(val, i), ll95[i], ul95[i]);
     if (status === "upper") {
       outside95[i] = 1;
     } else if (status === "lower") {

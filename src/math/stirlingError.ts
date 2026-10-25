@@ -1,3 +1,4 @@
+import at from "../util/at";
 import lgamma from "./lgamma";
 import ldexp from "./ldexp";
 import lgamma1p from "./lgamma1p";
@@ -61,7 +62,7 @@ export default function stirlingError(n: number): number {
 
   let nn = n + n;
   if (n <= 15 && nn === Math.trunc(nn)) {
-    return sferr_halves[nn];
+    return at(sferr_halves, nn);
   }
 
   if (n <= 5.25) {
@@ -102,9 +103,9 @@ export default function stirlingError(n: number): number {
   }
 
   nn = n * n;
-  let total = s_coeffs[start_coeff];
+  let total = at(s_coeffs, start_coeff);
   for (let i = start_coeff - 1; i >= 0; i--) {
-    total = s_coeffs[i] - total / nn;
+    total = at(s_coeffs, i) - total / nn;
   }
   return total / n;
 }

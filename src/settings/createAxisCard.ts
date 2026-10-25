@@ -1,3 +1,4 @@
+import at from "../util/at";
 import {
   defineCard, toggleOption, numberOption, colourOption, fontOption, fontSizeOption,
   textOption, dropdownOption, fontStyleOption, type SettingDefinition, type MergeUnions
@@ -93,9 +94,10 @@ export type AxisCard<A extends AxisName, E> = {
 };
 
 function addPrefixed(group: Record<string, SettingDefinition>, axis: AxisName, definitions: Record<string, SettingDefinition>): void {
-  const names = Object.keys(definitions);
-  for (let i = 0; i < names.length; i++) {
-    group[`${axis}limit_${names[i]}`] = definitions[names[i]];
+  const entries = Object.entries(definitions);
+  for (let i = 0; i < entries.length; i++) {
+    const [name, definition] = at(entries, i);
+    group[`${axis}limit_${name}`] = definition;
   }
 }
 
@@ -106,9 +108,10 @@ export default function createAxisCard<const A extends AxisName, E extends Recor
   addPrefixed(axisGroup, axis, showDefinition(axis));
   addPrefixed(axisGroup, axis, colourDefinition());
   if (extras !== undefined) {
-    const names = Object.keys(extras);
-    for (let i = 0; i < names.length; i++) {
-      axisGroup[names[i]] = extras[names[i]];
+    const entries = Object.entries(extras);
+    for (let i = 0; i < entries.length; i++) {
+      const [name, definition] = at(entries, i);
+      axisGroup[name] = definition;
     }
   }
   if (axis === "y") {

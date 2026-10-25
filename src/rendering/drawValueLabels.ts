@@ -1,3 +1,4 @@
+import at from "../util/at";
 import { labelGeometry, type LabelPoint } from "./labelGeometry";
 import { trianglePath } from "./symbolPath";
 import screenToSvg from "./screenToSvg";
@@ -41,7 +42,7 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
 
   const points = options.points;
   for (let i = 0; i < points.length; i++) {
-    const point = points[i];
+    const point = at(points, i);
     const text = point.label.text_value ?? "";
     if (text === "") {
       continue;

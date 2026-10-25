@@ -1,3 +1,4 @@
+import { at } from "../util";
 import type powerbi from "powerbi-visuals-api";
 import { updateType } from "../powerbi";
 import { SVG_NS } from "../rendering";
@@ -72,12 +73,12 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
         const groups = updateValues.crosstalk_identities;
         const identities = new Array<FrontendSelectionId>(selectedKeys.length);
         for (let i = 0; i < selectedKeys.length; i++) {
-          identities[i] = selectionId([selectedKeys[i]]);
+          identities[i] = selectionId([at(selectedKeys, i)]);
         }
         for (let i = 0; i < groups.length; i++) {
-          const keys = keysOf(groups[i]);
+          const keys = keysOf(at(groups, i));
           for (let j = 0; j < keys.length; j++) {
-            if (selected.has(keys[j])) {
+            if (selected.has(at(keys, j))) {
               identities.push(selectionId(keys));
               break;
             }
@@ -90,16 +91,17 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
         const identities = Array.isArray(identity) ? identity : [identity];
         const selected = new Set(multiSelect === true ? selectionHandle.value ?? [] : []);
         for (let i = 0; i < identities.length; i++) {
-          const keys = identities[i].keys;
+          const keys = at(identities, i).keys;
           let anySelected = false;
           for (let j = 0; j < keys.length && !anySelected; j++) {
-            anySelected = selected.has(keys[j]);
+            anySelected = selected.has(at(keys, j));
           }
           for (let j = 0; j < keys.length; j++) {
+            const key = at(keys, j);
             if (anySelected) {
-              selected.delete(keys[j]);
+              selected.delete(key);
             } else {
-              selected.add(keys[j]);
+              selected.add(key);
             }
           }
         }
@@ -121,7 +123,7 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
     const visual: FrontendVisual = new (frontendChart(chartType).Visual)(constructorOptions(el, {
       selectionManager,
       tooltipService: svgTooltipService(() => visual.svg, () => x?.tooltip_settings),
-      rowKeys: index => keysOf(updateValues.crosstalk_identities[index]),
+      rowKeys: index => keysOf(at(updateValues.crosstalk_identities, index)),
       displayWarningIcon: (hoverText, detailedText) => {
         console.warn(hoverText, detailedText);
       }
@@ -196,9 +198,10 @@ function fileName(svg: SVGSVGElement, chartType: string): string {
 
 function svgElement<K extends keyof SVGElementTagNameMap>(name: K, attributes: Readonly<Record<string, string>>): SVGElementTagNameMap[K] {
   const element = document.createElementNS(SVG_NS, name);
-  const names = Object.keys(attributes);
-  for (let i = 0; i < names.length; i++) {
-    element.setAttribute(names[i], attributes[names[i]]);
+  const entries = Object.entries(attributes);
+  for (let i = 0; i < entries.length; i++) {
+    const [name, value] = at(entries, i);
+    element.setAttribute(name, value);
   }
   return element;
 }
@@ -236,10 +239,12 @@ function addExportControl(el: HTMLElement, svg: SVGSVGElement, chartType: string
   const formats = ["svg", "png"];
   const buttons = new Array<HTMLButtonElement>(formats.length);
   for (let i = 0; i < formats.length; i++) {
-    buttons[i] = document.createElement("button");
-    buttons[i].type = "button";
-    buttons[i].dataset.format = formats[i];
-    buttons[i].textContent = formats[i].toUpperCase();
+    const format = at(formats, i);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.format = format;
+    button.textContent = format.toUpperCase();
+    buttons[i] = button;
   }
   const status = document.createElement("span");
   status.className = "controlcharts-export-status";
@@ -250,7 +255,7 @@ function addExportControl(el: HTMLElement, svg: SVGSVGElement, chartType: string
 
   function setBusy(busy: boolean): void {
     for (let i = 0; i < buttons.length; i++) {
-      buttons[i].disabled = busy;
+      at(buttons, i).disabled = busy;
     }
     if (busy) {
       control.setAttribute("aria-busy", "true");
@@ -299,8 +304,8 @@ function addExportControl(el: HTMLElement, svg: SVGSVGElement, chartType: string
     }
   });
   for (let i = 0; i < buttons.length; i++) {
-    const format = formats[i];
-    buttons[i].addEventListener("click", () => {
+    const format = at(formats, i);
+    at(buttons, i).addEventListener("click", () => {
       void exportChart(format);
     });
   }

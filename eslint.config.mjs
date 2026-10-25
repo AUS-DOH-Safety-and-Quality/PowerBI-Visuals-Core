@@ -7,13 +7,6 @@ import eslintConfig from "./config/eslint.mjs";
 export default [
   ...eslintConfig(powerbiVisualsConfigs, js, tseslint, { project: ["./tsconfig.json", "./tsconfig.test.json"], tsconfigRootDir: import.meta.dirname }),
   {
-    files: ["src/**/*.ts"],
-    rules: {
-      // With noUncheckedIndexedAccess on, a check the compiler can prove redundant is noise
-      "@typescript-eslint/no-unnecessary-condition": "error"
-    }
-  },
-  {
     files: ["src/frontends/headless.ts", "src/frontends/interactive.ts"],
     rules: {
       "@typescript-eslint/no-restricted-imports": ["error", {

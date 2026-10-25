@@ -72,8 +72,6 @@ export default function eslintConfig(powerbiVisualsConfigs, js, tseslint, parser
       languageOptions: { parserOptions },
       rules: {
         "@typescript-eslint/prefer-for-of": "off",
-        // Without noUncheckedIndexedAccess, bounds and Power BI null checks read as unnecessary
-        "@typescript-eslint/no-unnecessary-condition": "off",
         "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
         "@typescript-eslint/strict-boolean-expressions": ["error", { allowNullableBoolean: true, allowNullableString: true, allowNumber: false }],
         "@typescript-eslint/switch-exhaustiveness-check": ["error", { considerDefaultExhaustiveForUnions: true }],
@@ -98,6 +96,13 @@ export default function eslintConfig(powerbiVisualsConfigs, js, tseslint, parser
     },
     ...importDirectionConfigs(),
     {
+      files: ["src/**/*.ts"],
+      rules: {
+        // With noUncheckedIndexedAccess on, a check the compiler can prove redundant is noise
+        "@typescript-eslint/no-unnecessary-condition": "error"
+      }
+    },
+    {
       files: ["src/settings/**/*.ts"],
       rules: {
         // Option builders return inferred literal schemas that the settings types are derived from
@@ -107,6 +112,8 @@ export default function eslintConfig(powerbiVisualsConfigs, js, tseslint, parser
     {
       files: ["test/**/*.ts"],
       rules: {
+        // The test program has noUncheckedIndexedAccess off, so fixture checks would read as unnecessary
+        "@typescript-eslint/no-unnecessary-condition": "off",
         // Spies and mock assertions take methods unbound
         "@typescript-eslint/unbound-method": "off",
         // Test helpers return inferred fixtures

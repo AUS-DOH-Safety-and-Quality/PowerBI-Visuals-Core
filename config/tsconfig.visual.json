@@ -12,19 +12,19 @@
         "strictBindCallApply": true,
         "strict": true,
         "strictNullChecks": true,
+        "exactOptionalPropertyTypes": true,
+        "verbatimModuleSyntax": true,
         "skipLibCheck": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
         "removeComments": true,
-        "target": "es2020",
-        "module": "es2020",
+        "target": "es2022",
+        "module": "es2022",
         "sourceMap": false,
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "declaration": true,
         "lib": [
-            "es2020",
+            "es2022",
             "dom"
         ]
     }

@@ -8,7 +8,10 @@ function value(role: string): powerbi.DataViewValueColumn {
 }
 function view(categories: powerbi.DataViewCategoryColumn[] | undefined, columns: powerbi.DataViewValueColumn[] = []): powerbi.DataView {
   const values: powerbi.DataViewValueColumns = Object.assign(columns, { grouped: () => [] });
-  return { metadata: { columns: [] }, categorical: categories === undefined ? undefined : { categories, values } };
+  if (categories === undefined) {
+    return { metadata: { columns: [] } };
+  }
+  return { metadata: { columns: [] }, categorical: { categories, values } };
 }
 
 describe("data view validation", () => {

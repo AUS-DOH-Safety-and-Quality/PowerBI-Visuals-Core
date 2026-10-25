@@ -49,7 +49,7 @@ type NumberDefinition<T extends number | undefined> = {
   description: string;
   type: typeof FormattingComponent.NumUpDown;
   default: T;
-  options?: SettingDefinition["options"];
+  options?: NonNullable<SettingDefinition["options"]>;
   integer?: boolean;
   exclusiveMin?: boolean;
   exclusiveMax?: boolean;

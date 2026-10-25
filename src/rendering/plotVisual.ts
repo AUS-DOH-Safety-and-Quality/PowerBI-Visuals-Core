@@ -27,8 +27,8 @@ type ISelectionId = powerbi.visuals.ISelectionId;
 type ContextMenuDatum = { readonly identity: ISelectionId | ISelectionId[] };
 
 export type ViewModelValidation =
-  | { status: true; warning?: string }
-  | { status: false; error: string; type?: ErrorKind };
+  | { status: true; warning?: string | undefined }
+  | { status: false; error: string; type?: ErrorKind | undefined };
 
 export type PlotVisualSettings = PlotSettings & PlotFrameSettings & {
   readonly canvas: { readonly show_errors: boolean };

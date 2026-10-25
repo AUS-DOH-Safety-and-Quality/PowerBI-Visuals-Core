@@ -7,7 +7,7 @@ type IVisualHost = powerbi.extensibility.visual.IVisualHost;
 type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 
 export type RenderOptions = {
-  host?: IVisualHost;
+  host?: IVisualHost | undefined;
   /** Adjusts each data view before the update, e.g. highlights */
   prepare?: (dataView: powerbi.DataView) => void;
 };

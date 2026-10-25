@@ -1,4 +1,4 @@
-export type SettingsOverrides<S> = { readonly [K in keyof S]?: Partial<S[K]> };
+export type SettingsOverrides<S> = { readonly [K in keyof S]?: Partial<S[K]> | undefined };
 
 /** The defaults with each overridden card merged over its default values */
 export default function settingsWith<S extends Readonly<Record<string, object>>>(defaults: S, overrides: SettingsOverrides<S>): S {

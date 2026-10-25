@@ -3,7 +3,7 @@ export {
   textOption, lineLabelPositionOption, dropdownOption, borderStyleOption, borderWidthOption, alignmentOption, fontWeightOption,
   fontStyleOption, textTransformOption, defineCard, createDefaultValues
 } from "./definitions";
-export type { SettingDefinition, SettingsValues, MutableSettingsValues } from "./definitions";
+export type { SettingCard, SettingDefinition, SettingsValues, MutableSettingsValues } from "./definitions";
 export { default as settingsReference } from "./settingsReference";
 export { default as createCanvasCard } from "./createCanvasCard";
 export { default as createLabelsCard } from "./createLabelsCard";

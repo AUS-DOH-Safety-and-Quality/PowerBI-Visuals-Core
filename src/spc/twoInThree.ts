@@ -11,7 +11,13 @@ export default function twoInThree(val: readonly number[], ll95: readonly (numbe
   const two_in_three_detected: OutlierStatus[] = new Array<OutlierStatus>(length);
   for (let i: number = 0; i < length; i++) {
     const status = limitStatus(val[i], ll95[i], ul95[i]);
-    outside95[i] = status === "upper" ? 1 : (status === "lower" ? -1 : 0);
+    if (status === "upper") {
+      outside95[i] = 1;
+    } else if (status === "lower") {
+      outside95[i] = -1;
+    } else {
+      outside95[i] = 0;
+    }
     two_in_three_detected[i] = "none";
 
     // Each side is counted separately, so a point beyond the other limit doesn't cancel a pair
@@ -25,7 +31,12 @@ export default function twoInThree(val: readonly number[], ll95: readonly (numbe
         below++;
       }
     }
-    const side: number = above >= 2 ? 1 : (below >= 2 ? -1 : 0);
+    let side = 0;
+    if (above >= 2) {
+      side = 1;
+    } else if (below >= 2) {
+      side = -1;
+    }
     if (side === 0) {
       continue;
     }

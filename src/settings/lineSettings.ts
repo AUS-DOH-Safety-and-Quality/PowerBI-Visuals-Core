@@ -12,8 +12,8 @@ export type LimitLine = LimitLevel | "target" | "alt_target";
 
 /** The limit and target lines' `createLineGroup` visibility and label values */
 export type LimitLineSettings =
-  { readonly [K in `show_${LimitLine}`]: boolean }
-  & { readonly [K in `ttip_label_${LimitLine}` | `ttip_label_${LimitLevel}_prefix_lower` | `ttip_label_${LimitLevel}_prefix_upper`]: string };
+  Readonly<Record<`show_${LimitLine}`, boolean>>
+  & Readonly<Record<`ttip_label_${LimitLine}` | `ttip_label_${LimitLevel}_prefix_lower` | `ttip_label_${LimitLevel}_prefix_upper`, string>>;
 
 /** Upper limits from 99% in, the targets, then lower limits from 68% out, as `limitTooltips` orders them */
 export function limitColumns(lines: LimitLineSettings, controlLimits: boolean): TableColumn[] {
@@ -60,10 +60,10 @@ export const standardLineKeys = {
 export type StandardLineName = keyof typeof standardLineKeys;
 
 /** A value per limit line */
-export type LimitLineValues<T> = { [K in LimitLineName]: T };
+export type LimitLineValues<T> = Record<LimitLineName, T>;
 
 /** A value per limit and target line */
-export type StandardLineValues<T> = { [K in StandardLineName]: T };
+export type StandardLineValues<T> = Record<StandardLineName, T>;
 
 export type LineSettingValues = Readonly<Record<string, unknown>>;
 

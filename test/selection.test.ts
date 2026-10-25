@@ -1,3 +1,4 @@
+import type powerbi from "powerbi-visuals-api";
 import { describe, expect, it } from "vitest";
 import { identitySelected, rowIdentity, selectedKeys } from "../src/powerbi/index";
 import type { SelectionKeyed } from "../src/powerbi/selection";
@@ -35,8 +36,8 @@ describe("selection matching", () => {
 describe("row identities", () => {
   it("builds one identity from every column, so a key repeated under another grouping stays distinct", () => {
     const host = keyedHost();
-    const key = { source: { displayName: "Key" }, values: ["A", "A"] } as never;
-    const group = { source: { displayName: "Group" }, values: ["X", "Y"] } as never;
+    const key: powerbi.DataViewCategoryColumn = { source: { displayName: "Key" }, values: ["A", "A"] };
+    const group: powerbi.DataViewCategoryColumn = { source: { displayName: "Group" }, values: ["X", "Y"] };
     expect(rowIdentity(host, [key, group], 1).getKey()).toBe("Key[1];Group[1];");
     expect(rowIdentity(host, [key], 0).getKey()).toBe("Key[0];");
     expect(rowIdentity(host, [key, group], 0).getKey()).not.toBe(rowIdentity(host, [key, group], 1).getKey());

@@ -25,8 +25,12 @@ function validationMessage(value: unknown, definition: SettingDefinition, name: 
   if (value === undefined && definition.default === undefined) {
     return "";
   }
-  const expected = definition.type === FormattingComponent.NumUpDown ? "number"
-    : definition.type === FormattingComponent.ToggleSwitch ? "boolean" : "string";
+  let expected = "string";
+  if (definition.type === FormattingComponent.NumUpDown) {
+    expected = "number";
+  } else if (definition.type === FormattingComponent.ToggleSwitch) {
+    expected = "boolean";
+  }
   if (typeof value !== expected) {
     return `${String(value)} is not a valid ${expected} for ${name}`;
   }

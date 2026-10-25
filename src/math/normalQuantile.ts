@@ -14,7 +14,7 @@ function polyEval(x: number, q: number, num_coeffs: readonly number[], den_coeff
 }
 
 /** Normal quantile (Wichura 1988, AS 241); adapted from R's qnorm. */
-export default function normalQuantile(p: number, mu: number, sigma: number, lower_tail: boolean, log_p: boolean) {
+export default function normalQuantile(p: number, mu: number, sigma: number, lower_tail: boolean, log_p: boolean): number {
   let r: number;
   let val: number;
 
@@ -36,8 +36,12 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
   }
 
   // Lower-tail probability on the natural scale
-  const p_: number = log_p ? (lower_tail ? Math.exp(p) : - Math.expm1(p))
-                            : (lower_tail ? p : (0.5 - p + 0.5));
+  let p_: number;
+  if (log_p) {
+    p_ = lower_tail ? Math.exp(p) : -Math.expm1(p);
+  } else {
+    p_ = lower_tail ? p : (0.5 - p + 0.5);
+  }
   const q: number = p_ - 0.5;
 
   const coeffs_a: readonly number[] = [
@@ -112,8 +116,11 @@ export default function normalQuantile(p: number, mu: number, sigma: number, low
       lp = p;
     } else {
       if (q > 0) {
-        lp = log_p ? (lower_tail ? -Math.expm1(p) : Math.exp(p))
-                    : (lower_tail ? (0.5 - p + 0.5) : p)
+        if (log_p) {
+          lp = lower_tail ? -Math.expm1(p) : Math.exp(p);
+        } else {
+          lp = lower_tail ? (0.5 - p + 0.5) : p;
+        }
       } else {
         lp = p_;
       }

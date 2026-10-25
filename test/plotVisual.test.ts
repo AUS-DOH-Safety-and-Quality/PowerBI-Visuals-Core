@@ -48,9 +48,7 @@ class TestModel extends PlotViewModelBase<typeof schema, { formatValue: ValueFor
     super(visualHost, new SettingsStore(schema, () => ({ formatValue: createValueFormatter(2, "") })), ["numerators"]);
   }
 
-  protected get hasAxes(): boolean {
-    return true;
-  }
+  protected readonly hasAxes = true;
 
   axisRanges() {
     return { x: { lower: 0, upper: 10 }, y: { lower: 0, upper: 100 } };

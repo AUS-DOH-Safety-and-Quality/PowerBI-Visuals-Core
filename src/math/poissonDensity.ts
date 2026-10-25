@@ -8,7 +8,10 @@ export default function poissonDensity(x: number, lambda: number, log_p: boolean
   const zeroBound: number = log_p ? Number.NEGATIVE_INFINITY : 0;
 
   if (lambda === 0) {
-    return (x === 0) ? (log_p ? 0 : 1) : zeroBound ;
+    if (x === 0) {
+      return log_p ? 0 : 1;
+    }
+    return zeroBound;
   }
 
   if (!Number.isFinite(lambda) || x < 0) {

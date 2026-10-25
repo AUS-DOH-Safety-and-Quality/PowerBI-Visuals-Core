@@ -8,7 +8,7 @@ export type ValidatedDataView<R extends string = never> = {
   readonly category: powerbi.DataViewCategoryColumn;
   readonly rowCount: number;
   readonly categories: RoleColumns<powerbi.DataViewCategoryColumn> & { readonly key: powerbi.DataViewCategoryColumn[] };
-  readonly values: RoleColumns<powerbi.DataViewValueColumn> & { readonly [K in R]: powerbi.DataViewValueColumn[] };
+  readonly values: RoleColumns<powerbi.DataViewValueColumn> & Readonly<Record<R, powerbi.DataViewValueColumn[]>>;
 };
 
 export type DataViewValidation<R extends string> =

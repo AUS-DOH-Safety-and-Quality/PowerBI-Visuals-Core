@@ -103,7 +103,7 @@ export function drawAxis(svg: SVGSVGElement, options: AxisDrawOptions): void {
     : axisLabelPlacement(properties.label_align, frame.height - frame.yAxis.start_padding, frame.yAxis.end_padding);
   const side = isX ? "bottom" : "left";
   const extent = isX ? frame.height : frame.width;
-  const position = (offset: number) => label
+  const position = (offset: number): typeof label => label
     .attr("x", isX ? placement.position : offset)
     .attr("y", isX ? offset : placement.position)
     .attr("transform", isX ? null : `rotate(-90, ${offset}, ${placement.position})`);

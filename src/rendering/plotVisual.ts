@@ -291,6 +291,7 @@ export abstract class PlotVisual<P extends PlotVisualPoint, VM extends PlotViewM
             return Array.isArray(datum.identity) ? datum.identity[0] : datum.identity;
           }
         }
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- no row under the pointer; Power BI treats the id as opaque
         return {} as ISelectionId;
       },
       show: (identity, position) => {

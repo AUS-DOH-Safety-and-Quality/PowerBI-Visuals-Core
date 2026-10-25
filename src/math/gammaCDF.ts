@@ -16,8 +16,10 @@ export default function gammaCDF(x: number, alpha: number, scale: number,
   if (alpha === 0) {
     const zeroBoundLower: number = log_p ? Number.NEGATIVE_INFINITY : 0;
     const zeroBoundUpper: number = log_p ? 0 : 1;
-    return (x <= 0) ? (lower_tail ? zeroBoundLower : zeroBoundUpper)
-                    : (lower_tail ? zeroBoundUpper : zeroBoundLower);
+    if (x <= 0) {
+      return lower_tail ? zeroBoundLower : zeroBoundUpper;
+    }
+    return lower_tail ? zeroBoundUpper : zeroBoundLower;
   }
 
   return gammaCDFImpl(x, alpha, lower_tail, log_p);

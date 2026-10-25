@@ -3,7 +3,14 @@ function tickSpec(start: number, stop: number, count: number): [number, number, 
   const step = (stop - start) / count;
   const power = Math.floor(Math.log10(step));
   const error = step / Math.pow(10, power);
-  const factor = error >= Math.sqrt(50) ? 10 : error >= Math.sqrt(10) ? 5 : error >= Math.sqrt(2) ? 2 : 1;
+  let factor = 1;
+  if (error >= Math.sqrt(50)) {
+    factor = 10;
+  } else if (error >= Math.sqrt(10)) {
+    factor = 5;
+  } else if (error >= Math.sqrt(2)) {
+    factor = 2;
+  }
 
   let i1: number;
   let i2: number;
@@ -36,7 +43,7 @@ function tickSpec(start: number, stop: number, count: number): [number, number, 
   return [i1, i2, inc];
 }
 
-export interface LinearScale {
+export type LinearScale = {
   (value: number): number;
   domain(): number[];
   domain(values: readonly [number, number]): LinearScale;

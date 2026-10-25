@@ -22,7 +22,7 @@ export type ValueTooltipRow = {
 };
 
 /** The limit and target lines' `createLineGroup` tooltip values */
-export type LimitTooltipSettings = LimitLineSettings & { readonly [K in `ttip_show_${Line}`]: boolean };
+export type LimitTooltipSettings = LimitLineSettings & Readonly<Record<`ttip_show_${Line}`, boolean>>;
 
 export type LimitTooltipRow = Readonly<StandardLineValues<number | undefined>>;
 

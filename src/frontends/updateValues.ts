@@ -15,7 +15,7 @@ export type RawData = {
   /** Levels of the indicators that have them, by indicator name, ordering those indicators as `category_levels` does */
   readonly indicator_levels?: Readonly<Record<string, Column>> | null;
   readonly tooltips?: Readonly<Record<string, Column>> | null;
-} & { readonly [R in ValueRole]?: Column | null };
+} & Readonly<Partial<Record<ValueRole, Column | null>>>;
 
 /** A column as the visuals read it; R and Python round-trip these as JSON */
 export type FrontendColumn = {

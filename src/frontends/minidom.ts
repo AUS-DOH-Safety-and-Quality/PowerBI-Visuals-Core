@@ -22,13 +22,13 @@ type MiniNode = MiniElement | MiniText;
 /** What d3 writes as attribute, style and text values */
 type DOMValue = string | number | boolean;
 
-interface Attribute {
+type Attribute = {
   namespaceURI: string | null;
   localName: string;
   value: string | MiniStyle;
 }
 
-interface StyleValue {
+type StyleValue = {
   readonly value: string;
   readonly priority: string;
 }
@@ -55,7 +55,7 @@ class ClassList {
 
   add(className: string): void {
     const classes = classNames(this.element);
-    if (classes.indexOf(className) === -1) {
+    if (!classes.includes(className)) {
       classes.push(className);
       this.element.setAttribute("class", classes.join(" "));
     }
@@ -71,7 +71,7 @@ class ClassList {
   }
 
   contains(className: string): boolean {
-    return classNames(this.element).indexOf(className) !== -1;
+    return classNames(this.element).includes(className);
   }
 }
 
@@ -234,11 +234,11 @@ function parseSelector(selector: string): string[][][] {
 function matchesSimple(element: MiniElement, parts: readonly string[]): boolean {
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
-    if (part.charAt(0) === ".") {
+    if (part.startsWith(".")) {
       if (!element.classList.contains(part.slice(1))) {
         return false;
       }
-    } else if (part.charAt(0) === "#") {
+    } else if (part.startsWith("#")) {
       if (element.getAttribute("id") !== part.slice(1)) {
         return false;
       }

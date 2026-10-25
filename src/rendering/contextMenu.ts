@@ -17,7 +17,7 @@ export default function bindContextMenu<I>(root: GlobalEventHandlers, options: C
   if (!options.enabled) {
     return;
   }
-  const listener = (event: MouseEvent) => {
+  const listener = (event: MouseEvent): void => {
     options.show(options.identity(event.target), { x: event.clientX, y: event.clientY });
     event.preventDefault();
   };

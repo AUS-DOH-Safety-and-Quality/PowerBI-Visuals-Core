@@ -13,8 +13,15 @@ export default function normalCDF(x: number, mu: number, sigma: number,
     return Number.NaN;
   }
 
-  const zeroBoundLower: number = (lower_tail ? (log_p ? Number.NEGATIVE_INFINITY : 0) : (log_p ? 0 : 1));
-  const zeroBoundUpper: number = (lower_tail ? (log_p ? 0 : 1) : (log_p ? Number.NEGATIVE_INFINITY : 0));
+  let zeroBoundLower: number;
+  let zeroBoundUpper: number;
+  if (lower_tail) {
+    zeroBoundLower = log_p ? Number.NEGATIVE_INFINITY : 0;
+    zeroBoundUpper = log_p ? 0 : 1;
+  } else {
+    zeroBoundLower = log_p ? 0 : 1;
+    zeroBoundUpper = log_p ? Number.NEGATIVE_INFINITY : 0;
+  }
 
   if (sigma < 0) {
     return Number.NaN;

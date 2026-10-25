@@ -80,7 +80,7 @@ export function host(): powerbi.extensibility.visual.IVisualHost {
   return result;
 }
 
-const column = { source: { displayName: "key" }, values: ["A", "B", "C", "D"] } as never;
+const column: powerbi.DataViewCategoryColumn = { source: { displayName: "key" }, values: ["A", "B", "C", "D"] };
 
 export function points(visualHost: powerbi.extensibility.visual.IVisualHost, values: readonly number[], labels: readonly (string | undefined)[] = []): TestPoint[] {
   const result = new Array<TestPoint>(values.length);

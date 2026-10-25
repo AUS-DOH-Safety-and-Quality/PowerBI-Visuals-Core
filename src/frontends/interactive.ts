@@ -123,7 +123,7 @@ export function makeFactory(chartType: string): (el: HTMLElement, width: number,
       tooltipService: svgTooltipService(() => visual.svg, () => x?.tooltip_settings),
       rowKeys: index => keysOf(updateValues.crosstalk_identities[index]),
       displayWarningIcon: (hoverText, detailedText) => {
-        console.log(hoverText, detailedText);
+        console.warn(hoverText, detailedText);
       }
     }));
     const svg = visual.svg.node();

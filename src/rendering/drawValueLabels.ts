@@ -106,7 +106,7 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
     group.addEventListener("pointerdown", (event: PointerEvent) => {
       group.setPointerCapture(event.pointerId);
       dragged = false;
-      const onMove = (move: PointerEvent) => {
+      const onMove = (move: PointerEvent): void => {
         dragged = true;
         const pointer = screenToSvg(svg, move.clientX, move.clientY);
         const x = pointer.x;
@@ -125,7 +125,7 @@ export default function drawValueLabels(svg: SVGSVGElement, options: ValueLabelO
         lineElement.setAttribute("y2", String(dragMarkerY));
         pathElement?.setAttribute("transform", `translate(${dragMarkerX}, ${dragMarkerY}) rotate(${dragAngle - 90})`);
       };
-      const onUp = (up: PointerEvent) => {
+      const onUp = (up: PointerEvent): void => {
         group.releasePointerCapture(up.pointerId);
         group.removeEventListener("pointermove", onMove);
         group.removeEventListener("pointerup", onUp);

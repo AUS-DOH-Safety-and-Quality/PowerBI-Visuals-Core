@@ -40,8 +40,12 @@ export default function gammaQuantile(p: number, alpha: number, scale: number,
   }
 
   // Lower-tail probability on the natural scale
-  const p_: number = log_p ? (lower_tail ? Math.exp(p) : -Math.expm1(p))
-                           : (lower_tail ? p : (0.5 - p + 0.5));
+  let p_: number;
+  if (log_p) {
+    p_ = lower_tail ? Math.exp(p) : -Math.expm1(p);
+  } else {
+    p_ = lower_tail ? p : (0.5 - p + 0.5);
+  }
 
   if (ch < 5e-7 || p_ > (1 - 1e-14) || p_ < 1e-100) {
     return gammaNewtonIter(ch, p, alpha, scale, lower_tail, log_p, 20, 1e-15);

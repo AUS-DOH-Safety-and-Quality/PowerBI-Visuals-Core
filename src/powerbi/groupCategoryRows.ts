@@ -35,8 +35,13 @@ export default function groupCategoryRows(
     for (let j = 0; j < columns.length; j++) {
       const value = columns[j].values[i];
       names[j] = value instanceof Date ? dateName(value) : formatPrimitiveValue(value) ?? "";
-      parts[j] = value == null ? ["undefined", ""]
-        : value instanceof Date ? ["date", String(value.getTime())] : [typeof value, String(value)];
+      if (value == null) {
+        parts[j] = ["undefined", ""];
+      } else if (value instanceof Date) {
+        parts[j] = ["date", String(value.getTime())];
+      } else {
+        parts[j] = [typeof value, String(value)];
+      }
     }
     const key = JSON.stringify(parts);
     let index = indexes.get(key);

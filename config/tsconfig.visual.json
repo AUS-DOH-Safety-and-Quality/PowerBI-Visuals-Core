@@ -14,7 +14,7 @@
         "strictNullChecks": true,
         "exactOptionalPropertyTypes": true,
         "noUncheckedIndexedAccess": true,
-        "verbatimModuleSyntax": true,
+        "isolatedModules": true,
         "skipLibCheck": true,
         "allowSyntheticDefaultImports": true,
         "removeComments": true,

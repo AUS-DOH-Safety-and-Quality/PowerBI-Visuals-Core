@@ -4,10 +4,16 @@ import type { SvgSelection } from "../rendering/plotVisual";
 
 type TooltipService = Pick<powerbi.extensibility.ITooltipService, "show" | "hide">;
 
-export type TooltipSettings = {
+type TooltipFontSettings = {
   readonly ttip_font_size: number;
   readonly ttip_font: string;
   readonly ttip_font_color: string;
+} | {
+  /** A stylesheet class whose font and colour the text inherits */
+  readonly ttip_font_class: string;
+};
+
+export type TooltipSettings = TooltipFontSettings & {
   readonly ttip_background_color: string;
   readonly ttip_opacity: number;
   readonly ttip_border_radius: number;
@@ -15,18 +21,8 @@ export type TooltipSettings = {
   readonly ttip_border_width: number;
 };
 
-export const defaultTooltipSettings: TooltipSettings = {
-  ttip_font_size: 12,
-  ttip_font: "Arial, sans-serif",
-  ttip_font_color: "#000000",
-  ttip_background_color: "#E0E0E0",
-  ttip_opacity: 1,
-  ttip_border_radius: 5,
-  ttip_border_color: "#000000",
-  ttip_border_width: 1
-};
-
-const lineHeight = 15;
+// Keeps the 15px lines of a 12px font
+const lineSpacing = 1.25;
 
 export function showTooltip(svg: SvgSelection, settings: TooltipSettings, items: readonly powerbi.extensibility.VisualTooltipDataItem[],
                             coordinates: readonly number[]): void {
@@ -36,8 +32,21 @@ export function showTooltip(svg: SvgSelection, settings: TooltipSettings, items:
   }
   const bounds = node.getBoundingClientRect();
   // Updates clear the SVG, so the group is (re)created on each show
-  const tooltipGroup = svg.selectAll<SVGGElement, null>(".chart-tooltip-group").data([null]).join("g").classed("chart-tooltip-group", true);
+  const tooltipGroup = svg.selectAll<SVGGElement, null>(".chart-tooltip-group").data([null]).join("g");
   tooltipGroup.raise();
+  if ("ttip_font_class" in settings) {
+    tooltipGroup.attr("class", `chart-tooltip-group ${settings.ttip_font_class}`).style("fill", "currentColor");
+  } else {
+    tooltipGroup.attr("class", "chart-tooltip-group")
+      .style("font-size", `${settings.ttip_font_size}px`)
+      .style("font-family", settings.ttip_font)
+      .style("fill", settings.ttip_font_color);
+  }
+  const groupNode = tooltipGroup.node();
+  if (groupNode === null) {
+    return;
+  }
+  const lineHeight = parseFloat(getComputedStyle(groupNode).fontSize) * lineSpacing;
   const rect = tooltipGroup.selectAll("rect").data([0]).join("rect");
   const texts = tooltipGroup.selectAll<SVGTextElement, unknown>("text")
     .data(items)
@@ -46,9 +55,6 @@ export function showTooltip(svg: SvgSelection, settings: TooltipSettings, items:
     .attr("y", (_, i) => lineHeight + lineHeight * i)
     .text(d => `${d.displayName}: ${d.value}`)
     .style("text-anchor", "left")
-    .style("font-size", `${settings.ttip_font_size}px`)
-    .style("font-family", settings.ttip_font)
-    .style("fill", settings.ttip_font_color)
     .nodes();
   let maxTextLength = 0;
   for (let i = 0; i < texts.length; i++) {

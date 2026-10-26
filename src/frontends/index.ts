@@ -15,7 +15,7 @@ export { makeUpdateValues, toDataViews } from "./updateValues";
 export type { RawData, DatePart, DatePartCategory, FrontendColumn, KeyColumn, FrontendDataView, CrosstalkIdentities, UpdateValues } from "./updateValues";
 export { paddedDataViews } from "./paddedDataViews";
 export { chartSvgBlob, chartPngBlob } from "./chartImage";
-export { defaultTooltipSettings, showTooltip, hideTooltip, svgTooltipService } from "./tooltip";
+export { showTooltip, hideTooltip, svgTooltipService } from "./tooltip";
 export type { TooltipSettings } from "./tooltip";
 export { renderSettingsDialog } from "./settingsDialog";
 export type { SettingsDialogHandlers } from "./settingsDialog";

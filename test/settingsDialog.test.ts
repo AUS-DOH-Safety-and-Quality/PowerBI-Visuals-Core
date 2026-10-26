@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { registerChart, renderSettingsDialog, type InputSettings } from "../src/frontends/index";
+import { renderSettingsDialog, type InputSettings } from "../src/frontends/index";
 import { defineCard, dropdownOption, numberOption, textOption, toggleOption } from "../src/settings/index";
 import { must } from "../src/testing/index";
-import { TestVisual } from "./frontendHelpers";
 
 const settingsModel = {
   canvas: defineCard({
@@ -20,14 +19,13 @@ const settingsModel = {
     }
   })
 };
-registerChart("dialog", { Visual: TestVisual, settingsModel, limitColumns: [], limits: () => ({}) });
 
 describe("Settings dialog", () => {
   function render(stored: InputSettings = {}) {
     document.title = "Test settings";
     const root = document.body.appendChild(document.createElement("div"));
     const handlers = { onChange: vi.fn((_settings: InputSettings) => {}), onOk: vi.fn((_settings: InputSettings) => {}), onCancel: vi.fn() };
-    renderSettingsDialog("dialog", root, stored, handlers);
+    renderSettingsDialog(settingsModel, root, stored, handlers);
     const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>("[role=tab]"));
     const panels = Array.from(root.querySelectorAll<HTMLElement>("[role=tabpanel]"));
     const rows = Array.from(root.querySelectorAll<HTMLElement>(".setting"));

@@ -21,8 +21,10 @@ export type TooltipSettings = TooltipFontSettings & {
   readonly ttip_border_width: number;
 };
 
-// Keeps the 15px lines of a 12px font
-const lineSpacing = 1.25;
+// Power BI's tooltip spacing, in multiples of the font size
+const lineEms = 1.4;
+const paddingEms = 1.1;
+const gapEms = 1;
 
 export function showTooltip(svg: SvgSelection, settings: TooltipSettings, items: readonly powerbi.extensibility.VisualTooltipDataItem[],
                             coordinates: readonly number[]): void {
@@ -46,28 +48,48 @@ export function showTooltip(svg: SvgSelection, settings: TooltipSettings, items:
   if (groupNode === null) {
     return;
   }
-  const lineHeight = parseFloat(getComputedStyle(groupNode).fontSize) * lineSpacing;
+  const fontSize = parseFloat(getComputedStyle(groupNode).fontSize);
+  const lineHeight = fontSize * lineEms;
+  const padding = fontSize * paddingEms;
+  const gap = fontSize * gapEms;
   const rect = tooltipGroup.selectAll("rect").data([0]).join("rect");
-  const texts = tooltipGroup.selectAll<SVGTextElement, unknown>("text")
+  // Power BI's layout: names right-aligned against left-aligned values, each centred in its line
+  const names = tooltipGroup.selectAll<SVGTextElement, unknown>(".chart-tooltip-name")
     .data(items)
     .join("text")
-    .attr("x", 5)
-    .attr("y", (_, i) => lineHeight + lineHeight * i)
-    .text(d => `${d.displayName}: ${d.value}`)
-    .style("text-anchor", "left")
-    .nodes();
-  let maxTextLength = 0;
-  for (let i = 0; i < texts.length; i++) {
-    maxTextLength = Math.max(maxTextLength, at(texts, i).getComputedTextLength());
+    .attr("class", "chart-tooltip-name")
+    .attr("y", (_, i) => padding + lineHeight * (i + 0.5))
+    .text(d => d.displayName)
+    .style("text-anchor", "end")
+    .style("dominant-baseline", "central");
+  const values = tooltipGroup.selectAll<SVGTextElement, unknown>(".chart-tooltip-value")
+    .data(items)
+    .join("text")
+    .attr("class", "chart-tooltip-value")
+    .attr("y", (_, i) => padding + lineHeight * (i + 0.5))
+    .text(d => d.value)
+    .style("text-anchor", "start")
+    .style("dominant-baseline", "central");
+  const nameNodes = names.nodes();
+  const valueNodes = values.nodes();
+  let nameWidth = 0;
+  let valueWidth = 0;
+  for (let i = 0; i < nameNodes.length; i++) {
+    nameWidth = Math.max(nameWidth, at(nameNodes, i).getComputedTextLength());
+    valueWidth = Math.max(valueWidth, at(valueNodes, i).getComputedTextLength());
   }
+  names.attr("x", padding + nameWidth);
+  values.attr("x", padding + nameWidth + gap);
+  const width = padding + nameWidth + gap + valueWidth + padding;
+  const height = padding + lineHeight * items.length + padding;
   let left = at(coordinates, 0);
   let top = at(coordinates, 1);
   // Keep the tooltip within the right and bottom edges
-  if (left + maxTextLength > bounds.width) {
-    left = left - maxTextLength - 10;
+  if (left + width > bounds.width) {
+    left = left - width;
   }
-  if (top + lineHeight * items.length > bounds.height) {
-    top = top - lineHeight * items.length - 5;
+  if (top + height > bounds.height) {
+    top = top - height;
   }
   rect.attr("fill", settings.ttip_background_color)
     .attr("stroke", settings.ttip_border_color)
@@ -77,8 +99,8 @@ export function showTooltip(svg: SvgSelection, settings: TooltipSettings, items:
     .attr("ry", settings.ttip_border_radius)
     .attr("x", 0)
     .attr("y", 0)
-    .attr("width", maxTextLength + 10)
-    .attr("height", lineHeight * items.length + 5);
+    .attr("width", width)
+    .attr("height", height);
   tooltipGroup.attr("transform", `translate(${left}, ${top})`);
 }
 

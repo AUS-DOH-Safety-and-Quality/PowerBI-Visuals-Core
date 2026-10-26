@@ -1,4 +1,4 @@
-import { frontendChart } from "./charts";
+import type { SettingsModel } from "./charts";
 import type { SettingDefinition } from "../settings/definitions";
 import at from "../util/at";
 import { control, element, type Control, type Setting } from "./settingsControls";
@@ -57,8 +57,7 @@ function hideEmptyHeadings(panel: HTMLElement): void {
   }
 }
 
-export function renderSettingsDialog(chartType: string, root: HTMLElement, stored: InputSettings, handlers: SettingsDialogHandlers): void {
-  const model = frontendChart(chartType).settingsModel;
+export function renderSettingsDialog(model: SettingsModel, root: HTMLElement, stored: InputSettings, handlers: SettingsDialogHandlers): void {
   const rows: Row[] = [];
   const tabs: Tab[] = [];
   const tabList = element("nav", "settings-tabs");

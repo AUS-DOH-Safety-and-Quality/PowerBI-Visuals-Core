@@ -33,37 +33,40 @@ function drawn(settings: TooltipSettings, coordinates: readonly number[] = [10, 
   const svg = select(svgElement(300, 150));
   showTooltip(svg, settings, tooltipItems, coordinates);
   const group = must(svg.select<SVGGElement>(".chart-tooltip-group").node());
-  const texts = group.querySelectorAll("text");
-  const ys = new Array<number>(texts.length);
-  for (let i = 0; i < texts.length; i++) {
-    ys[i] = Number(texts[i].getAttribute("y"));
+  const names = group.querySelectorAll<SVGTextElement>(".chart-tooltip-name");
+  const values = group.querySelectorAll<SVGTextElement>(".chart-tooltip-value");
+  const ys = new Array<number>(names.length);
+  for (let i = 0; i < names.length; i++) {
+    ys[i] = Number(names[i].getAttribute("y"));
   }
-  return { group, texts, ys, rectHeight: Number(group.querySelector("rect")?.getAttribute("height")) };
+  const rect = must(group.querySelector("rect"));
+  return { group, names, values, ys, rectWidth: Number(rect.getAttribute("width")), rectHeight: Number(rect.getAttribute("height")) };
 }
 
 describe("SVG tooltips", () => {
-  it("styles the text from the settings, spacing a 12px font 15px apart", () => {
-    const { group, texts, ys, rectHeight } = drawn(fontSettings(12));
+  it("styles the text from the settings, spacing a 12px font as Power BI does", () => {
+    const { group, names, ys, rectHeight } = drawn(fontSettings(12));
     expect(group.getAttribute("class")).toBe("chart-tooltip-group");
-    expect(ys).toEqual([15, 30]);
-    expect(rectHeight).toBe(35);
-    const style = getComputedStyle(texts[0]);
+    // 13.2px padding, then 16.8px lines with the text centred in each
+    expect(ys).toEqual([expect.closeTo(21.6), expect.closeTo(38.4)]);
+    expect(rectHeight).toBeCloseTo(60);
+    const style = getComputedStyle(names[0]);
     expect([style.fontSize, style.fontFamily, style.fill]).toEqual(["12px", "monospace", "rgb(1, 2, 3)"]);
   });
 
-  it("spaces lines in proportion to the font size", () => {
+  it("scales the spacing with the font size", () => {
     const { ys, rectHeight } = drawn(fontSettings(20));
-    expect(ys).toEqual([25, 50]);
-    expect(rectHeight).toBe(55);
+    expect(ys).toEqual([expect.closeTo(36), expect.closeTo(64)]);
+    expect(rectHeight).toBeCloseTo(100);
   });
 
   it("takes font, size and colour from the class, overriding the page's text styles", () => {
     addStyle(".test-tooltip { font-family: monospace; font-size: 20px; font-weight: bold; color: rgb(1, 2, 3); } svg { font-size: 8px; }");
-    const { group, texts, ys, rectHeight } = drawn(classSettings);
+    const { group, values, ys, rectHeight } = drawn(classSettings);
     expect(group.getAttribute("class")).toBe("chart-tooltip-group test-tooltip");
-    expect(ys).toEqual([25, 50]);
-    expect(rectHeight).toBe(55);
-    const style = getComputedStyle(texts[1]);
+    expect(ys).toEqual([expect.closeTo(36), expect.closeTo(64)]);
+    expect(rectHeight).toBeCloseTo(100);
+    const style = getComputedStyle(values[1]);
     expect([style.fontSize, style.fontFamily, style.fontWeight, style.fill]).toEqual(["20px", "monospace", "700", "rgb(1, 2, 3)"]);
   });
 
@@ -73,19 +76,59 @@ describe("SVG tooltips", () => {
     showTooltip(svg, classSettings, items, [10, 10]);
     must(sheets[0]).textContent = ".test-tooltip { font-size: 16px; }";
     showTooltip(svg, classSettings, items, [10, 10]);
-    const texts = must(svg.node()).querySelectorAll(".chart-tooltip-group text");
-    expect([texts[0].getAttribute("y"), texts[1].getAttribute("y")]).toEqual(["20", "40"]);
+    const names = must(svg.node()).querySelectorAll(".chart-tooltip-name");
+    expect([Number(names[0].getAttribute("y")), Number(names[1].getAttribute("y"))]).toEqual([expect.closeTo(28.8), expect.closeTo(51.2)]);
   });
 
-  it("moves above the point by the scaled height when it would pass the bottom edge", () => {
-    const { group } = drawn(fontSettings(20), [10, 140]);
-    // 140 - 2 lines of 25px - 5px padding
-    expect(group.getAttribute("transform")).toBe("translate(10, 85)");
+  it("right-aligns the names against left-aligned values, as Power BI does", () => {
+    const { names, values, rectWidth } = drawn(fontSettings(12));
+    const nameWidth = Math.max(names[0].getComputedTextLength(), names[1].getComputedTextLength());
+    const valueWidth = Math.max(values[0].getComputedTextLength(), values[1].getComputedTextLength());
+    expect(nameWidth).toBeGreaterThan(0);
+    expect([names[0].textContent, values[0].textContent, names[1].textContent, values[1].textContent]).toEqual(["Value", "4", "Upper limit", "12.5"]);
+    expect([getComputedStyle(names[0]).textAnchor, getComputedStyle(values[0]).textAnchor]).toEqual(["end", "start"]);
+    for (let i = 0; i < names.length; i++) {
+      expect(Number(names[i].getAttribute("x"))).toBeCloseTo(13.2 + nameWidth);
+      expect(Number(values[i].getAttribute("x"))).toBeCloseTo(13.2 + nameWidth + 12);
+      const box = names[i].getBBox();
+      expect(box.x + box.width).toBeCloseTo(13.2 + nameWidth, 3);
+    }
+    expect(rectWidth).toBeCloseTo(13.2 + nameWidth + 12 + valueWidth + 13.2);
   });
 
-  it("draws an empty box for no items", () => {
-    const { texts, rectHeight } = drawn(fontSettings(12), [10, 10], []);
-    expect(texts.length).toBe(0);
-    expect(rectHeight).toBe(5);
+  it("centres each row in its line, leaving equal space above and below the text", () => {
+    const { names, values, ys, rectHeight } = drawn(fontSettings(20));
+    for (let i = 0; i < names.length; i++) {
+      const nameBox = names[i].getBBox();
+      const valueBox = values[i].getBBox();
+      expect(nameBox.y + nameBox.height / 2).toBeCloseTo(ys[i], 0);
+      expect(valueBox.y).toBeCloseTo(nameBox.y, 3);
+    }
+    const first = names[0].getBBox();
+    const last = names[names.length - 1].getBBox();
+    expect(first.y).toBeCloseTo(rectHeight - last.y - last.height, 0);
+  });
+
+  it("moves left of the point by the full width when it would pass the right edge", () => {
+    const { group, rectWidth } = drawn(fontSettings(12), [290, 10]);
+    expect(group.getAttribute("transform")).toBe(`translate(${290 - rectWidth}, 10)`);
+  });
+
+  it("moves above the point by the full height when it would pass the bottom edge", () => {
+    const { group, rectHeight } = drawn(fontSettings(20), [10, 60]);
+    // 60 + 100 passes the 150px edge; 60 alone does not
+    expect(rectHeight).toBeCloseTo(100);
+    expect(group.getAttribute("transform")).toBe(`translate(10, ${60 - rectHeight})`);
+  });
+
+  it("stays put when the box fits", () => {
+    const { group } = drawn(fontSettings(12), [10, 10]);
+    expect(group.getAttribute("transform")).toBe("translate(10, 10)");
+  });
+
+  it("draws an empty, padded box for no items", () => {
+    const { names, values, rectHeight } = drawn(fontSettings(12), [10, 10], []);
+    expect([names.length, values.length]).toEqual([0, 0]);
+    expect(rectHeight).toBeCloseTo(26.4);
   });
 });

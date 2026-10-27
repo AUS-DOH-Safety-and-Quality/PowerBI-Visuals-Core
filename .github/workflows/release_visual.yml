@@ -7,6 +7,10 @@ on:
 permissions:
   contents: write
 
+env:
+  # npm 12+ disables installing packages from git refs by default
+  NPM_CONFIG_ALLOW_GIT: root
+
 jobs:
   build-pbiviz-packages:
     name: "Pre Release"

@@ -10,6 +10,8 @@ permissions:
 env:
   # Away from UTC, so that date-only parsing is tested meaningfully
   TZ: Australia/Perth
+  # npm 12+ disables installing packages from git refs by default
+  NPM_CONFIG_ALLOW_GIT: root
 
 jobs:
   build:
